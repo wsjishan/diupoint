@@ -1,0 +1,285 @@
+export type Badge = 'New' | 'Used' | 'Featured';
+
+export interface Listing {
+  id: string;
+  title: string;
+  price: number;
+  seller: string;
+  location: string;
+  category: string;
+  badge?: Badge;
+  gradientFrom: string;
+  gradientTo: string;
+}
+
+export interface Category {
+  id: string;
+  label: string;
+}
+
+export const CATEGORIES: Category[] = [
+  { id: 'all', label: 'All Items' },
+  { id: 'books', label: 'Books & Notes' },
+  { id: 'electronics', label: 'Electronics' },
+  { id: 'housing', label: 'Housing' },
+  { id: 'furniture', label: 'Furniture' },
+  { id: 'room-essentials', label: 'Room Essentials' },
+  { id: 'others', label: 'Others' },
+];
+
+export const RECENTLY_ADDED: Listing[] = [
+  {
+    id: 'r1',
+    title: 'Apple Watch Series 8',
+    price: 18000,
+    seller: 'Arif Islam',
+    location: 'ASC Tower',
+    category: 'Electronics',
+    badge: 'Used',
+    gradientFrom: '#f97316',
+    gradientTo: '#ea580c',
+  },
+  {
+    id: 'r2',
+    title: 'Premium Fountain Pen',
+    price: 1200,
+    seller: 'Sadia Sultana',
+    location: 'Main Campus',
+    category: 'Books & Notes',
+    badge: 'New',
+    gradientFrom: '#a3e635',
+    gradientTo: '#65a30d',
+  },
+  {
+    id: 'r3',
+    title: 'Acoustic Guitar',
+    price: 6500,
+    seller: 'Nahid Ahmed',
+    location: 'Dorm Area',
+    category: 'Others',
+    badge: 'Used',
+    gradientFrom: '#38bdf8',
+    gradientTo: '#0284c7',
+  },
+  {
+    id: 'r4',
+    title: 'Comfortable Bean Bag',
+    price: 3200,
+    seller: 'Rahela Akter',
+    location: 'AB Road',
+    category: 'Room Essentials',
+    badge: 'Used',
+    gradientFrom: '#c084fc',
+    gradientTo: '#9333ea',
+  },
+  {
+    id: 'r5',
+    title: 'Gaming Headset',
+    price: 2500,
+    seller: 'Rifat Hasan',
+    location: 'ASC Tower',
+    category: 'Electronics',
+    badge: 'New',
+    gradientFrom: '#fbbf24',
+    gradientTo: '#d97706',
+  },
+];
+
+export const BOOKS_LISTINGS: Listing[] = [
+  {
+    id: 'b1',
+    title: 'Engineering Physics Vol 1',
+    price: 350,
+    seller: 'Arman Hossain',
+    location: 'Main Campus',
+    category: 'Books & Notes',
+    badge: 'Used',
+    gradientFrom: '#fb923c',
+    gradientTo: '#f97316',
+  },
+  {
+    id: 'b2',
+    title: 'CSE 221 Lecture Notes',
+    price: 120,
+    seller: 'Tasfia Islam',
+    location: 'Dorm Area',
+    category: 'Books & Notes',
+    badge: 'Used',
+    gradientFrom: '#4ade80',
+    gradientTo: '#16a34a',
+  },
+  {
+    id: 'b3',
+    title: 'Algorithm Design Manual',
+    price: 500,
+    seller: 'Shakib Mahmud',
+    location: 'Hasna Hostel',
+    category: 'Books & Notes',
+    badge: 'New',
+    gradientFrom: '#60a5fa',
+    gradientTo: '#2563eb',
+  },
+  {
+    id: 'b4',
+    title: 'Discrete Mathematics',
+    price: 400,
+    seller: 'Nadia Rahman',
+    location: 'Tamal Campus',
+    category: 'Books & Notes',
+    badge: 'Used',
+    gradientFrom: '#f472b6',
+    gradientTo: '#db2777',
+  },
+  {
+    id: 'b5',
+    title: 'Data Communications',
+    price: 450,
+    seller: 'Imran Kabir',
+    location: 'Hasnad Campus',
+    category: 'Books & Notes',
+    badge: 'Used',
+    gradientFrom: '#34d399',
+    gradientTo: '#059669',
+  },
+];
+
+export const ELECTRONICS_LISTINGS: Listing[] = [
+  {
+    id: 'e1',
+    title: 'MacBook Air M1 2020',
+    price: 75000,
+    seller: 'Farhan Ahmed',
+    location: 'Main Campus',
+    category: 'Electronics',
+    badge: 'Used',
+    gradientFrom: '#818cf8',
+    gradientTo: '#4f46e5',
+  },
+  {
+    id: 'e2',
+    title: 'Sony WH-1000XM4',
+    price: 16000,
+    seller: 'Anika Sobhan',
+    location: 'Main Campus',
+    category: 'Electronics',
+    badge: 'New',
+    gradientFrom: '#2dd4bf',
+    gradientTo: '#0d9488',
+  },
+];
+
+export const HOUSING_LISTINGS: Listing[] = [
+  {
+    id: 'h1',
+    title: 'Single Room for Mens',
+    price: 4500,
+    seller: 'Karim Uddin',
+    location: 'Ashulia',
+    category: 'Housing',
+    badge: 'Featured',
+    gradientFrom: '#fb923c',
+    gradientTo: '#ea580c',
+  },
+  {
+    id: 'h2',
+    title: 'Hasna Dorm (Female)',
+    price: 3000,
+    seller: 'Fatema Khatun',
+    location: 'Private Hostel',
+    category: 'Housing',
+    badge: 'New',
+    gradientFrom: '#a78bfa',
+    gradientTo: '#7c3aed',
+  },
+  {
+    id: 'h3',
+    title: '2BHK Student Flat',
+    price: 10000,
+    seller: 'Mr. Faruq',
+    location: 'Permanent Campus',
+    category: 'Housing',
+    badge: 'Featured',
+    gradientFrom: '#4ade80',
+    gradientTo: '#16a34a',
+  },
+  {
+    id: 'h4',
+    title: 'Suit in Private Hostel',
+    price: 2500,
+    seller: 'Minhaz Ali',
+    location: 'Private',
+    category: 'Housing',
+    badge: 'Used',
+    gradientFrom: '#f87171',
+    gradientTo: '#dc2626',
+  },
+  {
+    id: 'h5',
+    title: 'Mentor Room Sublet',
+    price: 6000,
+    seller: 'Simna White',
+    location: 'Jaber Road',
+    category: 'Housing',
+    badge: 'New',
+    gradientFrom: '#fcd34d',
+    gradientTo: '#f59e0b',
+  },
+];
+
+export const ROOM_ESSENTIALS_LISTINGS: Listing[] = [
+  {
+    id: 're1',
+    title: 'Philips Electric Kettle',
+    price: 1600,
+    seller: 'Aryan Islam',
+    location: 'ASC Tower',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#d8b4fe',
+    gradientTo: '#9333ea',
+  },
+  {
+    id: 're2',
+    title: 'Veloce BDT Bicycle',
+    price: 1000,
+    seller: 'Abrar Hasan',
+    location: 'Main Road',
+    category: 'Room Essentials',
+    badge: 'Used',
+    gradientFrom: '#fdba74',
+    gradientTo: '#ea580c',
+  },
+  {
+    id: 're3',
+    title: 'Monster Study Table',
+    price: 3200,
+    seller: 'Rubab Hossa',
+    location: 'New Campus',
+    category: 'Room Essentials',
+    badge: 'Featured',
+    gradientFrom: '#5eead4',
+    gradientTo: '#0d9488',
+  },
+  {
+    id: 're4',
+    title: 'Mini Refrigerator',
+    price: 5880,
+    seller: 'Nitu Akter',
+    location: 'Permanent Campus',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#86efac',
+    gradientTo: '#22c55e',
+  },
+  {
+    id: 're5',
+    title: 'Ergonomic Office Chair',
+    price: 8000,
+    seller: 'Ashnoor Barry',
+    location: 'Permanent Campus',
+    category: 'Room Essentials',
+    badge: 'Featured',
+    gradientFrom: '#93c5fd',
+    gradientTo: '#2563eb',
+  },
+];
