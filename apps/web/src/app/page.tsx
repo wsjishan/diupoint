@@ -57,15 +57,12 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(79,70,229,0.18),transparent)]" />
           </div>
           <div className="relative">
-            <span className="inline-flex items-center rounded-full border border-[#2F3FBF]/20 dark:border-indigo-400/30 bg-[#2F3FBF]/5 dark:bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold tracking-wide text-[#2F3FBF] dark:text-indigo-300">
-              Exclusive for DIU students
-            </span>
-            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl lg:text-4xl">
-              DIUPoint — Student Marketplace
+            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl lg:text-4xl">
+              The marketplace built for DIU students
             </h1>
             <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-slate-400">
               Buy and sell textbooks, electronics, housing, and campus
-              essentials with fellow DIU students.
+              essentials across the DIU campus.
             </p>
           </div>
         </div>
@@ -120,18 +117,18 @@ export default function HomePage() {
         ))}
 
         {/* CTA section */}
-        <div className="bg-linear-to-r from-[#2F3FBF] via-[#4454e6] to-[#2F3FBF] py-16">
-          <div className="mx-auto max-w-2xl px-4 text-center">
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
+        <div className="border-t border-white/5 bg-linear-to-r from-[#1d255f] via-[#2a2f7c] to-[#1d255f] py-12">
+          <div className="mx-auto max-w-3xl px-4 text-center">
+            <h2 className="text-xl font-semibold text-white sm:text-2xl">
               Sell something you no longer need
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">
+            <p className="mt-3 text-sm leading-relaxed text-white/70">
               Post your item and connect with DIU students looking for it.
             </p>
             <div className="mt-8">
-              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-7 py-2.5 text-sm font-semibold text-[#2F3FBF] shadow-lg shadow-black/10 transition-all duration-200 hover:scale-105 hover:bg-blue-50 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2F3FBF]">
+              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-7 py-2.5 text-sm font-semibold text-[#2F3FBF] shadow-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/95 hover:shadow-lg hover:shadow-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1d255f]">
                 <span className="text-base leading-none">+</span>
-                Post Item
+                Post Now
               </button>
             </div>
           </div>
