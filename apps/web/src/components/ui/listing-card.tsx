@@ -58,14 +58,14 @@ export default function ListingCard({ listing }: ListingCardProps) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-2 p-3.5">
+      <div className="flex flex-1 flex-col gap-1.5 p-2.5 lg:p-3">
         <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-400">
           {listing.category}
         </span>
-        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#2F3FBF]">
+        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#2F3FBF] lg:text-sm">
           {listing.title}
         </h3>
-        <p className="mt-auto pt-1 text-base font-bold text-gray-900">
+        <p className="mt-auto pt-0.5 text-sm font-bold text-gray-900 lg:text-base">
           ৳ {listing.price.toLocaleString()}
           {isRental && (
             <span className="ml-1 text-xs font-medium text-gray-400">

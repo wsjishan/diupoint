@@ -56,7 +56,7 @@ export default function HomePage() {
               <section>
                 <SectionHeader title={section.title} />
                 {section.listings.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 lg:gap-4">
                     {section.listings.map((listing) => (
                       <ListingCard
                         key={listing.id}

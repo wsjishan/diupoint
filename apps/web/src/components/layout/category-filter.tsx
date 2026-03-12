@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import CategoryChip from '@/components/ui/category-chip';
-import Container from '@/components/ui/container';
 import { CATEGORIES } from '@/data/mock-listings';
 
 export default function CategoryFilter() {
   const [active, setActive] = useState('all');
 
   return (
-    <div className="w-full border-b border-gray-100 bg-white py-4">
-      <Container>
-        <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-0.5">
+    <div className="w-full border-b border-gray-100 bg-white">
+      <div className="mx-auto w-full max-w-7xl">
+        {/* Chip scroller owns its own horizontal padding so chips never clip on mobile scroll */}
+        <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
           {CATEGORIES.map((cat) => (
             <CategoryChip
               key={cat.id}
@@ -20,8 +20,13 @@ export default function CategoryFilter() {
               onClick={() => setActive(cat.id)}
             />
           ))}
+          {/* trailing spacer so the last chip clears the viewport edge on scroll */}
+          <div
+            className="shrink-0 w-1"
+            aria-hidden="true"
+          />
         </div>
-      </Container>
+      </div>
     </div>
   );
 }

@@ -21,9 +21,8 @@ export const CATEGORIES: Category[] = [
   { id: 'all', label: 'All Items' },
   { id: 'books', label: 'Books & Notes' },
   { id: 'electronics', label: 'Electronics' },
-  { id: 'housing', label: 'Housing' },
-  { id: 'furniture', label: 'Furniture' },
   { id: 'room-essentials', label: 'Room Essentials' },
+  { id: 'housing', label: 'Housing' },
   { id: 'others', label: 'Others' },
 ];
 
@@ -83,6 +82,17 @@ export const RECENTLY_ADDED: Listing[] = [
     gradientFrom: '#fbbf24',
     gradientTo: '#d97706',
   },
+  {
+    id: 'r6',
+    title: 'Portable Desk Lamp',
+    price: 850,
+    seller: 'Mitu Sarkar',
+    location: 'Main Campus',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#67e8f9',
+    gradientTo: '#0891b2',
+  },
 ];
 
 export const BOOKS_LISTINGS: Listing[] = [
@@ -140,6 +150,17 @@ export const BOOKS_LISTINGS: Listing[] = [
     badge: 'Used',
     gradientFrom: '#34d399',
     gradientTo: '#059669',
+  },
+  {
+    id: 'b6',
+    title: 'Operating Systems Concepts',
+    price: 380,
+    seller: 'Sumaiya Akter',
+    location: 'Main Campus',
+    category: 'Books & Notes',
+    badge: 'Used',
+    gradientFrom: '#a78bfa',
+    gradientTo: '#7c3aed',
   },
 ];
 
@@ -199,6 +220,17 @@ export const ELECTRONICS_LISTINGS: Listing[] = [
     gradientFrom: '#fbbf24',
     gradientTo: '#d97706',
   },
+  {
+    id: 'e6',
+    title: 'USB-C Hub 7-in-1',
+    price: 3200,
+    seller: 'Rezaul Karim',
+    location: 'Dorm Area',
+    category: 'Electronics',
+    badge: 'New',
+    gradientFrom: '#6ee7b7',
+    gradientTo: '#059669',
+  },
 ];
 
 export const HOUSING_LISTINGS: Listing[] = [
@@ -257,6 +289,17 @@ export const HOUSING_LISTINGS: Listing[] = [
     gradientFrom: '#fcd34d',
     gradientTo: '#f59e0b',
   },
+  {
+    id: 'h6',
+    title: 'Shared Room (3 Person)',
+    price: 2000,
+    seller: 'Jahid Hasan',
+    location: 'Ashulia',
+    category: 'Housing',
+    badge: 'New',
+    gradientFrom: '#93c5fd',
+    gradientTo: '#3b82f6',
+  },
 ];
 
 export const ROOM_ESSENTIALS_LISTINGS: Listing[] = [
@@ -314,5 +357,16 @@ export const ROOM_ESSENTIALS_LISTINGS: Listing[] = [
     badge: 'Featured',
     gradientFrom: '#93c5fd',
     gradientTo: '#2563eb',
+  },
+  {
+    id: 're6',
+    title: 'Wall-Mount Bookshelf',
+    price: 1400,
+    seller: 'Prodip Roy',
+    location: 'New Campus',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#fda4af',
+    gradientTo: '#e11d48',
   },
 ];
