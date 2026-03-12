@@ -17,7 +17,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
     <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 hover:shadow-lg hover:shadow-gray-900/8">
       {/* Image placeholder */}
       <div
-        className="relative w-full"
+        className="relative w-full transition-all duration-200 group-hover:brightness-105"
         style={{
           aspectRatio: '4 / 3',
           background: `linear-gradient(135deg, ${listing.gradientFrom}, ${listing.gradientTo})`,

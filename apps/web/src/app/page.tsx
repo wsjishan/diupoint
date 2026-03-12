@@ -21,7 +21,7 @@ const SECTIONS = [
 ];
 
 function getSectionBg(title: string, index: number): string {
-  if (title === 'Housing') return 'bg-amber-50';
+  if (title === 'Housing') return 'bg-[#f3f5ff]';
   return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
 }
 
@@ -52,7 +52,7 @@ export default function HomePage() {
             key={section.title}
             className={getSectionBg(section.title, i)}
           >
-            <Container className="py-10">
+            <Container className="py-12">
               <section>
                 <SectionHeader title={section.title} />
                 {section.listings.length > 0 ? (
@@ -96,16 +96,16 @@ export default function HomePage() {
         ))}
 
         {/* CTA section */}
-        <div className="bg-[#2F3FBF] py-12">
-          <div className="mx-auto max-w-lg px-4 text-center">
-            <h2 className="text-xl font-bold text-white sm:text-2xl">
+        <div className="bg-gradient-to-r from-[#2F3FBF] via-[#4454e6] to-[#2F3FBF] py-16">
+          <div className="mx-auto max-w-2xl px-4 text-center">
+            <h2 className="text-2xl font-bold text-white sm:text-3xl">
               Sell something you no longer need
             </h2>
-            <p className="mt-2.5 text-sm leading-relaxed text-blue-200">
+            <p className="mt-3 text-sm leading-relaxed text-white/80">
               Post your item and connect with DIU students looking for it.
             </p>
-            <div className="mt-6">
-              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-7 py-2.5 text-sm font-semibold text-[#2F3FBF] shadow-lg shadow-black/10 transition-all duration-150 hover:bg-blue-50 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2F3FBF]">
+            <div className="mt-8">
+              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-7 py-2.5 text-sm font-semibold text-[#2F3FBF] shadow-lg shadow-black/10 transition-all duration-200 hover:scale-105 hover:bg-blue-50 hover:shadow-xl hover:shadow-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#2F3FBF]">
                 <span className="text-base leading-none">+</span>
                 Post Item
               </button>

@@ -6,7 +6,9 @@ import Container from '@/components/ui/container';
 
 function SearchInput({ className = '' }: { className?: string }) {
   return (
-    <div className={`relative w-full ${className}`}>
+    <div
+      className={`relative w-full rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${className}`}
+    >
       <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center sm:left-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -100,7 +102,7 @@ export default function Navbar() {
         </div>
 
         {/* Search row — mobile only */}
-        <div className="pb-3 pt-1.5 sm:hidden">
+        <div className="px-0.5 pb-3 pt-1.5 sm:hidden">
           <SearchInput />
         </div>
       </Container>
