@@ -14,7 +14,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const isRental = listing.category === 'Housing';
 
   return (
-    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 hover:shadow-lg hover:shadow-gray-900/8">
+    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-lg hover:shadow-gray-900/8 dark:hover:shadow-black/30">
       {/* Image placeholder */}
       <div
         className="relative w-full transition-all duration-200 group-hover:brightness-105"
@@ -38,7 +38,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <button
           type="button"
           aria-label="Add to wishlist"
-          className="group/heart absolute right-2 top-2 rounded-full bg-white/80 p-1.5 shadow-sm transition-all duration-150 hover:scale-110 hover:bg-white hover:shadow-md"
+          className="group/heart absolute right-2 top-2 rounded-full bg-white/80 dark:bg-slate-700/80 p-1.5 shadow-sm transition-all duration-150 hover:scale-110 hover:bg-white dark:hover:bg-slate-700 hover:shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +46,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             fill="none"
             stroke="currentColor"
             strokeWidth={1.75}
-            className="h-4 w-4 text-gray-500 transition-colors group-hover/heart:text-rose-500"
+            className="h-4 w-4 text-gray-500 dark:text-slate-400 transition-colors group-hover/heart:text-rose-500"
           >
             <path
               strokeLinecap="round"
@@ -59,21 +59,21 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
       {/* Card body */}
       <div className="flex flex-1 flex-col gap-1.5 p-2.5 lg:p-3">
-        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-400">
+        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-gray-400 dark:text-slate-400">
           {listing.category}
         </span>
-        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#2F3FBF] lg:text-sm">
+        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900 dark:text-slate-100 transition-colors group-hover:text-[#2F3FBF] dark:group-hover:text-indigo-400 lg:text-sm">
           {listing.title}
         </h3>
-        <p className="mt-auto pt-0.5 text-sm font-bold text-gray-900 lg:text-base">
+        <p className="mt-auto pt-0.5 text-sm font-bold text-gray-900 dark:text-slate-100 lg:text-base">
           ৳ {listing.price.toLocaleString()}
           {isRental && (
-            <span className="ml-1 text-xs font-medium text-gray-400">
+            <span className="ml-1 text-xs font-medium text-gray-400 dark:text-slate-500">
               / month
             </span>
           )}
         </p>
-        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
+        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -90,7 +90,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </svg>
           <span className="truncate">{listing.seller}</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400">
+        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

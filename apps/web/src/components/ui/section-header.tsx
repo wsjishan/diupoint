@@ -11,12 +11,12 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="mb-8 flex items-center justify-between">
-      <h2 className="text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl">
+      <h2 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-2xl">
         {title}
       </h2>
       <Link
         href={viewAllHref}
-        className="group flex items-center gap-1 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:gap-2 hover:text-[#2535a8]"
+        className="group flex items-center gap-1 text-sm font-semibold text-[#2F3FBF] dark:text-indigo-400 transition-all duration-200 hover:gap-2 hover:text-[#2535a8] dark:hover:text-indigo-300"
       >
         View all
         <svg

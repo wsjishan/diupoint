@@ -1,8 +1,16 @@
 @import 'tailwindcss';
 
+/* Enable class-based dark mode (Tailwind v4) */
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f1f5f9;
 }
 
 @theme inline {
@@ -12,9 +20,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Force light color scheme so the marketplace always renders in light mode */
 html {
-  color-scheme: light;
   scroll-behavior: smooth;
 }
 

@@ -21,37 +21,49 @@ const SECTIONS = [
 ];
 
 function getSectionBg(title: string, index: number): string {
-  if (title === 'Housing') return 'bg-[#f3f5ff]';
-  return index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+  if (title === 'Housing') return 'bg-[#f3f5ff] dark:bg-indigo-950/30';
+  return index % 2 === 0
+    ? 'bg-white dark:bg-slate-950'
+    : 'bg-gray-50 dark:bg-slate-900';
 }
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
       <Navbar />
       <CategoryFilter />
 
       <main>
         {/* Hero */}
-        <div
-          className="relative border-b border-gray-100 bg-center bg-cover bg-no-repeat py-10 text-center"
-          style={{
-            backgroundImage: "url('/images/hero/hero-bg-marketplace.png')",
-          }}
-        >
-          {/* Soft white overlay to keep text readable */}
+        <div className="relative border-b border-gray-100 dark:border-slate-800 py-10 text-center overflow-hidden">
+          {/* Light mode: background image */}
           <div
-            className="absolute inset-0 bg-white/65"
+            className="absolute inset-0 bg-center bg-cover bg-no-repeat dark:hidden"
+            style={{
+              backgroundImage: "url('/images/hero/hero-bg-marketplace.png')",
+            }}
             aria-hidden="true"
           />
+          {/* Light mode: soft white overlay */}
+          <div
+            className="absolute inset-0 bg-white/65 dark:hidden"
+            aria-hidden="true"
+          />
+          {/* Dark mode: gradient background */}
+          <div
+            className="absolute inset-0 hidden dark:block bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950"
+            aria-hidden="true"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(79,70,229,0.18),transparent)]" />
+          </div>
           <div className="relative">
-            <span className="inline-flex items-center rounded-full border border-[#2F3FBF]/20 bg-[#2F3FBF]/5 px-3.5 py-1 text-xs font-semibold tracking-wide text-[#2F3FBF]">
+            <span className="inline-flex items-center rounded-full border border-[#2F3FBF]/20 dark:border-indigo-400/30 bg-[#2F3FBF]/5 dark:bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold tracking-wide text-[#2F3FBF] dark:text-indigo-300">
               Exclusive for DIU students
             </span>
-            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
+            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl lg:text-4xl">
               DIUPoint — Student Marketplace
             </h1>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500">
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-slate-400">
               Buy and sell textbooks, electronics, housing, and campus
               essentials with fellow DIU students.
             </p>
@@ -77,15 +89,15 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-white py-14 text-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-14 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth={1.5}
-                        className="h-6 w-6 text-gray-400"
+                        className="h-6 w-6 text-gray-400 dark:text-slate-500"
                       >
                         <path
                           strokeLinecap="round"
@@ -94,10 +106,10 @@ export default function HomePage() {
                         />
                       </svg>
                     </div>
-                    <p className="mt-3 text-sm font-medium text-gray-600">
+                    <p className="mt-3 text-sm font-medium text-gray-600 dark:text-slate-400">
                       No listings yet
                     </p>
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
                       Be the first to post in this category.
                     </p>
                   </div>
@@ -108,7 +120,7 @@ export default function HomePage() {
         ))}
 
         {/* CTA section */}
-        <div className="bg-gradient-to-r from-[#2F3FBF] via-[#4454e6] to-[#2F3FBF] py-16">
+        <div className="bg-linear-to-r from-[#2F3FBF] via-[#4454e6] to-[#2F3FBF] py-16">
           <div className="mx-auto max-w-2xl px-4 text-center">
             <h2 className="text-2xl font-bold text-white sm:text-3xl">
               Sell something you no longer need

@@ -4,7 +4,7 @@ const INFO_LINKS = ['About DIUPoint', 'Contact', 'Terms of Service', 'FAQ'];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 bg-gray-50 py-8 md:py-8">
+    <footer className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 py-8 md:py-8">
       <Container>
         {/* Main row */}
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-12">
@@ -13,7 +13,7 @@ export default function Footer() {
             <span className="text-base font-extrabold tracking-tight text-[#2F3FBF]">
               DIUPoint
             </span>
-            <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
+            <p className="mt-1.5 text-sm leading-relaxed text-gray-500 dark:text-slate-400">
               A student-to-student marketplace for
               <br className="hidden sm:block" /> Daffodil International
               University.
@@ -27,7 +27,7 @@ export default function Footer() {
                 <li key={link}>
                   <a
                     href="#"
-                    className="text-sm text-gray-500 underline-offset-2 transition-colors hover:text-[#2F3FBF] hover:underline"
+                    className="text-sm text-gray-500 dark:text-slate-400 underline-offset-2 transition-colors hover:text-[#2F3FBF] dark:hover:text-indigo-400 hover:underline"
                   >
                     {link}
                   </a>
@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="mt-8 border-t border-gray-200 pt-5 text-center text-xs text-gray-400/80">
+        <p className="mt-8 border-t border-gray-200 dark:border-slate-700 pt-5 text-center text-xs text-gray-400/80 dark:text-slate-500">
           © 2026 DIUPoint — Built for DIU students
         </p>
       </Container>
