@@ -10,18 +10,20 @@ export default function SectionHeader({
   viewAllHref = '#',
 }: SectionHeaderProps) {
   return (
-    <div className="mb-5 flex items-center justify-between">
-      <h2 className="text-lg font-bold text-gray-900 sm:text-xl">{title}</h2>
+    <div className="mb-6 flex items-center justify-between">
+      <h2 className="text-xl font-extrabold tracking-tight text-gray-900 sm:text-2xl">
+        {title}
+      </h2>
       <Link
         href={viewAllHref}
-        className="flex items-center gap-0.5 text-sm font-medium text-[#2F3FBF] transition-colors hover:text-[#2535a8] hover:underline"
+        className="group flex items-center gap-1 text-sm font-medium text-[#2F3FBF] transition-colors hover:text-[#2535a8]"
       >
         View all
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="h-4 w-4"
+          className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5"
         >
           <path
             fillRule="evenodd"

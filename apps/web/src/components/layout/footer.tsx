@@ -10,7 +10,9 @@ export default function Footer() {
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-12">
           {/* Brand */}
           <div className="max-w-xs text-center sm:text-left">
-            <span className="text-base font-bold text-[#2F3FBF]">DIUPoint</span>
+            <span className="text-base font-extrabold tracking-tight text-[#2F3FBF]">
+              DIUPoint
+            </span>
             <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
               A student-to-student marketplace for
               <br className="hidden sm:block" /> Daffodil International
@@ -25,7 +27,7 @@ export default function Footer() {
                 <li key={link}>
                   <a
                     href="#"
-                    className="text-sm text-gray-500 transition-colors hover:text-[#2F3FBF]"
+                    className="text-sm text-gray-500 underline-offset-2 transition-colors hover:text-[#2F3FBF] hover:underline"
                   >
                     {link}
                   </a>
@@ -36,7 +38,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="mt-8 border-t border-gray-200 pt-5 text-center text-xs text-gray-400">
+        <p className="mt-8 border-t border-gray-200 pt-5 text-center text-xs text-gray-400/80">
           © 2026 DIUPoint — Built for DIU students
         </p>
       </Container>

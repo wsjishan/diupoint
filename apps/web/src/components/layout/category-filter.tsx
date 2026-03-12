@@ -9,9 +9,9 @@ export default function CategoryFilter() {
   const [active, setActive] = useState('all');
 
   return (
-    <div className="w-full border-b border-gray-100 bg-white py-3.5">
+    <div className="w-full border-b border-gray-100 bg-white py-4">
       <Container>
-        <div className="scrollbar-hide flex gap-2.5 overflow-x-auto pb-0.5">
+        <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-0.5">
           {CATEGORIES.map((cat) => (
             <CategoryChip
               key={cat.id}

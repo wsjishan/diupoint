@@ -11,8 +11,10 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
+  const isRental = listing.category === 'Housing';
+
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-gray-200">
+    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 hover:shadow-lg hover:shadow-gray-900/8">
       {/* Image placeholder */}
       <div
         className="relative w-full"
@@ -21,6 +23,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
           background: `linear-gradient(135deg, ${listing.gradientFrom}, ${listing.gradientTo})`,
         }}
       >
+        {/* subtle bottom vignette to lift card content boundary */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/20 to-transparent" />
+
         {listing.badge && (
           <span
             className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -33,7 +38,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <button
           type="button"
           aria-label="Add to wishlist"
-          className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 transition-all hover:bg-white hover:scale-110 hover:text-rose-500"
+          className="group/heart absolute right-2 top-2 rounded-full bg-white/80 p-1.5 shadow-sm transition-all duration-150 hover:scale-110 hover:bg-white hover:shadow-md"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +46,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             fill="none"
             stroke="currentColor"
             strokeWidth={1.75}
-            className="h-4 w-4 text-gray-500 transition-colors hover:text-rose-500"
+            className="h-4 w-4 text-gray-500 transition-colors group-hover/heart:text-rose-500"
           >
             <path
               strokeLinecap="round"
@@ -53,17 +58,22 @@ export default function ListingCard({ listing }: ListingCardProps) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+      <div className="flex flex-1 flex-col gap-2 p-3.5">
+        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-400">
           {listing.category}
         </span>
-        <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-colors group-hover:text-[#2F3FBF]">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 transition-colors group-hover:text-[#2F3FBF]">
           {listing.title}
         </h3>
         <p className="mt-auto pt-1 text-base font-bold text-gray-900">
           ৳ {listing.price.toLocaleString()}
+          {isRental && (
+            <span className="ml-1 text-xs font-medium text-gray-400">
+              / month
+            </span>
+          )}
         </p>
-        <div className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -80,7 +90,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </svg>
           <span className="truncate">{listing.seller}</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-500">
+        <div className="flex items-center gap-1 text-xs text-gray-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

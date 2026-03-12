@@ -40,7 +40,7 @@ export default function Navbar() {
             <input
               type="search"
               placeholder="Search items, books, electronics, housing..."
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 focus:bg-white focus:ring-2 focus:ring-[#2F3FBF]/10"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-11 pr-5 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 focus:bg-white focus:ring-2 focus:ring-[#2F3FBF]/15"
             />
           </div>
 
@@ -55,7 +55,7 @@ export default function Navbar() {
             </Button>
             <button
               type="button"
-              className="flex h-10 items-center rounded-xl border border-gray-300 px-4 text-sm font-medium text-gray-700 transition-all hover:border-[#2F3FBF]/40 hover:bg-[#2F3FBF]/5 hover:text-[#2F3FBF] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 sm:px-5"
+              className="flex h-10 items-center rounded-xl border border-gray-200 px-4 text-sm font-medium text-gray-600 transition-all hover:border-[#2F3FBF]/40 hover:bg-[#2F3FBF]/5 hover:text-[#2F3FBF] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 sm:px-5"
             >
               Sign In
             </button>
