@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 interface SectionHeaderProps {
   title: string;
   viewAllHref?: string;
@@ -9,10 +11,10 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="mb-5 flex items-center justify-between">
-      <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-      <a
+      <h2 className="text-lg font-bold text-gray-900 sm:text-xl">{title}</h2>
+      <Link
         href={viewAllHref}
-        className="flex items-center gap-0.5 text-sm font-medium text-[#2F3FBF] hover:underline"
+        className="flex items-center gap-0.5 text-sm font-medium text-[#2F3FBF] transition-colors hover:text-[#2535a8] hover:underline"
       >
         View all
         <svg
@@ -27,7 +29,7 @@ export default function SectionHeader({
             clipRule="evenodd"
           />
         </svg>
-      </a>
+      </Link>
     </div>
   );
 }

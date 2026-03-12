@@ -12,7 +12,7 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-shadow duration-200 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:border-gray-200">
       {/* Image placeholder */}
       <div
         className="relative w-full"
@@ -31,8 +31,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </span>
         )}
         <button
+          type="button"
           aria-label="Add to wishlist"
-          className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 transition-colors hover:bg-white"
+          className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 transition-all hover:bg-white hover:scale-110 hover:text-rose-500"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +41,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             fill="none"
             stroke="currentColor"
             strokeWidth={1.75}
-            className="h-4 w-4 text-gray-500"
+            className="h-4 w-4 text-gray-500 transition-colors hover:text-rose-500"
           >
             <path
               strokeLinecap="round"
@@ -53,7 +54,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
       {/* Card body */}
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <span className="text-xs font-medium text-gray-400">
+        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
           {listing.category}
         </span>
         <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-gray-900 transition-colors group-hover:text-[#2F3FBF]">
