@@ -33,17 +33,29 @@ export default function HomePage() {
 
       <main>
         {/* Hero */}
-        <div className="border-b border-gray-100 bg-white py-10 text-center">
-          <span className="inline-flex items-center rounded-full border border-[#2F3FBF]/20 bg-[#2F3FBF]/5 px-3.5 py-1 text-xs font-semibold tracking-wide text-[#2F3FBF]">
-            Exclusive for DIU students
-          </span>
-          <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
-            DIUPoint — Student Marketplace
-          </h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500">
-            Buy and sell textbooks, electronics, housing, and campus essentials
-            with fellow DIU students.
-          </p>
+        <div
+          className="relative border-b border-gray-100 bg-center bg-cover bg-no-repeat py-10 text-center"
+          style={{
+            backgroundImage: "url('/images/hero/hero-bg-marketplace.png')",
+          }}
+        >
+          {/* Soft white overlay to keep text readable */}
+          <div
+            className="absolute inset-0 bg-white/65"
+            aria-hidden="true"
+          />
+          <div className="relative">
+            <span className="inline-flex items-center rounded-full border border-[#2F3FBF]/20 bg-[#2F3FBF]/5 px-3.5 py-1 text-xs font-semibold tracking-wide text-[#2F3FBF]">
+              Exclusive for DIU students
+            </span>
+            <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
+              DIUPoint — Student Marketplace
+            </h1>
+            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500">
+              Buy and sell textbooks, electronics, housing, and campus
+              essentials with fellow DIU students.
+            </p>
+          </div>
         </div>
 
         {/* Listing sections — each gets its own background band */}
