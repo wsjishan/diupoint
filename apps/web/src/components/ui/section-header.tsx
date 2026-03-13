@@ -2,28 +2,38 @@ import Link from 'next/link';
 
 interface SectionHeaderProps {
   title: string;
+  icon?: string;
   viewAllHref?: string;
 }
 
 export default function SectionHeader({
   title,
+  icon,
   viewAllHref = '#',
 }: SectionHeaderProps) {
   return (
     <div className="mb-7 flex items-center justify-between sm:mb-8">
-      <h2 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-2xl">
+      <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-2xl">
+        {icon ? (
+          <span
+            aria-hidden="true"
+            className="text-xl leading-none sm:text-2xl"
+          >
+            {icon}
+          </span>
+        ) : null}
         {title}
       </h2>
       <Link
         href={viewAllHref}
-        className="group inline-flex items-center gap-1 text-sm font-semibold text-[#2F3FBF] dark:text-indigo-400 underline-offset-4 decoration-transparent transition-all duration-200 hover:text-[#2535a8] dark:hover:text-indigo-300 hover:underline hover:decoration-current"
+        className="group inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/70 hover:text-[#2535a8] dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-300/40 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-200"
       >
         View all
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
         >
           <path
             fillRule="evenodd"

@@ -39,7 +39,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <p className="mt-8 border-t border-gray-200 dark:border-white/10 pt-5 text-center text-xs text-gray-400/80 dark:text-slate-500">
-          © 2026 DIUPoint — Built for DIU students
+          (c) 2026 DIUPoint - Built for DIU students
         </p>
       </Container>
     </footer>

@@ -1,10 +1,14 @@
 export type Badge = 'New' | 'Used' | 'Featured';
+export type SellerType = 'personal' | 'store';
 
 export interface Listing {
   id: string;
   title: string;
   price: number;
   seller: string;
+  sellerType?: SellerType;
+  storeSlug?: string;
+  storeLabel?: string;
   location: string;
   category: string;
   badge?: Badge;
@@ -41,11 +45,14 @@ export const RECENTLY_ADDED: Listing[] = [
   },
   {
     id: 'r2',
-    title: 'Premium Fountain Pen',
-    price: 1200,
-    seller: 'Sadia Sultana',
+    title: 'Cold Brew Bottle Set',
+    price: 980,
+    seller: 'Campus Coffee',
+    sellerType: 'store',
+    storeSlug: 'campus-coffee',
+    storeLabel: 'Campus Store',
     location: 'Main Campus',
-    category: 'Books & Notes',
+    category: 'Room Essentials',
     badge: 'New',
     gradientFrom: '#a3e635',
     gradientTo: '#65a30d',
@@ -76,7 +83,10 @@ export const RECENTLY_ADDED: Listing[] = [
     id: 'r5',
     title: 'Gaming Headset',
     price: 2500,
-    seller: 'Rifat Hasan',
+    seller: 'TechHub DIU',
+    sellerType: 'store',
+    storeSlug: 'techhub-diu',
+    storeLabel: 'Featured Store',
     location: 'ASC Tower',
     category: 'Electronics',
     badge: 'New',
@@ -189,7 +199,10 @@ export const BOOKS_LISTINGS: Listing[] = [
     id: 'b3',
     title: 'Algorithm Design Manual',
     price: 500,
-    seller: 'Shakib Mahmud',
+    seller: 'Study Corner',
+    sellerType: 'store',
+    storeSlug: 'study-corner',
+    storeLabel: 'Campus Book Store',
     location: 'Hasna Hostel',
     category: 'Books & Notes',
     badge: 'New',
@@ -244,7 +257,10 @@ export const BOOKS_LISTINGS: Listing[] = [
     id: 'b8',
     title: 'Computer Networks (Tanenbaum)',
     price: 550,
-    seller: 'Shirin Akter',
+    seller: 'BookBarn DIU',
+    sellerType: 'store',
+    storeSlug: 'bookbarn-diu',
+    storeLabel: 'Featured Store',
     location: 'Hasna Hostel',
     category: 'Books & Notes',
     badge: 'Used',
@@ -357,7 +373,10 @@ export const ELECTRONICS_LISTINGS: Listing[] = [
     id: 'e6',
     title: 'USB-C Hub 7-in-1',
     price: 3200,
-    seller: 'Rezaul Karim',
+    seller: 'Gadget Grove',
+    sellerType: 'store',
+    storeSlug: 'gadget-grove',
+    storeLabel: 'Campus Tech Store',
     location: 'Dorm Area',
     category: 'Electronics',
     badge: 'New',
@@ -448,7 +467,10 @@ export const HOUSING_LISTINGS: Listing[] = [
     id: 'h2',
     title: 'Hasna Dorm (Female)',
     price: 3000,
-    seller: 'Fatema Khatun',
+    seller: 'Dorm Decor Studio',
+    sellerType: 'store',
+    storeSlug: 'dorm-decor-studio',
+    storeLabel: 'Verified Housing Store',
     location: 'Private Hostel',
     category: 'Housing',
     badge: 'New',
@@ -605,7 +627,10 @@ export const ROOM_ESSENTIALS_LISTINGS: Listing[] = [
     id: 're4',
     title: 'Mini Refrigerator',
     price: 5880,
-    seller: 'Nitu Akter',
+    seller: 'Campus Coffee',
+    sellerType: 'store',
+    storeSlug: 'campus-coffee',
+    storeLabel: 'Campus Store',
     location: 'Permanent Campus',
     category: 'Room Essentials',
     badge: 'New',

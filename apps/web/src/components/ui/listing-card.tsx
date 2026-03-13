@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Listing } from '@/data/mock-listings';
 
 const badgeClasses: Record<string, string> = {
@@ -11,12 +12,26 @@ interface ListingCardProps {
   listing: Listing;
 }
 
+function toStoreSlug(listing: Listing): string {
+  if (listing.storeSlug) return listing.storeSlug;
+
+  return listing.seller
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 export default function ListingCard({ listing }: ListingCardProps) {
   const isRental = listing.category === 'Housing';
   const hasImage = Boolean(listing.imageUrl);
+  const isStoreSeller =
+    listing.sellerType === 'store' || Boolean(listing.storeSlug);
+  const storeHref = `/store/${toStoreSlug(listing)}`;
+  const storeIdentityLabel = listing.storeLabel ?? 'Store';
 
   return (
-    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-800/90 shadow-sm shadow-gray-900/3 transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-lg hover:shadow-gray-900/10 dark:hover:shadow-black/35">
+    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-800/90 shadow-sm shadow-gray-900/5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-xl hover:shadow-gray-900/12 dark:hover:shadow-black/35">
       {/* Image placeholder */}
       <div
         className="relative aspect-4/3 w-full overflow-hidden transition-all duration-200 group-hover:brightness-105"
@@ -33,7 +48,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             src={listing.imageUrl as string}
             alt={listing.title}
             fill
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
           />
         ) : null}
@@ -88,23 +103,63 @@ export default function ListingCard({ listing }: ListingCardProps) {
             </span>
           )}
         </p>
-        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.75}
-            className="h-3.5 w-3.5 shrink-0"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-            />
-          </svg>
-          <span className="truncate">{listing.seller}</span>
-        </div>
+        {isStoreSeller ? (
+          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+            <span
+              className="inline-flex shrink-0"
+              aria-hidden="true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.75}
+                className="h-3.5 w-3.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 9l1.5-4.5h15L21 9m-18 0h18v10.5a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 19.5V9zm4.5 0v12m9-12v12"
+                />
+              </svg>
+            </span>
+            <Link
+              href={storeHref}
+              className="min-w-0 flex-1 truncate font-medium text-gray-600 transition-colors hover:text-[#2F3FBF] dark:text-slate-300 dark:hover:text-indigo-300"
+            >
+              {listing.seller}
+            </Link>
+            <span className="hidden shrink-0 whitespace-nowrap text-[10px] font-medium text-gray-400 dark:text-slate-500 sm:inline">
+              • {storeIdentityLabel}
+            </span>
+          </div>
+        ) : (
+          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+            <span
+              className="inline-flex shrink-0"
+              aria-hidden="true"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.75}
+                className="h-3.5 w-3.5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 0115 0"
+                />
+              </svg>
+            </span>
+            <span className="truncate font-medium text-gray-600 dark:text-slate-300">
+              {listing.seller}
+            </span>
+          </div>
+        )}
         <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
