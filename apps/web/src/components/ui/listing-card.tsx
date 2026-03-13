@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import type { Listing } from '@/data/mock-listings';
 
 const badgeClasses: Record<string, string> = {
@@ -12,17 +13,31 @@ interface ListingCardProps {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   const isRental = listing.category === 'Housing';
+  const hasImage = Boolean(listing.imageUrl);
 
   return (
-    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 dark:hover:border-slate-600 hover:shadow-lg hover:shadow-gray-900/8 dark:hover:shadow-black/30">
+    <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-800/90 shadow-sm shadow-gray-900/3 transition-all duration-200 hover:-translate-y-1 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-lg hover:shadow-gray-900/10 dark:hover:shadow-black/35">
       {/* Image placeholder */}
       <div
-        className="relative w-full transition-all duration-200 group-hover:brightness-105"
-        style={{
-          aspectRatio: '4 / 3',
-          background: `linear-gradient(135deg, ${listing.gradientFrom}, ${listing.gradientTo})`,
-        }}
+        className="relative aspect-4/3 w-full overflow-hidden transition-all duration-200 group-hover:brightness-105"
+        style={
+          hasImage
+            ? undefined
+            : {
+                background: `linear-gradient(135deg, ${listing.gradientFrom}, ${listing.gradientTo})`,
+              }
+        }
       >
+        {hasImage ? (
+          <Image
+            src={listing.imageUrl as string}
+            alt={listing.title}
+            fill
+            className="h-full w-full object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+          />
+        ) : null}
+
         {/* subtle bottom vignette to lift card content boundary */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/20 to-transparent" />
 
@@ -58,14 +73,14 @@ export default function ListingCard({ listing }: ListingCardProps) {
       </div>
 
       {/* Card body */}
-      <div className="flex flex-1 flex-col gap-1.5 p-2.5 lg:p-3">
-        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-gray-400 dark:text-slate-400">
+      <div className="flex flex-1 flex-col gap-2 p-3 lg:p-3.5">
+        <span className="inline-flex w-fit items-center rounded-full bg-gray-100 dark:bg-slate-700/80 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-slate-300">
           {listing.category}
         </span>
-        <h3 className="line-clamp-2 text-xs font-semibold leading-snug text-gray-900 dark:text-slate-100 transition-colors group-hover:text-[#2F3FBF] dark:group-hover:text-indigo-400 lg:text-sm">
+        <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-slate-100 transition-colors group-hover:text-[#2F3FBF] dark:group-hover:text-indigo-400">
           {listing.title}
         </h3>
-        <p className="mt-auto pt-0.5 text-sm font-bold text-gray-900 dark:text-slate-100 lg:text-base">
+        <p className="mt-auto pt-0.5 text-base font-bold text-gray-900 dark:text-slate-100">
           ৳ {listing.price.toLocaleString()}
           {isRental && (
             <span className="ml-1 text-xs font-medium text-gray-400 dark:text-slate-500">
@@ -73,7 +88,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             </span>
           )}
         </p>
-        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
+        <div className="mt-0.5 flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -90,7 +105,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </svg>
           <span className="truncate">{listing.seller}</span>
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
+        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

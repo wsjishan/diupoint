@@ -48,7 +48,7 @@ export default function HomePage() {
             key={section.title}
             className={getSectionBg(section.title, i)}
           >
-            <Container className="py-12">
+            <Container className="py-14 sm:py-16">
               <section>
                 <SectionHeader title={section.title} />
                 {section.listings.length > 0 ? (
@@ -61,7 +61,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-14 text-center">
+                  <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-white/10 bg-white dark:bg-slate-800 py-14 text-center">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-700">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

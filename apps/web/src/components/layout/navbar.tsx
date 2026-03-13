@@ -9,7 +9,7 @@ import Container from '@/components/ui/container';
 function SearchInput({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`relative w-full rounded-xl shadow-sm transition-all duration-200 hover:shadow-md ${className}`}
+      className={`relative w-full rounded-xl shadow-sm shadow-gray-900/3 transition-all duration-200 hover:shadow-md ${className}`}
     >
       <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center sm:left-4">
         <svg
@@ -30,7 +30,7 @@ function SearchInput({ className = '' }: { className?: string }) {
       <input
         type="search"
         placeholder="Search items, books, electronics, housing..."
-        className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10 sm:pl-11 sm:pr-5 sm:py-3"
+        className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10 sm:pl-11 sm:pr-5 sm:py-2.5"
       />
     </div>
   );
@@ -57,7 +57,7 @@ export default function Navbar() {
           Mobile  → two rows: [logo + actions] then [search]
           Desktop → single row: logo | search | actions
         */}
-        <div className="flex items-center gap-2 py-2.5 sm:h-18 sm:gap-6 sm:py-0 lg:gap-10">
+        <div className="flex items-center gap-2 py-2.5 sm:h-16 sm:gap-6 sm:py-0 lg:gap-8">
           {/* Logo */}
           <Link
             href="/"
@@ -72,7 +72,7 @@ export default function Navbar() {
           <SearchInput className="hidden flex-1 sm:block" />
 
           {/* Action group */}
-          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:ml-0 sm:gap-2.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:ml-0 sm:gap-2">
             {/* Dark mode toggle */}
             <button
               type="button"
@@ -80,7 +80,7 @@ export default function Navbar() {
               aria-label={
                 isDark ? 'Switch to light mode' : 'Switch to dark mode'
               }
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:w-10"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 dark:border-white/10 text-gray-500 dark:text-slate-400 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-white/8 hover:text-gray-900 dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:w-10"
             >
               {/* Show sun in dark mode, moon in light mode */}
               {mounted && isDark ? (
@@ -121,7 +121,7 @@ export default function Navbar() {
             {/* Post Item */}
             <Button
               variant="primary"
-              className="h-9 gap-0.5 px-3 text-xs sm:h-10 sm:gap-1.5 sm:px-5 sm:text-sm"
+              className="h-9 gap-0.5 px-3 text-xs sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
             >
               <span className="text-sm font-light leading-none sm:text-base">
                 +
@@ -132,7 +132,7 @@ export default function Navbar() {
             {/* Sign In */}
             <button
               type="button"
-              className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-slate-600 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-indigo-500/40 hover:bg-[#2F3FBF]/5 dark:hover:bg-indigo-500/10 hover:text-[#2F3FBF] dark:hover:text-indigo-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-5 sm:text-sm"
+              className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
             >
               Sign In
             </button>
@@ -140,7 +140,7 @@ export default function Navbar() {
         </div>
 
         {/* Search row — mobile only */}
-        <div className="px-0.5 pb-3 pt-1.5 sm:hidden">
+        <div className="px-0.5 pb-2.5 pt-1.5 sm:hidden">
           <SearchInput />
         </div>
       </Container>

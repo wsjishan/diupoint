@@ -11,7 +11,7 @@ export default function CategoryFilter() {
     <div className="w-full border-b border-gray-100 dark:border-white/10 bg-white dark:bg-slate-900">
       <div className="mx-auto w-full max-w-7xl">
         {/* Chip scroller owns its own horizontal padding so chips never clip on mobile scroll */}
-        <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-4 py-3 sm:gap-3 sm:px-6 sm:py-4 lg:px-8">
+        <div className="scrollbar-hide flex gap-2.5 overflow-x-auto px-4 py-2.5 sm:gap-3 sm:px-6 sm:py-3 lg:px-8">
           {CATEGORIES.map((cat) => (
             <CategoryChip
               key={cat.id}

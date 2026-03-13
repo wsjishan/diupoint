@@ -14,7 +14,7 @@ export default function LandingBanner({
   const HeadingTag = titleAs;
 
   return (
-    <section className="relative overflow-hidden border-b border-gray-100 py-10 text-center dark:border-slate-800">
+    <section className="relative overflow-hidden border-b border-gray-100 py-12 text-center dark:border-white/10 sm:py-14">
       <div
         className="absolute inset-0 bg-center bg-cover bg-no-repeat"
         style={{

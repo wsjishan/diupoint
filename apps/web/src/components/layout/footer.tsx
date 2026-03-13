@@ -1,10 +1,10 @@
 import Container from '@/components/ui/container';
 
-const INFO_LINKS = ['About DIUPoint', 'Contact', 'Terms of Service', 'FAQ'];
+const INFO_LINKS = ['About Us', 'Contact', 'Terms of Service', 'FAQ'];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 py-8 md:py-8">
+    <footer className="border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-slate-900 py-10 md:py-12">
       <Container>
         {/* Main row */}
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-12">
@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="mt-8 border-t border-gray-200 dark:border-slate-700 pt-5 text-center text-xs text-gray-400/80 dark:text-slate-500">
+        <p className="mt-8 border-t border-gray-200 dark:border-white/10 pt-5 text-center text-xs text-gray-400/80 dark:text-slate-500">
           © 2026 DIUPoint — Built for DIU students
         </p>
       </Container>

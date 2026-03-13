@@ -8,6 +8,7 @@ export interface Listing {
   location: string;
   category: string;
   badge?: Badge;
+  imageUrl?: string;
   gradientFrom: string;
   gradientTo: string;
 }
