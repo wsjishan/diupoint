@@ -1,6 +1,7 @@
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
+import LandingBanner from '@/components/ui/landing-banner';
 import CategoryFilter from '@/components/layout/category-filter';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
@@ -35,37 +36,11 @@ export default function HomePage() {
 
       <main>
         {/* Hero */}
-        <div className="relative border-b border-gray-100 dark:border-slate-800 py-10 text-center overflow-hidden">
-          {/* Light mode: background image */}
-          <div
-            className="absolute inset-0 bg-center bg-cover bg-no-repeat dark:hidden"
-            style={{
-              backgroundImage: "url('/images/hero/hero-bg-marketplace.png')",
-            }}
-            aria-hidden="true"
-          />
-          {/* Light mode: soft white overlay */}
-          <div
-            className="absolute inset-0 bg-white/65 dark:hidden"
-            aria-hidden="true"
-          />
-          {/* Dark mode: gradient background */}
-          <div
-            className="absolute inset-0 hidden dark:block bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950"
-            aria-hidden="true"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(79,70,229,0.18),transparent)]" />
-          </div>
-          <div className="relative">
-            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-3xl lg:text-4xl">
-              The marketplace built for DIU students
-            </h1>
-            <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-slate-400">
-              Buy and sell textbooks, electronics, housing, and campus
-              essentials across the DIU campus.
-            </p>
-          </div>
-        </div>
+        <LandingBanner
+          title="The marketplace built for DIU students"
+          subtitle="Buy and sell textbooks, electronics, housing, and campus essentials across the DIU campus."
+          titleAs="h1"
+        />
 
         {/* Listing sections — each gets its own background band */}
         {SECTIONS.map((section, i) => (
@@ -117,22 +92,12 @@ export default function HomePage() {
         ))}
 
         {/* CTA section */}
-        <div className="border-t border-white/5 bg-linear-to-r from-[#1d255f] via-[#2a2f7c] to-[#1d255f] py-12">
-          <div className="mx-auto max-w-3xl px-4 text-center">
-            <h2 className="text-xl font-semibold text-white sm:text-2xl">
-              Sell something you no longer need
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
-              Post your item and connect with DIU students looking for it.
-            </p>
-            <div className="mt-8">
-              <button className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-7 py-2.5 text-sm font-semibold text-[#2F3FBF] shadow-md transition-all duration-200 hover:-translate-y-[1px] hover:bg-white/95 hover:shadow-lg hover:shadow-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1d255f]">
-                <span className="text-base leading-none">+</span>
-                Post Now
-              </button>
-            </div>
-          </div>
-        </div>
+        <LandingBanner
+          title="Sell something you no longer need"
+          subtitle="Post your item and connect with DIU students looking for it."
+          buttonText="+ Post Now"
+          titleAs="h2"
+        />
       </main>
 
       <Footer />
