@@ -9,6 +9,7 @@ import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import {
   RECENTLY_ADDED,
+  LATEST_FROM_STORES,
   BOOKS_LISTINGS,
   ELECTRONICS_LISTINGS,
   HOUSING_LISTINGS,
@@ -26,6 +27,7 @@ const CATEGORY_SECTIONS = [
 interface ListingSectionProps {
   title: string;
   icon?: string;
+  subtitle?: string;
   listings: (typeof RECENTLY_ADDED)[number][];
   className: string;
   viewAllHref?: string;
@@ -35,6 +37,7 @@ interface ListingSectionProps {
 function ListingSection({
   title,
   icon,
+  subtitle,
   listings,
   className,
   viewAllHref,
@@ -42,15 +45,16 @@ function ListingSection({
 }: ListingSectionProps) {
   return (
     <div className={className}>
-      <Container className="py-14 sm:py-16">
+      <Container className="py-16">
         <section>
           <SectionHeader
             title={title}
             icon={icon}
+            subtitle={subtitle}
             viewAllHref={viewAllHref}
           />
           {listings.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6 lg:gap-4">
+            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -112,14 +116,22 @@ export default function HomePage() {
           viewAllHref="/listings/recent"
         />
 
-        <div className="bg-gray-50 dark:bg-slate-900">
-          <Container className="py-14 sm:py-16">
+        <ListingSection
+          title="Latest from Stores"
+          subtitle="Fresh products from campus stores and student-run businesses."
+          listings={LATEST_FROM_STORES}
+          className="bg-gray-50 dark:bg-slate-900"
+          viewAllHref="/listings?type=store"
+        />
+
+        <div className="bg-white dark:bg-slate-950">
+          <Container className="py-16">
             <section>
               <SectionHeader
                 title="Featured Stores"
                 viewAllHref="/stores"
               />
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 {FEATURED_STORES.map((store) => (
                   <StoreCard
                     key={store.id}
@@ -134,7 +146,7 @@ export default function HomePage() {
         {CATEGORY_SECTIONS.map((section, index) => {
           const className =
             section.title === 'Housing'
-              ? 'bg-[#f3f5ff] dark:bg-indigo-950/30'
+              ? 'bg-[#f8f9ff] dark:bg-indigo-950/20'
               : index % 2 === 0
                 ? 'bg-white dark:bg-slate-950'
                 : 'bg-gray-50 dark:bg-slate-900';

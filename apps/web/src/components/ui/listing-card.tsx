@@ -104,7 +104,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           )}
         </p>
         {isStoreSeller ? (
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">
             <span
               className="inline-flex shrink-0"
               aria-hidden="true"
@@ -126,16 +126,19 @@ export default function ListingCard({ listing }: ListingCardProps) {
             </span>
             <Link
               href={storeHref}
-              className="min-w-0 flex-1 truncate font-medium text-gray-600 transition-colors hover:text-[#2F3FBF] dark:text-slate-300 dark:hover:text-indigo-300"
+              className="min-w-0 flex-1 truncate font-medium text-gray-700 transition-colors hover:text-[#2F3FBF] dark:text-slate-200 dark:hover:text-indigo-300"
             >
               {listing.seller}
             </Link>
-            <span className="hidden shrink-0 whitespace-nowrap text-[10px] font-medium text-gray-400 dark:text-slate-500 sm:inline">
+            <span
+              className="min-w-0 max-w-[8rem] truncate text-[10px] font-medium text-gray-500 dark:text-slate-400"
+              title={storeIdentityLabel}
+            >
               • {storeIdentityLabel}
             </span>
           </div>
         ) : (
-          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">
             <span
               className="inline-flex shrink-0"
               aria-hidden="true"
@@ -155,12 +158,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 />
               </svg>
             </span>
-            <span className="truncate font-medium text-gray-600 dark:text-slate-300">
+            <span className="truncate font-medium text-gray-700 dark:text-slate-200">
               {listing.seller}
             </span>
           </div>
         )}
-        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+        <div className="mt-1.5 flex items-center gap-1 text-xs text-gray-400 dark:text-slate-500">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

@@ -30,6 +30,10 @@ export default function StoreSpotlightCard({ store }: StoreSpotlightCardProps) {
             <p className="mt-0.5 line-clamp-1 text-sm font-medium text-gray-600 dark:text-slate-300">
               {store.tagline}
             </p>
+            <p className="mt-1 text-xs font-medium text-gray-500 dark:text-slate-400">
+              Top seller in {store.categoryFocus} - {store.productCount}{' '}
+              products listed
+            </p>
             <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
               <span
                 className="inline-flex"

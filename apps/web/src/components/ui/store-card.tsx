@@ -34,15 +34,9 @@ export default function StoreCard({ store }: StoreCardProps) {
         {store.description}
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-        <span className="rounded-full bg-gray-100 px-2 py-1 font-medium dark:bg-slate-800 dark:text-slate-300">
-          {store.categoryFocus}
-        </span>
-        <span aria-hidden="true">•</span>
-        <span className="whitespace-nowrap font-medium">
-          {store.productCount} products
-        </span>
-      </div>
+      <p className="mt-3 truncate text-xs font-medium text-gray-500 dark:text-slate-400">
+        {store.categoryFocus} • {store.productCount} products
+      </p>
 
       <Link
         href={`/store/${store.slug}`}

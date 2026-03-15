@@ -726,3 +726,15 @@ export const ROOM_ESSENTIALS_LISTINGS: Listing[] = [
     gradientTo: '#9d174d',
   },
 ];
+
+const STORE_LISTINGS_FEED_SOURCE: Listing[] = [
+  ...RECENTLY_ADDED,
+  ...BOOKS_LISTINGS,
+  ...ELECTRONICS_LISTINGS,
+  ...ROOM_ESSENTIALS_LISTINGS,
+  ...HOUSING_LISTINGS,
+];
+
+export const LATEST_FROM_STORES: Listing[] = STORE_LISTINGS_FEED_SOURCE.filter(
+  (listing) => listing.sellerType === 'store'
+).slice(0, 6);
