@@ -735,6 +735,82 @@ const STORE_LISTINGS_FEED_SOURCE: Listing[] = [
   ...HOUSING_LISTINGS,
 ];
 
-export const LATEST_FROM_STORES: Listing[] = STORE_LISTINGS_FEED_SOURCE.filter(
-  (listing) => listing.sellerType === 'store'
-).slice(0, 6);
+const LATEST_FROM_STORES_SUPPLEMENTAL: Listing[] = [
+  {
+    id: 's1',
+    title: 'A4 Exam Sheet Bundle (500 pages)',
+    price: 420,
+    seller: 'Study Corner',
+    sellerType: 'store',
+    storeSlug: 'study-corner',
+    storeLabel: 'Campus Book Store',
+    location: 'Hasna Hostel',
+    category: 'Books & Notes',
+    badge: 'New',
+    gradientFrom: '#93c5fd',
+    gradientTo: '#1d4ed8',
+  },
+  {
+    id: 's2',
+    title: 'TI-84 Plus Graphing Calculator',
+    price: 7800,
+    seller: 'BookBarn DIU',
+    sellerType: 'store',
+    storeSlug: 'bookbarn-diu',
+    storeLabel: 'Featured Store',
+    location: 'Hasna Hostel',
+    category: 'Electronics',
+    badge: 'New',
+    gradientFrom: '#67e8f9',
+    gradientTo: '#0891b2',
+  },
+  {
+    id: 's3',
+    title: 'USB-C 65W GaN Fast Charger',
+    price: 1950,
+    seller: 'Gadget Grove',
+    sellerType: 'store',
+    storeSlug: 'gadget-grove',
+    storeLabel: 'Campus Tech Store',
+    location: 'Dorm Area',
+    category: 'Electronics',
+    badge: 'New',
+    gradientFrom: '#6ee7b7',
+    gradientTo: '#047857',
+  },
+  {
+    id: 's4',
+    title: 'Insulated Lunch Box Set',
+    price: 760,
+    seller: 'Campus Coffee',
+    sellerType: 'store',
+    storeSlug: 'campus-coffee',
+    storeLabel: 'Campus Store',
+    location: 'Main Campus',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#bef264',
+    gradientTo: '#4d7c0f',
+  },
+  {
+    id: 's5',
+    title: 'Hostel Curtain Set (2 panels)',
+    price: 1250,
+    seller: 'Dorm Decor Studio',
+    sellerType: 'store',
+    storeSlug: 'dorm-decor-studio',
+    storeLabel: 'Verified Housing Store',
+    location: 'Private Hostel',
+    category: 'Room Essentials',
+    badge: 'New',
+    gradientFrom: '#c4b5fd',
+    gradientTo: '#7c3aed',
+  },
+];
+
+export const LATEST_FROM_STORES: Listing[] = [
+  ...STORE_LISTINGS_FEED_SOURCE.filter(
+    (listing) => listing.sellerType === 'store'
+  ),
+  ...LATEST_FROM_STORES_SUPPLEMENTAL,
+].slice(0, 12);
