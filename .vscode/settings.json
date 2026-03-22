@@ -5,6 +5,10 @@
     "/^perl -0pi -e \"s/export type Badge = 'New' \\\\\\| 'Used' \\\\\\| 'Featured';/export type ListingCondition = 'new' \\| 'used';/g; s/\\\\bbadge\\\\\\?: Badge;/condition\\?: ListingCondition;/g; s/\\\\bbadge:/condition:/g; s/condition:\\\\s\\*'New'/condition: 'new'/g; s/condition:\\\\s\\*'Used'/condition: 'used'/g; s/condition:\\\\s\\*'Featured'/condition: 'used'/g\" apps/web/src/data/mock-listings\\.ts$/": {
       "approve": true,
       "matchCommandLine": true
+    },
+    "/^node -e \"const fs=require\\('fs'\\);const s=fs\\.readFileSync\\('apps/web/src/data/mock-listings\\.ts','utf8'\\);const seg=\\(name,next\\)=>\\{const a=s\\.indexOf\\('export const '\\+name\\);const b=s\\.indexOf\\(next,a\\);return s\\.slice\\(a,b\\)\\};const recently=seg\\('RECENTLY_ADDED','export const BOOKS_LISTINGS'\\);const room=seg\\('ROOM_ESSENTIALS_LISTINGS','const STORE_LISTINGS_FEED_SOURCE'\\);const c=\\(txt\\)=>\\(txt\\.match\\(/storeSlug: 'campus-coffee'/g\\)\\|\\|\\[\\]\\)\\.length;console\\.log\\('campus-coffee in RECENTLY_ADDED:',c\\(recently\\)\\);console\\.log\\('campus-coffee in ROOM_ESSENTIALS_LISTINGS:',c\\(room\\)\\);console\\.log\\('campus-coffee in ALL_LISTINGS source:',c\\(recently\\)\\+c\\(room\\)\\);\"$/": {
+      "approve": true,
+      "matchCommandLine": true
     }
   }
 }

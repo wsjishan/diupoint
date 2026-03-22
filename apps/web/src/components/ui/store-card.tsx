@@ -10,7 +10,7 @@ export default function StoreCard({ store }: StoreCardProps) {
     <article className="group flex h-full flex-col rounded-2xl border border-indigo-100/80 bg-white p-4 shadow-sm shadow-indigo-900/5 transition-all duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-900/10 dark:border-indigo-400/20 dark:bg-slate-900/70 dark:hover:border-indigo-300/40">
       <div className="flex items-start justify-between gap-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-xs font-bold text-[#2F3FBF] ring-1 ring-indigo-200/80 dark:from-indigo-500/25 dark:to-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/35">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-100 to-indigo-50 text-xs font-bold text-[#2F3FBF] ring-1 ring-indigo-200/80 dark:from-indigo-500/25 dark:to-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-400/35">
             {store.logoPlaceholder}
           </div>
           <div className="min-w-0">
