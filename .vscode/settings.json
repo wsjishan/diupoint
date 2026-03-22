@@ -1,6 +1,10 @@
 {
   "chat.tools.terminal.autoApprove": {
     "pnpm": true,
-    "true": true
+    "true": true,
+    "/^perl -0pi -e \"s/export type Badge = 'New' \\\\\\| 'Used' \\\\\\| 'Featured';/export type ListingCondition = 'new' \\| 'used';/g; s/\\\\bbadge\\\\\\?: Badge;/condition\\?: ListingCondition;/g; s/\\\\bbadge:/condition:/g; s/condition:\\\\s\\*'New'/condition: 'new'/g; s/condition:\\\\s\\*'Used'/condition: 'used'/g; s/condition:\\\\s\\*'Featured'/condition: 'used'/g\" apps/web/src/data/mock-listings\\.ts$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   }
 }

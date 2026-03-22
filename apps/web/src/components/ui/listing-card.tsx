@@ -2,10 +2,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Listing } from '@/data/mock-listings';
 
-const badgeClasses: Record<string, string> = {
-  New: 'bg-green-500 text-white',
-  Used: 'bg-amber-500 text-white',
-  Featured: 'bg-[#2F3FBF] text-white',
+type ConditionBadge = 'new' | 'used';
+
+const badgeClasses: Record<ConditionBadge, string> = {
+  new: 'bg-green-500 text-white',
+  used: 'bg-amber-500 text-white',
+};
+
+const badgeLabels: Record<ConditionBadge, string> = {
+  new: 'New',
+  used: 'Used',
 };
 
 interface ListingCardProps {
@@ -28,7 +34,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const isStoreSeller =
     listing.sellerType === 'store' || Boolean(listing.storeSlug);
   const storeHref = `/store/${toStoreSlug(listing)}`;
-  const storeIdentityLabel = listing.storeLabel ?? 'Store';
+  const conditionBadge: ConditionBadge = listing.condition ?? 'used';
 
   return (
     <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-800/90 shadow-sm shadow-gray-900/5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-xl hover:shadow-gray-900/12 dark:hover:shadow-black/35">
@@ -56,15 +62,11 @@ export default function ListingCard({ listing }: ListingCardProps) {
         {/* subtle bottom vignette to lift card content boundary */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/20 to-transparent" />
 
-        {listing.badge && (
-          <span
-            className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold ${
-              badgeClasses[listing.badge] ?? 'bg-gray-500 text-white'
-            }`}
-          >
-            {listing.badge}
-          </span>
-        )}
+        <span
+          className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClasses[conditionBadge]}`}
+        >
+          {badgeLabels[conditionBadge]}
+        </span>
         <button
           type="button"
           aria-label="Add to wishlist"
@@ -104,7 +106,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           )}
         </p>
         {isStoreSeller ? (
-          <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">
+          <div className="mt-1.5 flex min-w-0 items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
             <span
               className="inline-flex shrink-0"
               aria-hidden="true"
@@ -130,12 +132,6 @@ export default function ListingCard({ listing }: ListingCardProps) {
             >
               {listing.seller}
             </Link>
-            <span
-              className="min-w-0 max-w-[8rem] truncate text-[10px] font-medium text-gray-500 dark:text-slate-400"
-              title={storeIdentityLabel}
-            >
-              • {storeIdentityLabel}
-            </span>
           </div>
         ) : (
           <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">

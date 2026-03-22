@@ -17,10 +17,10 @@ import {
 import { FEATURED_STORES } from '@/data/mock-stores';
 
 const CATEGORY_SECTIONS = [
-  { title: 'Books & Notes', listings: BOOKS_LISTINGS },
   { title: 'Electronics', listings: ELECTRONICS_LISTINGS },
   { title: 'Room Essentials', listings: ROOM_ESSENTIALS_LISTINGS },
   { title: 'Housing', listings: HOUSING_LISTINGS },
+  { title: 'Books & Notes', listings: BOOKS_LISTINGS },
 ];
 
 interface ListingSectionProps {
