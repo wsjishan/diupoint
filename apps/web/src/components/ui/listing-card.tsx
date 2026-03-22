@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Listing } from '@/data/mock-listings';
+import { getListingSlug, type Listing } from '@/data/mock-listings';
 
 type ConditionBadge = 'new' | 'used';
 
@@ -50,6 +50,7 @@ function toStoreSlug(listing: Listing): string {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   const isRental = listing.category === 'Housing';
+  const listingHref = `/listing/${getListingSlug(listing)}`;
   const imageSrc = listing.imageUrl?.trim() ?? '';
   const hasImage = imageSrc.length > 0;
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
@@ -74,15 +75,27 @@ export default function ListingCard({ listing }: ListingCardProps) {
         }
       >
         {showImage ? (
-          <Image
-            src={imageSrc}
-            alt={listing.title}
-            fill
-            className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            onError={() => setFailedImageSrc(imageSrc)}
+          <Link
+            href={listingHref}
+            aria-label={`View details for ${listing.title}`}
+            className="absolute inset-0"
+          >
+            <Image
+              src={imageSrc}
+              alt={listing.title}
+              fill
+              className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+              onError={() => setFailedImageSrc(imageSrc)}
+            />
+          </Link>
+        ) : (
+          <Link
+            href={listingHref}
+            aria-label={`View details for ${listing.title}`}
+            className="absolute inset-0"
           />
-        ) : null}
+        )}
 
         {/* subtle bottom vignette to lift card content boundary */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/20 to-transparent" />
@@ -120,7 +133,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
           {listing.category}
         </span>
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-slate-100 transition-colors group-hover:text-[#2F3FBF] dark:group-hover:text-indigo-400">
-          {listing.title}
+          <Link
+            href={listingHref}
+            className="hover:underline"
+          >
+            {listing.title}
+          </Link>
         </h3>
         <p className="mt-auto pt-0.5 text-base font-bold text-gray-900 dark:text-slate-100">
           ৳ {listing.price.toLocaleString()}
@@ -206,6 +224,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </svg>
           <span className="truncate">{listing.location}</span>
         </div>
+        <Link
+          href={listingHref}
+          className="mt-1 inline-flex w-fit text-xs font-semibold text-[#2F3FBF] transition-colors hover:text-[#2535a8] dark:text-indigo-300 dark:hover:text-indigo-200"
+        >
+          View details
+        </Link>
       </div>
     </article>
   );

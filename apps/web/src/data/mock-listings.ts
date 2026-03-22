@@ -1,18 +1,28 @@
 export type ListingCondition = 'new' | 'used';
 export type SellerType = 'personal' | 'store';
+export type StockStatus = 'in-stock' | 'low-stock' | 'out-of-stock';
+export type PaymentMethod = 'cod' | 'bkash' | 'card';
 
 export interface Listing {
   id: string;
+  slug?: string;
   title: string;
   price: number;
   seller: string;
   sellerType?: SellerType;
   storeSlug?: string;
   storeLabel?: string;
+  sellerSummary?: string;
+  isSellerVerified?: boolean;
   location: string;
   category: string;
   condition: ListingCondition;
   imageUrl?: string;
+  images?: string[];
+  description?: string;
+  postedAt?: string;
+  stockStatus?: StockStatus;
+  paymentSupported?: PaymentMethod[];
   gradientFrom: string;
   gradientTo: string;
 }
@@ -1393,7 +1403,128 @@ const STORE_LISTINGS_FEED_SOURCE: Listing[] = [
   ...HOUSING_LISTINGS,
 ];
 
-export const ALL_LISTINGS: Listing[] = STORE_LISTINGS_FEED_SOURCE;
+const LISTING_DETAIL_OVERRIDES: Record<string, Partial<Listing>> = {
+  e6: {
+    images: [
+      '/images/landing-banner-bg.png',
+      '/images/landing-banner-bg.png?view=desk',
+      '/images/landing-banner-bg.png?view=detail',
+    ],
+    description:
+      'Compact USB-C hub for daily class and project work. It includes HDMI, USB-A, SD card, and PD charging passthrough so you can connect everything from one port without cluttering your desk setup.',
+    postedAt: '2026-03-16T09:10:00.000Z',
+    sellerSummary: 'Trusted tech picks for campus life.',
+    isSellerVerified: true,
+    stockStatus: 'in-stock',
+    paymentSupported: ['cod', 'bkash'],
+  },
+  e1: {
+    description:
+      'Well-maintained Apple Watch Series 8 with minimal signs of use. Battery health is strong, all sensors are working, and the watch is great for daily fitness tracking and notifications during classes.',
+    postedAt: '2026-03-11T14:25:00.000Z',
+    isSellerVerified: false,
+  },
+  h1: {
+    description:
+      'Single room available near DIU with attached washroom, stable Wi-Fi, and secure gate access. Ideal for students who want a quiet study environment with easy campus commute.',
+    postedAt: '2026-03-08T10:40:00.000Z',
+    isSellerVerified: true,
+  },
+};
+
+function toKebabCase(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function getStableHash(seed: string): number {
+  let hash = 0;
+
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  return Math.abs(hash);
+}
+
+function defaultPostedAt(listingId: string): string {
+  const base = new Date('2026-03-20T09:00:00.000Z').getTime();
+  const offsetDays = getStableHash(listingId) % 50;
+  const createdAt = new Date(base - offsetDays * 24 * 60 * 60 * 1000);
+  return createdAt.toISOString();
+}
+
+function defaultDescription(listing: Listing): string {
+  return `${listing.title} listed by ${listing.seller}. Condition: ${listing.condition === 'new' ? 'New' : 'Used'}. Great fit for DIU students looking for reliable campus marketplace deals.`;
+}
+
+function defaultSellerSummary(listing: Listing): string {
+  if (listing.sellerType === 'store' || listing.storeSlug) {
+    return listing.storeLabel ?? 'Student-run store on DIUPoint.';
+  }
+
+  return 'DIU student seller.';
+}
+
+function withListingDetails(listing: Listing): Listing {
+  const override = LISTING_DETAIL_OVERRIDES[listing.id] ?? {};
+  const isStoreSeller =
+    listing.sellerType === 'store' || Boolean(listing.storeSlug);
+  const rawImages = override.images ?? listing.images;
+  const images = rawImages?.filter((image) => image.trim().length > 0);
+  const resolvedPaymentMethods =
+    override.paymentSupported ??
+    listing.paymentSupported ??
+    (isStoreSeller ? (['cod', 'bkash'] as PaymentMethod[]) : undefined);
+
+  return {
+    ...listing,
+    ...override,
+    slug:
+      override.slug ??
+      listing.slug ??
+      `${toKebabCase(listing.title)}-${listing.id.toLowerCase()}`,
+    description:
+      override.description ??
+      listing.description ??
+      defaultDescription(listing),
+    postedAt:
+      override.postedAt ?? listing.postedAt ?? defaultPostedAt(listing.id),
+    sellerSummary:
+      override.sellerSummary ??
+      listing.sellerSummary ??
+      defaultSellerSummary(listing),
+    isSellerVerified:
+      override.isSellerVerified ?? listing.isSellerVerified ?? false,
+    stockStatus:
+      override.stockStatus ??
+      listing.stockStatus ??
+      (isStoreSeller ? 'in-stock' : undefined),
+    paymentSupported:
+      resolvedPaymentMethods && resolvedPaymentMethods.length > 0
+        ? resolvedPaymentMethods
+        : undefined,
+    images: images && images.length > 0 ? images : undefined,
+  };
+}
+
+export const ALL_LISTINGS: Listing[] =
+  STORE_LISTINGS_FEED_SOURCE.map(withListingDetails);
+
+export function getListingSlug(listing: Listing): string {
+  return (
+    listing.slug ?? `${toKebabCase(listing.title)}-${listing.id.toLowerCase()}`
+  );
+}
+
+export function getListingBySlug(slug: string): Listing | undefined {
+  return ALL_LISTINGS.find((listing) => getListingSlug(listing) === slug);
+}
 
 const LATEST_FROM_STORES_SUPPLEMENTAL: Listing[] = [
   {
