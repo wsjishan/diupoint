@@ -4,7 +4,7 @@ const INFO_LINKS = ['About Us', 'Contact', 'Terms of Service', 'FAQ'];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-slate-900 py-10 md:py-12">
+    <footer className="py-10 md:py-12">
       <Container>
         {/* Main row */}
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between sm:gap-12">

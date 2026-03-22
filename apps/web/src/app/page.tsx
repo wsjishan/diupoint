@@ -163,16 +163,17 @@ export default function HomePage() {
           );
         })}
 
-        {/* CTA section */}
-        <LandingBanner
-          title="Sell something you no longer need"
-          subtitle="Post your item and connect with DIU students looking for it."
-          buttonText="+ Post Now"
-          titleAs="h2"
-        />
+        {/* CTA + footer region */}
+        <div className="bg-gray-50 dark:bg-slate-900">
+          <LandingBanner
+            title="Sell something you no longer need"
+            subtitle="Post your item and connect with DIU students looking for it."
+            buttonText="+ Post Now"
+            titleAs="h2"
+          />
+          <Footer />
+        </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
