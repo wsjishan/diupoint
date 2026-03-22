@@ -3,7 +3,6 @@ import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
 import LandingBanner from '@/components/ui/landing-banner';
 import StoreCard from '@/components/ui/store-card';
-import StoreSpotlightCard from '@/components/ui/store-spotlight-card';
 import CategoryFilter from '@/components/layout/category-filter';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
@@ -15,7 +14,7 @@ import {
   HOUSING_LISTINGS,
   ROOM_ESSENTIALS_LISTINGS,
 } from '@/data/mock-listings';
-import { FEATURED_STORES, STORE_SPOTLIGHT } from '@/data/mock-stores';
+import { FEATURED_STORES } from '@/data/mock-stores';
 
 const CATEGORY_SECTIONS = [
   { title: 'Books & Notes', listings: BOOKS_LISTINGS },
@@ -31,7 +30,6 @@ interface ListingSectionProps {
   listings: (typeof RECENTLY_ADDED)[number][];
   className: string;
   viewAllHref?: string;
-  children?: React.ReactNode;
 }
 
 function ListingSection({
@@ -41,7 +39,6 @@ function ListingSection({
   listings,
   className,
   viewAllHref,
-  children,
 }: ListingSectionProps) {
   return (
     <div className={className}>
@@ -88,7 +85,6 @@ function ListingSection({
               </p>
             </div>
           )}
-          {children}
         </section>
       </Container>
     </div>
@@ -111,6 +107,7 @@ export default function HomePage() {
 
         <ListingSection
           title="Recently Added"
+          subtitle="Fresh listings from the DIU community"
           listings={RECENTLY_ADDED}
           className="bg-white dark:bg-slate-950"
           viewAllHref="/listings/recent"
@@ -118,7 +115,7 @@ export default function HomePage() {
 
         <ListingSection
           title="Latest from Stores"
-          subtitle="Fresh products from campus stores and student-run businesses."
+          subtitle="New arrivals from student-run stores"
           listings={LATEST_FROM_STORES}
           className="bg-gray-50 dark:bg-slate-900"
           viewAllHref="/listings?type=store"
@@ -129,6 +126,7 @@ export default function HomePage() {
             <section>
               <SectionHeader
                 title="Featured Stores"
+                subtitle="Discover trusted student-run stores on DIUPoint"
                 viewAllHref="/stores"
               />
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
@@ -161,13 +159,7 @@ export default function HomePage() {
                 .toLowerCase()
                 .replace(/\s*&\s*/g, '-')
                 .replace(/\s+/g, '-')}`}
-            >
-              {section.title === 'Electronics' && STORE_SPOTLIGHT ? (
-                <div className="mt-6 sm:mt-8">
-                  <StoreSpotlightCard store={STORE_SPOTLIGHT} />
-                </div>
-              ) : null}
-            </ListingSection>
+            />
           );
         })}
 
