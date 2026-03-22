@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Listing } from '@/data/mock-listings';
@@ -13,6 +16,23 @@ const badgeLabels: Record<ConditionBadge, string> = {
   new: 'New',
   used: 'Used',
 };
+
+const fallbackGradients = [
+  'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+  'linear-gradient(135deg, #eff6ff, #e2e8f0)',
+  'linear-gradient(135deg, #f8fafc, #e0e7ff)',
+];
+
+function getFallbackGradient(seed: string): string {
+  let hash = 0;
+
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  return fallbackGradients[Math.abs(hash) % fallbackGradients.length];
+}
 
 interface ListingCardProps {
   listing: Listing;
@@ -30,7 +50,11 @@ function toStoreSlug(listing: Listing): string {
 
 export default function ListingCard({ listing }: ListingCardProps) {
   const isRental = listing.category === 'Housing';
-  const hasImage = Boolean(listing.imageUrl);
+  const imageSrc = listing.imageUrl?.trim() ?? '';
+  const hasImage = imageSrc.length > 0;
+  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+  const showImage = hasImage && failedImageSrc !== imageSrc;
+  const fallbackBackground = getFallbackGradient(listing.id);
   const isStoreSeller =
     listing.sellerType === 'store' || Boolean(listing.storeSlug);
   const storeHref = `/store/${toStoreSlug(listing)}`;
@@ -42,20 +66,21 @@ export default function ListingCard({ listing }: ListingCardProps) {
       <div
         className="relative aspect-4/3 w-full overflow-hidden transition-all duration-200 group-hover:brightness-105"
         style={
-          hasImage
+          showImage
             ? undefined
             : {
-                background: `linear-gradient(135deg, ${listing.gradientFrom}, ${listing.gradientTo})`,
+                background: fallbackBackground,
               }
         }
       >
-        {hasImage ? (
+        {showImage ? (
           <Image
-            src={listing.imageUrl as string}
+            src={imageSrc}
             alt={listing.title}
             fill
             className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+            onError={() => setFailedImageSrc(imageSrc)}
           />
         ) : null}
 
