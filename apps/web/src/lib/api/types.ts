@@ -88,3 +88,21 @@ export interface ApiSignInResponse {
   accessToken: string;
   user: ApiAuthUser;
 }
+
+export interface ApiVerificationRequestResponse {
+  message: string;
+  verificationEmail: string;
+  expiresAt: string;
+  mockOtp?: string;
+}
+
+export interface ApiVerificationConfirmResponse {
+  message: string;
+}
+
+export interface ApiFavorite {
+  id: string;
+  listingId: string;
+  createdAt: string;
+  listing: ApiListing;
+}

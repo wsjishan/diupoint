@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
+import FavoriteToggleButton from '@/components/listing/favorite-toggle-button';
 import ListingImageGallery from '@/components/listing/listing-image-gallery';
 import PersonalSellerActions from '@/components/listing/personal-seller-actions';
 import Button from '@/components/ui/button';
@@ -162,6 +163,13 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 >
                   {listing.condition === 'new' ? 'New' : 'Used'}
                 </span>
+
+                <FavoriteToggleButton
+                  listingId={listing.id}
+                  showText
+                  className="ml-auto inline-flex items-center rounded-full border border-gray-200 bg-white px-2.5 py-1 text-gray-600 transition-colors hover:border-rose-200 hover:text-rose-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-rose-400/40 dark:hover:text-rose-300"
+                  iconClassName="h-3.5 w-3.5"
+                />
               </div>
 
               <h1 className="mt-3 text-2xl font-black leading-tight tracking-tight text-gray-950 dark:text-slate-100 sm:text-[1.75rem]">
@@ -344,7 +352,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
             </div>
 
             {relatedListings.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 lg:grid-cols-4 [&_.lg\:p-3\.5]:p-3 [&_.mt-1\.5]:mt-1">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-3.5 lg:grid-cols-4">
                 {relatedListings.map((item) => (
                   <ListingCard
                     key={item.id}

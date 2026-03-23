@@ -2,64 +2,122 @@
 
 import { Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
 
-function withVerifiedViewer(returnTo: string): string {
-  const safeTarget = returnTo.startsWith('/') ? returnTo : '/';
-  const [path, rawQuery = ''] = safeTarget.split('?');
-  const params = new URLSearchParams(rawQuery);
-
-  params.set('viewer', 'verified');
-  params.set('verified', '1');
-
-  const query = params.toString();
-  return query ? `${path}?${query}` : path;
+function resolveReturnPath(returnTo: string): string {
+  return returnTo.startsWith('/') ? returnTo : '/';
 }
 
 function VerifyAccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { refreshCurrentUser } = useAuth();
+  const { isLoading, isAuthenticated, verificationStatus, refreshCurrentUser } =
+    useAuth();
+  const [isDone, setIsDone] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
 
   const returnTo = useMemo(() => {
-    return searchParams.get('returnTo') ?? '/';
+    return resolveReturnPath(searchParams.get('returnTo') ?? '/');
   }, [searchParams]);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/sign-in?returnTo=%2Fverify-account');
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  const isAlreadyVerified = verificationStatus === 'VERIFIED';
 
   return (
     <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
       <Navbar />
 
-      <main className="pb-14 pt-8 sm:pt-10">
-        <Container>
-          <section className="mx-auto w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-4 shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900 sm:p-6">
-            <h1 className="text-2xl font-black tracking-tight text-gray-950 dark:text-slate-100">
-              Verify your account
-            </h1>
-            <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
-              Complete a quick DIU email verification to unlock seller contact
-              options.
-            </p>
+      <main className="relative isolate overflow-hidden py-12 sm:py-14">
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-[#fcfdff] via-[#f5f8ff] to-[#edf2ff] dark:from-slate-950 dark:via-slate-950 dark:to-indigo-950/30" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,rgba(47,63,191,0.08),transparent_46%),radial-gradient(circle_at_bottom,rgba(56,189,248,0.06),transparent_42%)] dark:bg-[radial-gradient(circle_at_50%_25%,rgba(99,102,241,0.18),transparent_42%),radial-gradient(circle_at_bottom,rgba(14,165,233,0.08),transparent_40%)]" />
 
-            <div className="mt-4">
-              <AccountVerificationFlow
-                autoCompleteOnSuccess
-                autoCompleteDelayMs={900}
-                onVerified={async () => {
-                  await refreshCurrentUser();
-                  router.replace(withVerifiedViewer(returnTo));
-                }}
-                className="border-0 bg-transparent p-0"
-              />
-            </div>
+        <Container className="relative">
+          <section className="mx-auto w-full max-w-md rounded-3xl border border-white/85 bg-white/90 p-5 shadow-[0_26px_70px_-28px_rgba(15,23,42,0.4),0_10px_30px_-20px_rgba(15,23,42,0.25)] backdrop-blur-sm dark:border-white/12 dark:bg-slate-900/82 dark:shadow-[0_30px_72px_-24px_rgba(2,6,23,0.86),0_12px_32px_-22px_rgba(15,23,42,0.62)] sm:p-6">
+            {isLoading ? (
+              <p className="text-sm text-gray-600 dark:text-slate-300">
+                Loading your account...
+              </p>
+            ) : isAlreadyVerified ? (
+              <div className="space-y-3">
+                <h1 className="text-2xl font-semibold tracking-tight text-gray-950 dark:text-slate-100">
+                  Your account is already verified.
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-slate-300">
+                  Your DIU verified status is active. You can continue using all
+                  seller contact features.
+                </p>
+                <div className="pt-1">
+                  <Link
+                    href={returnTo}
+                    className="inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
+                  >
+                    Continue
+                  </Link>
+                </div>
+              </div>
+            ) : isDone ? (
+              <div className="space-y-3">
+                <h1 className="text-2xl font-semibold tracking-tight text-gray-950 dark:text-slate-100">
+                  Your account is now verified.
+                </h1>
+                <p className="text-sm text-gray-600 dark:text-slate-300">
+                  Seller contact is now unlocked across DIUPoint.
+                </p>
+                {verifiedEmail ? (
+                  <p className="text-xs text-gray-500 dark:text-slate-400">
+                    Verified with {verifiedEmail}
+                  </p>
+                ) : null}
+                <div className="pt-1">
+                  <Link
+                    href={returnTo}
+                    className="inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
+                  >
+                    Continue
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-gray-950 dark:text-slate-100">
+                  Verify your account
+                </h1>
+                <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
+                  Use your DIU email to get a verified account.
+                </p>
+
+                <div className="mt-4">
+                  <AccountVerificationFlow
+                    autoCompleteOnSuccess
+                    autoCompleteDelayMs={700}
+                    onVerified={async (email) => {
+                      await refreshCurrentUser();
+                      setVerifiedEmail(email);
+                      setIsDone(true);
+                    }}
+                    className="border-0 bg-transparent p-0"
+                  />
+                </div>
+              </div>
+            )}
           </section>
         </Container>
       </main>
 
-      <Footer />
+      <div className="bg-gray-50 dark:bg-slate-900">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -230,6 +230,13 @@ export default function Navbar({
                 </Link>
 
                 <Link
+                  href="/favorites"
+                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
+                >
+                  Saved Items
+                </Link>
+
+                <Link
                   href={
                     verificationStatus === 'VERIFIED'
                       ? '/'

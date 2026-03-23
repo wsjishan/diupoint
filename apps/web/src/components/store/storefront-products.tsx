@@ -256,10 +256,7 @@ export default function StorefrontProducts({
                   className={`${getGridClasses(currentPageListings.length)} [&>article]:transition-all [&>article]:duration-200 [&>article:hover]:-translate-y-1 [&>article:hover]:shadow-lg [&>article:hover]:shadow-slate-900/10`}
                 >
                   {currentPageListings.map((listing) => (
-                    <div
-                      key={listing.id}
-                      className="[&_.aspect-4\/3]:aspect-4/2.75 [&_.lg\:p-3\.5]:p-3! sm:[&_.aspect-4\/3]:aspect-4/2.9"
-                    >
+                    <div key={listing.id}>
                       <ListingCard listing={listing} />
                     </div>
                   ))}

@@ -3,15 +3,44 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
 import { isDiuEmailDomain } from '@/lib/auth-account';
+import {
+  confirmVerificationOtp,
+  requestVerificationOtp,
+} from '@/lib/api/verification';
 
 type VerificationStep = 'email' | 'otp' | 'success';
 
 interface AccountVerificationFlowProps {
-  onVerified?: (verifiedEmail: string) => void;
+  onVerified?: (verifiedEmail: string) => void | Promise<void>;
   onCancel?: () => void;
   autoCompleteOnSuccess?: boolean;
   autoCompleteDelayMs?: number;
   className?: string;
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    const jsonStartIndex = error.message.indexOf('{');
+
+    if (jsonStartIndex >= 0) {
+      const jsonText = error.message.slice(jsonStartIndex);
+
+      try {
+        const parsed = JSON.parse(jsonText) as { message?: string | string[] };
+        if (Array.isArray(parsed.message) && parsed.message.length > 0) {
+          return parsed.message[0];
+        }
+
+        if (typeof parsed.message === 'string' && parsed.message.length > 0) {
+          return parsed.message;
+        }
+      } catch {
+        return fallback;
+      }
+    }
+  }
+
+  return fallback;
 }
 
 export default function AccountVerificationFlow({
@@ -26,6 +55,7 @@ export default function AccountVerificationFlow({
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const completionTimerRef = useRef<number | null>(null);
 
   const trimmedEmail = useMemo(() => email.trim(), [email]);
@@ -38,7 +68,7 @@ export default function AccountVerificationFlow({
     };
   }, []);
 
-  function handleSendOtp(event: FormEvent<HTMLFormElement>) {
+  async function handleSendOtp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!trimmedEmail || !isDiuEmailDomain(trimmedEmail)) {
@@ -47,40 +77,93 @@ export default function AccountVerificationFlow({
     }
 
     setError(null);
+    setInfoMessage(null);
     setIsSubmitting(true);
 
-    window.setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await requestVerificationOtp({
+        verificationEmail: trimmedEmail,
+      });
+
+      setInfoMessage(`OTP sent to ${response.verificationEmail}.`);
       setStep('otp');
-    }, 350);
+    } catch (requestError) {
+      setError(
+        extractErrorMessage(
+          requestError,
+          'Unable to send OTP right now. Please try again.'
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
-  function handleVerify(event: FormEvent<HTMLFormElement>) {
+  async function handleVerify(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (otp.trim().length < 4) {
-      setError('Enter the OTP sent to your DIU email.');
+    if (!/^\d{6}$/.test(otp.trim())) {
+      setError('Enter the 6-digit OTP sent to your DIU email.');
       return;
     }
 
     setError(null);
+    setInfoMessage(null);
     setIsSubmitting(true);
 
-    window.setTimeout(() => {
+    try {
+      await confirmVerificationOtp({
+        verificationEmail: trimmedEmail,
+        otp: otp.trim(),
+      });
+
       setIsSubmitting(false);
       setStep('success');
 
       if (autoCompleteOnSuccess && onVerified) {
         completionTimerRef.current = window.setTimeout(() => {
-          onVerified(trimmedEmail);
+          void onVerified(trimmedEmail);
         }, autoCompleteDelayMs);
       }
-    }, 350);
+    } catch (verifyError) {
+      setError(
+        extractErrorMessage(
+          verifyError,
+          'Verification failed. Please check OTP and try again.'
+        )
+      );
+      setIsSubmitting(false);
+    }
   }
 
-  function handleResendCode() {
+  async function handleResendCode() {
     setError(null);
-    setOtp('');
+    setInfoMessage(null);
+
+    if (!trimmedEmail || !isDiuEmailDomain(trimmedEmail)) {
+      setError('Please provide a valid DIU email first.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await requestVerificationOtp({
+        verificationEmail: trimmedEmail,
+      });
+
+      setOtp('');
+      setInfoMessage(`A new OTP was sent to ${response.verificationEmail}.`);
+    } catch (requestError) {
+      setError(
+        extractErrorMessage(
+          requestError,
+          'Unable to resend OTP right now. Please try again.'
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const stepIndex = step === 'email' ? 1 : step === 'otp' ? 2 : 3;
@@ -154,6 +237,12 @@ export default function AccountVerificationFlow({
             </p>
           ) : null}
 
+          {infoMessage ? (
+            <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+              {infoMessage}
+            </p>
+          ) : null}
+
           <div className="flex items-center justify-end gap-2.5">
             {onCancel ? (
               <button
@@ -206,10 +295,17 @@ export default function AccountVerificationFlow({
             </p>
           ) : null}
 
+          {infoMessage ? (
+            <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+              {infoMessage}
+            </p>
+          ) : null}
+
           <div className="flex flex-wrap items-center justify-between gap-2">
             <button
               type="button"
               onClick={handleResendCode}
+              disabled={isSubmitting}
               className="text-xs font-semibold text-[#2F3FBF] underline-offset-2 transition-colors hover:text-[#2535a8] hover:underline dark:text-indigo-300 dark:hover:text-indigo-200"
             >
               Resend code
@@ -252,7 +348,7 @@ export default function AccountVerificationFlow({
             <div className="pt-1">
               <Button
                 type="button"
-                onClick={() => onVerified(trimmedEmail)}
+                onClick={() => void onVerified(trimmedEmail)}
                 className="h-10 px-4"
               >
                 Continue
