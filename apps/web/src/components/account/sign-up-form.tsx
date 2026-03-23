@@ -4,15 +4,16 @@ import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import Button from '@/components/ui/button';
 
-interface SignInSubmitPayload {
+interface SignUpSubmitPayload {
+  fullName: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-interface SignInFormProps {
-  onSubmit?: (payload: SignInSubmitPayload) => Promise<void> | void;
-  forgotPasswordHref?: string;
-  createAccountHref?: string;
+interface SignUpFormProps {
+  onSubmit?: (payload: SignUpSubmitPayload) => Promise<void> | void;
+  signInHref?: string;
   showSocialDivider?: boolean;
   className?: string;
 }
@@ -23,23 +24,26 @@ function wait(ms: number) {
   });
 }
 
-export default function SignInForm({
+export default function SignUpForm({
   onSubmit,
-  forgotPasswordHref = '#',
-  createAccountHref = '/sign-up',
+  signInHref = '/sign-in',
   showSocialDivider = true,
   className = '',
-}: SignInFormProps) {
+}: SignUpFormProps) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const payload = {
+      fullName: fullName.trim(),
       email: email.trim(),
       password,
+      confirmPassword,
     };
 
     setIsSubmitting(true);
@@ -65,6 +69,25 @@ export default function SignInForm({
       <div className="space-y-3">
         <div>
           <label
+            htmlFor="full-name"
+            className="block text-sm font-medium text-gray-900 dark:text-slate-100"
+          >
+            Full name
+          </label>
+          <input
+            id="full-name"
+            type="text"
+            autoComplete="name"
+            placeholder="Your full name"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
+            required
+          />
+        </div>
+
+        <div>
+          <label
             htmlFor="email"
             className="block text-sm font-medium text-gray-900 dark:text-slate-100"
           >
@@ -86,29 +109,40 @@ export default function SignInForm({
           </p>
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between gap-3">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-900 dark:text-slate-100"
-            >
-              Password
-            </label>
-            <Link
-              href={forgotPasswordHref}
-              className="text-xs font-medium text-[#2F3FBF] underline-offset-2 transition-colors hover:text-[#2535a8] hover:underline dark:text-indigo-300 dark:hover:text-indigo-200"
-            >
-              Forgot password?
-            </Link>
-          </div>
+        <div>
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-gray-900 dark:text-slate-100"
+          >
+            Password
+          </label>
           <input
             id="password"
             type="password"
-            autoComplete="current-password"
-            placeholder="Enter your password"
+            autoComplete="new-password"
+            placeholder="Create a password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
+            className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
+            required
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="confirm-password"
+            className="block text-sm font-medium text-gray-900 dark:text-slate-100"
+          >
+            Confirm password
+          </label>
+          <input
+            id="confirm-password"
+            type="password"
+            autoComplete="new-password"
+            placeholder="Confirm your password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
             required
           />
         </div>
@@ -120,7 +154,7 @@ export default function SignInForm({
           className="h-11 w-full bg-linear-to-b from-[#3b4bd4] to-[#2F3FBF] text-sm font-medium shadow-md shadow-[#2F3FBF]/30 transition-all duration-200 hover:from-[#3646cd] hover:to-[#2a39b2] hover:shadow-lg hover:shadow-[#2F3FBF]/32 active:translate-y-px active:shadow-sm active:shadow-[#2F3FBF]/22"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
 
         {showSocialDivider ? (
@@ -166,12 +200,12 @@ export default function SignInForm({
       </div>
 
       <p className="pt-0.5 text-center text-xs text-gray-500 dark:text-slate-400">
-        New to DIUPoint?{' '}
+        Already have an account?{' '}
         <Link
-          href={createAccountHref}
+          href={signInHref}
           className="font-semibold text-[#2F3FBF] underline-offset-2 transition-colors hover:text-[#2535a8] hover:underline dark:text-indigo-300 dark:hover:text-indigo-200"
         >
-          Create account
+          Sign in
         </Link>
       </p>
     </form>
