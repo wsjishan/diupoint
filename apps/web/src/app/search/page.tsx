@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import CategoryChip from '@/components/ui/category-chip';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
-import { ALL_LISTINGS, CATEGORIES } from '@/data/mock-listings';
+import { ALL_LISTINGS, CATEGORIES, type Listing } from '@/data/mock-listings';
+import { searchMarketplaceListings } from '@/lib/api/marketplace';
 
 type ConditionFilter = 'all' | 'new' | 'used';
 type SortOption = 'latest' | 'price-asc' | 'price-desc';
@@ -104,7 +105,7 @@ function FiltersPanel({
   );
 }
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q') ?? '';
@@ -115,6 +116,8 @@ export default function SearchPage() {
     useState<ConditionFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('latest');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [filteredListings, setFilteredListings] =
+    useState<Listing[]>(ALL_LISTINGS);
 
   useEffect(() => {
     setSearchQuery(queryParam);
@@ -134,54 +137,33 @@ export default function SearchPage() {
     router.push(nextQueryString ? `/search?${nextQueryString}` : '/search');
   }
 
-  const filteredListings = useMemo(() => {
-    const query = normalize(searchQuery);
-    const categoryLabel = CATEGORY_LABEL_BY_ID[activeCategory];
+  useEffect(() => {
+    let cancelled = false;
 
-    const categoryFiltered =
-      activeCategory === 'all'
-        ? ALL_LISTINGS
-        : ALL_LISTINGS.filter((listing) => listing.category === categoryLabel);
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        const category =
+          activeCategory === 'all'
+            ? undefined
+            : CATEGORY_LABEL_BY_ID[activeCategory];
 
-    const conditionFiltered =
-      conditionFilter === 'all'
-        ? categoryFiltered
-        : categoryFiltered.filter(
-            (listing) => listing.condition === conditionFilter
-          );
+        const results = await searchMarketplaceListings({
+          q: searchQuery,
+          category,
+          condition: conditionFilter === 'all' ? undefined : conditionFilter,
+          sort: sortOption,
+        });
 
-    const searchFiltered =
-      query.length === 0
-        ? conditionFiltered
-        : conditionFiltered.filter((listing) => {
-            const title = (listing.title ?? '').toLowerCase();
-            const category = (listing.category ?? '').toLowerCase();
-            const seller = (listing.seller ?? '').toLowerCase();
-            const store = (listing.storeLabel ?? '').toLowerCase();
-            const location = (listing.location ?? '').toLowerCase();
+        if (!cancelled) {
+          setFilteredListings(results);
+        }
+      })();
+    }, 220);
 
-            return (
-              title.includes(query) ||
-              category.includes(query) ||
-              seller.includes(query) ||
-              store.includes(query) ||
-              location.includes(query)
-            );
-          });
-
-    return [...searchFiltered].sort((left, right) => {
-      if (sortOption === 'price-asc') {
-        return left.price - right.price;
-      }
-
-      if (sortOption === 'price-desc') {
-        return right.price - left.price;
-      }
-
-      const leftTime = left.postedAt ? Date.parse(left.postedAt) : 0;
-      const rightTime = right.postedAt ? Date.parse(right.postedAt) : 0;
-      return rightTime - leftTime;
-    });
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [activeCategory, conditionFilter, searchQuery, sortOption]);
 
   const resultsSummary = useMemo(() => {
@@ -342,5 +324,13 @@ export default function SearchPage() {
         <Footer />
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

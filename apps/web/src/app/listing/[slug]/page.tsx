@@ -7,12 +7,13 @@ import PersonalSellerActions from '@/components/listing/personal-seller-actions'
 import Button from '@/components/ui/button';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
-import {
-  ALL_LISTINGS,
-  getListingBySlug,
-  type Listing,
-} from '@/data/mock-listings';
+import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
+import {
+  fetchListingBySlug,
+  fetchMarketplaceListings,
+  fetchStorefrontBySlug,
+} from '@/lib/api/marketplace';
 
 interface ListingPageProps {
   params: Promise<{
@@ -76,8 +77,11 @@ function getMoreFromTitle(listing: Listing): string {
   return `More from ${listing.seller}`;
 }
 
-function getRelatedListings(listing: Listing): Listing[] {
-  const bySameSeller = ALL_LISTINGS.filter((item) => {
+function getRelatedListings(
+  listing: Listing,
+  sourceListings: Listing[]
+): Listing[] {
+  const bySameSeller = sourceListings.filter((item) => {
     if (item.id === listing.id) return false;
 
     if (listing.sellerType === 'store' || listing.storeSlug) {
@@ -91,9 +95,11 @@ function getRelatedListings(listing: Listing): Listing[] {
     return bySameSeller.slice(0, 6);
   }
 
-  return ALL_LISTINGS.filter(
-    (item) => item.id !== listing.id && item.category === listing.category
-  ).slice(0, 6);
+  return sourceListings
+    .filter(
+      (item) => item.id !== listing.id && item.category === listing.category
+    )
+    .slice(0, 6);
 }
 
 export default async function ListingPage({
@@ -102,13 +108,22 @@ export default async function ListingPage({
 }: ListingPageProps) {
   const { slug } = await params;
   const viewerSearchParams = await searchParams;
-  const listing = getListingBySlug(slug);
+  const listing = await fetchListingBySlug(slug);
 
   if (!listing) {
     notFound();
   }
 
-  const store = listing.storeSlug ? getStoreBySlug(listing.storeSlug) : null;
+  const [relatedSource, storefront] = await Promise.all([
+    fetchMarketplaceListings({ category: listing.category }),
+    listing.storeSlug
+      ? fetchStorefrontBySlug(listing.storeSlug)
+      : Promise.resolve(null),
+  ]);
+
+  const store = listing.storeSlug
+    ? (storefront?.store ?? getStoreBySlug(listing.storeSlug) ?? null)
+    : null;
   const isStoreSeller =
     listing.sellerType === 'store' || Boolean(listing.storeSlug);
   const isVerified = isStoreSeller
@@ -121,7 +136,10 @@ export default async function ListingPage({
     : (listing.sellerSummary ?? 'DIU student seller.');
   const stockStatus = listing.stockStatus ?? 'in-stock';
   const paymentMethods = listing.paymentSupported ?? [];
-  const relatedListings = getRelatedListings(listing);
+  const relatedListings = getRelatedListings(
+    listing,
+    relatedSource.length > 0 ? relatedSource : ALL_LISTINGS
+  );
   const viewerState = viewerSearchParams.viewer ?? 'guest';
   const isLoggedIn = viewerState === 'unverified' || viewerState === 'verified';
   const isAccountVerified =

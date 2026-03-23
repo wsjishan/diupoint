@@ -1,4 +1,10 @@
 import { Module } from '@nestjs/common';
 
-@Module({})
+import { VerificationController } from './verification.controller';
+import { VerificationService } from './verification.service';
+
+@Module({
+  controllers: [VerificationController],
+  providers: [VerificationService],
+})
 export class VerificationModule {}

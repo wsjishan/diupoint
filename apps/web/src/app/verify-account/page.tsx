@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
@@ -20,7 +20,7 @@ function withVerifiedViewer(returnTo: string): string {
   return query ? `${path}?${query}` : path;
 }
 
-export default function VerifyAccountPage() {
+function VerifyAccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -60,5 +60,13 @@ export default function VerifyAccountPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function VerifyAccountPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyAccountPageContent />
+    </Suspense>
   );
 }

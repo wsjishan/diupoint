@@ -4,7 +4,8 @@ import Footer from '@/components/layout/footer';
 import Container from '@/components/ui/container';
 import StorefrontProducts from '@/components/store/storefront-products';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
-import { getStoreBySlug } from '@/data/mock-stores';
+import { getStoreBySlug as getMockStoreBySlug } from '@/data/mock-stores';
+import { fetchStorefrontBySlug } from '@/lib/api/marketplace';
 
 interface StorePageProps {
   params: Promise<{
@@ -65,20 +66,23 @@ const HERO_META_CHIP_ICON_CLASS =
 
 export default async function StorePage({ params }: StorePageProps) {
   const { slug } = await params;
-  const store = getStoreBySlug(slug);
+  const apiStorefront = await fetchStorefrontBySlug(slug);
+  const store = apiStorefront?.store ?? getMockStoreBySlug(slug);
 
   if (!store) {
     notFound();
   }
 
-  const storeListings = ALL_LISTINGS.filter((listing) => {
-    const isStoreSeller =
-      listing.sellerType === 'store' || Boolean(listing.storeSlug);
+  const storeListings =
+    apiStorefront?.listings ??
+    ALL_LISTINGS.filter((listing) => {
+      const isStoreSeller =
+        listing.sellerType === 'store' || Boolean(listing.storeSlug);
 
-    if (!isStoreSeller) return false;
+      if (!isStoreSeller) return false;
 
-    return toStoreSlug(listing) === store.slug;
-  });
+      return toStoreSlug(listing) === store.slug;
+    });
 
   const storeCategories = Array.from(
     new Set(storeListings.map((listing) => listing.category))

@@ -1,3 +1,5 @@
+import { fetchAuthMe } from '@/lib/api/auth';
+
 export type AccountVerificationStatus = 'verified' | 'unverified';
 
 export interface AuthAccountState {
@@ -9,6 +11,7 @@ export interface AuthAccountState {
 }
 
 const AUTH_ACCOUNT_STORAGE_KEY = 'diupoint.auth.account';
+const AUTH_ACCESS_TOKEN_STORAGE_KEY = 'diupoint.auth.access-token';
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'] as const;
 
 function canUseStorage(): boolean {
@@ -43,6 +46,24 @@ export function getStoredAuthAccount(): AuthAccountState | null {
   } catch {
     return null;
   }
+}
+
+export function getStoredAuthAccessToken(): string | null {
+  if (!canUseStorage()) return null;
+
+  return window.localStorage.getItem(AUTH_ACCESS_TOKEN_STORAGE_KEY);
+}
+
+export function setStoredAuthAccessToken(accessToken: string): void {
+  if (!canUseStorage()) return;
+
+  window.localStorage.setItem(AUTH_ACCESS_TOKEN_STORAGE_KEY, accessToken);
+}
+
+export function clearStoredAuthAccessToken(): void {
+  if (!canUseStorage()) return;
+
+  window.localStorage.removeItem(AUTH_ACCESS_TOKEN_STORAGE_KEY);
 }
 
 export function setStoredAuthAccount(account: AuthAccountState): void {
@@ -95,4 +116,28 @@ export function upgradeStoredAccountToVerified(
 
   setStoredAuthAccount(upgraded);
   return upgraded;
+}
+
+export async function refreshStoredAuthAccountFromApi(): Promise<AuthAccountState | null> {
+  const accessToken = getStoredAuthAccessToken();
+  if (!accessToken) return getStoredAuthAccount();
+
+  try {
+    const apiUser = await fetchAuthMe(accessToken);
+
+    const hydratedAccount: AuthAccountState = {
+      email: apiUser.email,
+      isAuthenticated: true,
+      verificationStatus:
+        apiUser.verificationStatus === 'VERIFIED' ? 'verified' : 'unverified',
+      verifiedEmail:
+        apiUser.verificationStatus === 'VERIFIED' ? apiUser.email : undefined,
+      authProvider: 'password',
+    };
+
+    setStoredAuthAccount(hydratedAccount);
+    return hydratedAccount;
+  } catch {
+    return getStoredAuthAccount();
+  }
 }

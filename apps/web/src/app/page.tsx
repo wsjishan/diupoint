@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
@@ -11,37 +11,15 @@ import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import {
   CATEGORIES,
-  RECENTLY_ADDED,
   LATEST_FROM_STORES,
   ALL_LISTINGS,
+  type Listing,
 } from '@/data/mock-listings';
 import { FEATURED_STORES } from '@/data/mock-stores';
+import { buildMixedLatestFeed } from '@/lib/api/home';
+import { fetchMarketplaceListings } from '@/lib/api/marketplace';
 
-const LATEST_LISTINGS_FEED = (() => {
-  const personalListings = ALL_LISTINGS.filter(
-    (listing) => listing.sellerType !== 'store'
-  );
-  const storeListings = ALL_LISTINGS.filter(
-    (listing) => listing.sellerType === 'store'
-  );
-  const mixedFeed: typeof ALL_LISTINGS = [];
-
-  for (
-    let index = 0;
-    index < Math.max(personalListings.length, storeListings.length);
-    index += 1
-  ) {
-    if (personalListings[index]) {
-      mixedFeed.push(personalListings[index]);
-    }
-
-    if (storeListings[index]) {
-      mixedFeed.push(storeListings[index]);
-    }
-  }
-
-  return mixedFeed.slice(0, 18);
-})();
+const LATEST_LISTINGS_FEED = buildMixedLatestFeed(ALL_LISTINGS).slice(0, 18);
 
 const FRESH_FROM_STORES = LATEST_FROM_STORES.slice(0, 8);
 const HOMEPAGE_FEATURED_STORES = FEATURED_STORES.slice(0, 4);
@@ -57,7 +35,7 @@ interface ListingSectionProps {
   title: string;
   icon?: string;
   subtitle?: string;
-  listings: (typeof RECENTLY_ADDED)[number][];
+  listings: Listing[];
   className: string;
   viewAllHref?: string;
   emptyTitle?: string;
@@ -129,6 +107,33 @@ export default function HomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [latestListingsFeed, setLatestListingsFeed] =
+    useState<Listing[]>(LATEST_LISTINGS_FEED);
+  const [freshFromStores, setFreshFromStores] =
+    useState<Listing[]>(FRESH_FROM_STORES);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadListings() {
+      const listings = await fetchMarketplaceListings();
+
+      if (cancelled || listings.length === 0) {
+        return;
+      }
+
+      setLatestListingsFeed(buildMixedLatestFeed(listings).slice(0, 18));
+      setFreshFromStores(
+        listings.filter((listing) => listing.sellerType === 'store').slice(0, 8)
+      );
+    }
+
+    void loadListings();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleSearchSubmit(query: string) {
     const trimmedQuery = query.trim();
@@ -142,14 +147,14 @@ export default function HomePage() {
 
   const latestListings = useMemo(() => {
     if (activeCategory === 'all') {
-      return LATEST_LISTINGS_FEED;
+      return latestListingsFeed;
     }
 
     const categoryLabel = CATEGORY_LABEL_BY_ID[activeCategory];
-    return LATEST_LISTINGS_FEED.filter(
+    return latestListingsFeed.filter(
       (listing) => listing.category === categoryLabel
     );
-  }, [activeCategory]);
+  }, [activeCategory, latestListingsFeed]);
 
   const latestListingsSubtitle =
     activeCategory === 'all'
@@ -188,7 +193,7 @@ export default function HomePage() {
                 viewAllHref="/listings?type=store"
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
-                {FRESH_FROM_STORES.map((listing) => (
+                {freshFromStores.map((listing) => (
                   <div
                     key={listing.id}
                     className="w-[72vw] shrink-0 sm:w-[42vw] lg:w-[20rem]"
