@@ -6,9 +6,32 @@ import { useEffect, useState } from 'react';
 import Button from '@/components/ui/button';
 import Container from '@/components/ui/container';
 
-function SearchInput({ className = '' }: { className?: string }) {
+interface SearchInputProps {
+  className?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  onSubmit?: (value: string) => void;
+}
+
+function SearchInput({
+  className = '',
+  value,
+  onChange,
+  onSubmit,
+}: SearchInputProps) {
+  const isControlled =
+    typeof value === 'string' && typeof onChange === 'function';
+  const [internalValue, setInternalValue] = useState('');
+  const resolvedValue = isControlled ? value : internalValue;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onSubmit?.(resolvedValue.trim());
+  }
+
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       className={`relative w-full rounded-xl shadow-sm shadow-gray-900/3 transition-all duration-200 hover:shadow-md ${className}`}
     >
       <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center sm:left-4">
@@ -29,14 +52,53 @@ function SearchInput({ className = '' }: { className?: string }) {
       </div>
       <input
         type="search"
+        value={resolvedValue}
+        onChange={(event) => {
+          if (isControlled) {
+            onChange(event.target.value);
+            return;
+          }
+
+          setInternalValue(event.target.value);
+        }}
         placeholder="Search items, books, electronics, housing..."
-        className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10 sm:pl-11 sm:pr-5 sm:py-2.5"
+        className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 pl-10 pr-10 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10 sm:pl-11 sm:pr-11 sm:py-2.5"
       />
-    </div>
+      <button
+        type="submit"
+        aria-label="Search marketplace"
+        className="absolute inset-y-0 right-2 inline-flex items-center text-gray-400 transition-colors hover:text-[#2F3FBF] dark:text-slate-500 dark:hover:text-slate-200"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          className="h-4 w-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+          />
+        </svg>
+      </button>
+    </form>
   );
 }
 
-export default function Navbar() {
+interface NavbarProps {
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
+  onSearchSubmit?: (value: string) => void;
+}
+
+export default function Navbar({
+  searchQuery,
+  onSearchQueryChange,
+  onSearchSubmit,
+}: NavbarProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -69,7 +131,12 @@ export default function Navbar() {
           </Link>
 
           {/* Search — center column on desktop only */}
-          <SearchInput className="hidden flex-1 sm:block" />
+          <SearchInput
+            className="hidden flex-1 sm:block"
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            onSubmit={onSearchSubmit}
+          />
 
           {/* Action group */}
           <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:ml-0 sm:gap-2">
@@ -141,7 +208,11 @@ export default function Navbar() {
 
         {/* Search row — mobile only */}
         <div className="px-0.5 pb-2.5 pt-1.5 sm:hidden">
-          <SearchInput />
+          <SearchInput
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            onSubmit={onSearchSubmit}
+          />
         </div>
       </Container>
     </header>

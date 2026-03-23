@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
@@ -125,7 +126,19 @@ function ListingSection({
 }
 
 export default function HomePage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+
+  function handleSearchSubmit(query: string) {
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      router.push('/search');
+      return;
+    }
+
+    router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
+  }
 
   const latestListings = useMemo(() => {
     if (activeCategory === 'all') {
@@ -145,7 +158,11 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
-      <Navbar />
+      <Navbar
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        onSearchSubmit={handleSearchSubmit}
+      />
       <CategoryFilter
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
