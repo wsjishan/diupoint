@@ -1,3 +1,6 @@
+'use client';
+
+import { useMemo, useState } from 'react';
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
@@ -6,6 +9,7 @@ import CategoryFilter from '@/components/layout/category-filter';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import {
+  CATEGORIES,
   RECENTLY_ADDED,
   LATEST_FROM_STORES,
   ALL_LISTINGS,
@@ -40,6 +44,13 @@ const LATEST_LISTINGS_FEED = (() => {
 
 const FRESH_FROM_STORES = LATEST_FROM_STORES.slice(0, 8);
 const HOMEPAGE_FEATURED_STORES = FEATURED_STORES.slice(0, 4);
+const CATEGORY_LABEL_BY_ID = CATEGORIES.reduce<Record<string, string>>(
+  (acc, category) => {
+    acc[category.id] = category.label;
+    return acc;
+  },
+  {}
+);
 
 interface ListingSectionProps {
   title: string;
@@ -48,6 +59,8 @@ interface ListingSectionProps {
   listings: (typeof RECENTLY_ADDED)[number][];
   className: string;
   viewAllHref?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
 }
 
 function ListingSection({
@@ -57,6 +70,8 @@ function ListingSection({
   listings,
   className,
   viewAllHref,
+  emptyTitle = 'No listings yet',
+  emptyDescription = 'Be the first to post in this category.',
 }: ListingSectionProps) {
   return (
     <div className={className}>
@@ -96,10 +111,10 @@ function ListingSection({
                 </svg>
               </div>
               <p className="mt-3 text-sm font-medium text-gray-600 dark:text-slate-400">
-                No listings yet
+                {emptyTitle}
               </p>
               <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
-                Be the first to post in this category.
+                {emptyDescription}
               </p>
             </div>
           )}
@@ -110,18 +125,41 @@ function ListingSection({
 }
 
 export default function HomePage() {
+  const [activeCategory, setActiveCategory] = useState('all');
+
+  const latestListings = useMemo(() => {
+    if (activeCategory === 'all') {
+      return LATEST_LISTINGS_FEED;
+    }
+
+    const categoryLabel = CATEGORY_LABEL_BY_ID[activeCategory];
+    return LATEST_LISTINGS_FEED.filter(
+      (listing) => listing.category === categoryLabel
+    );
+  }, [activeCategory]);
+
+  const latestListingsSubtitle =
+    activeCategory === 'all'
+      ? 'A live mix of student and store listings across DIU'
+      : `Latest ${CATEGORY_LABEL_BY_ID[activeCategory]?.toLowerCase() ?? 'category'} listings across DIU`;
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
       <Navbar />
-      <CategoryFilter />
+      <CategoryFilter
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+      />
 
       <main>
         <ListingSection
           title="Latest Listings"
-          subtitle="A live mix of student and store listings across DIU"
-          listings={LATEST_LISTINGS_FEED}
+          subtitle={latestListingsSubtitle}
+          listings={latestListings}
           className="bg-white dark:bg-slate-950"
           viewAllHref="/listings/recent"
+          emptyTitle="No listings found in this category yet."
+          emptyDescription="Try another category."
         />
 
         <div className="bg-gray-50 dark:bg-slate-900">

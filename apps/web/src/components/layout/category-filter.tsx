@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import CategoryChip from '@/components/ui/category-chip';
 import { CATEGORIES } from '@/data/mock-listings';
 
-export default function CategoryFilter() {
-  const [active, setActive] = useState('all');
+interface CategoryFilterProps {
+  activeCategory: string;
+  onCategoryChange: (categoryId: string) => void;
+}
 
+export default function CategoryFilter({
+  activeCategory,
+  onCategoryChange,
+}: CategoryFilterProps) {
   return (
     <div className="w-full border-b border-gray-100 dark:border-white/10 bg-white dark:bg-slate-900">
       <div className="mx-auto w-full max-w-7xl">
@@ -16,8 +21,8 @@ export default function CategoryFilter() {
             <CategoryChip
               key={cat.id}
               label={cat.label}
-              active={active === cat.id}
-              onClick={() => setActive(cat.id)}
+              active={activeCategory === cat.id}
+              onClick={() => onCategoryChange(cat.id)}
             />
           ))}
           {/* trailing spacer so the last chip clears the viewport edge on scroll */}
