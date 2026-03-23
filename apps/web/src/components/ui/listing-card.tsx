@@ -150,6 +150,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
         </p>
         {isStoreSeller ? (
           <div className="mt-1.5 flex min-w-0 items-center gap-1 text-xs text-gray-600 dark:text-slate-300">
+            <span className="shrink-0 rounded-full bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-[#2F3FBF] dark:bg-indigo-500/15 dark:text-indigo-300">
+              Store
+            </span>
             <span
               className="inline-flex shrink-0"
               aria-hidden="true"
@@ -178,6 +181,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
         ) : (
           <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">
+            <span className="shrink-0 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-600 dark:bg-slate-700 dark:text-slate-200">
+              Seller
+            </span>
             <span
               className="inline-flex shrink-0"
               aria-hidden="true"

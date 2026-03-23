@@ -1,7 +1,6 @@
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
-import LandingBanner from '@/components/ui/landing-banner';
 import StoreCard from '@/components/ui/store-card';
 import CategoryFilter from '@/components/layout/category-filter';
 import Navbar from '@/components/layout/navbar';
@@ -9,19 +8,38 @@ import Footer from '@/components/layout/footer';
 import {
   RECENTLY_ADDED,
   LATEST_FROM_STORES,
-  BOOKS_LISTINGS,
-  ELECTRONICS_LISTINGS,
-  HOUSING_LISTINGS,
-  ROOM_ESSENTIALS_LISTINGS,
+  ALL_LISTINGS,
 } from '@/data/mock-listings';
 import { FEATURED_STORES } from '@/data/mock-stores';
 
-const CATEGORY_SECTIONS = [
-  { title: 'Electronics', listings: ELECTRONICS_LISTINGS },
-  { title: 'Room Essentials', listings: ROOM_ESSENTIALS_LISTINGS },
-  { title: 'Housing', listings: HOUSING_LISTINGS },
-  { title: 'Books & Notes', listings: BOOKS_LISTINGS },
-];
+const LATEST_LISTINGS_FEED = (() => {
+  const personalListings = ALL_LISTINGS.filter(
+    (listing) => listing.sellerType !== 'store'
+  );
+  const storeListings = ALL_LISTINGS.filter(
+    (listing) => listing.sellerType === 'store'
+  );
+  const mixedFeed: typeof ALL_LISTINGS = [];
+
+  for (
+    let index = 0;
+    index < Math.max(personalListings.length, storeListings.length);
+    index += 1
+  ) {
+    if (personalListings[index]) {
+      mixedFeed.push(personalListings[index]);
+    }
+
+    if (storeListings[index]) {
+      mixedFeed.push(storeListings[index]);
+    }
+  }
+
+  return mixedFeed.slice(0, 18);
+})();
+
+const FRESH_FROM_STORES = LATEST_FROM_STORES.slice(0, 8);
+const HOMEPAGE_FEATURED_STORES = FEATURED_STORES.slice(0, 4);
 
 interface ListingSectionProps {
   title: string;
@@ -42,7 +60,7 @@ function ListingSection({
 }: ListingSectionProps) {
   return (
     <div className={className}>
-      <Container className="py-16">
+      <Container className="py-8 sm:py-10">
         <section>
           <SectionHeader
             title={title}
@@ -51,7 +69,7 @@ function ListingSection({
             viewAllHref={viewAllHref}
           />
           {listings.length > 0 ? (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -98,79 +116,73 @@ export default function HomePage() {
       <CategoryFilter />
 
       <main>
-        {/* Hero */}
-        <LandingBanner
-          title="The marketplace built for DIU students"
-          subtitle="Buy and sell textbooks, electronics, housing, and campus essentials across the DIU campus."
-          titleAs="h1"
-        />
-
         <ListingSection
-          title="Recently Added"
-          subtitle="Fresh listings from the DIU community"
-          listings={RECENTLY_ADDED}
+          title="Latest Listings"
+          subtitle="A live mix of student and store listings across DIU"
+          listings={LATEST_LISTINGS_FEED}
           className="bg-white dark:bg-slate-950"
           viewAllHref="/listings/recent"
         />
 
-        <ListingSection
-          title="Latest from Stores"
-          subtitle="New arrivals from student-run stores"
-          listings={LATEST_FROM_STORES}
-          className="bg-gray-50 dark:bg-slate-900"
-          viewAllHref="/listings?type=store"
-        />
-
-        <div className="bg-white dark:bg-slate-950">
-          <Container className="py-16">
+        <div className="bg-gray-50 dark:bg-slate-900">
+          <Container className="py-7 sm:py-8">
             <section>
               <SectionHeader
-                title="Featured Stores"
-                subtitle="Discover trusted student-run stores on DIUPoint"
-                viewAllHref="/stores"
+                title="Fresh from Stores"
+                subtitle="Quick picks from student-run stores"
+                viewAllHref="/listings?type=store"
               />
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                {FEATURED_STORES.map((store) => (
-                  <StoreCard
-                    key={store.id}
-                    store={store}
-                  />
+              <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
+                {FRESH_FROM_STORES.map((listing) => (
+                  <div
+                    key={listing.id}
+                    className="w-[72vw] shrink-0 sm:w-[42vw] lg:w-[20rem]"
+                  >
+                    <ListingCard listing={listing} />
+                  </div>
                 ))}
               </div>
             </section>
           </Container>
         </div>
 
-        {CATEGORY_SECTIONS.map((section, index) => {
-          const className =
-            section.title === 'Housing'
-              ? 'bg-[#f8f9ff] dark:bg-indigo-950/20'
-              : index % 2 === 0
-                ? 'bg-white dark:bg-slate-950'
-                : 'bg-gray-50 dark:bg-slate-900';
-
-          return (
-            <ListingSection
-              key={section.title}
-              title={section.title}
-              listings={section.listings}
-              className={className}
-              viewAllHref={`/listings/${section.title
-                .toLowerCase()
-                .replace(/\s*&\s*/g, '-')
-                .replace(/\s+/g, '-')}`}
-            />
-          );
-        })}
+        <div className="bg-white dark:bg-slate-950">
+          <Container className="py-7 sm:py-8">
+            <section>
+              <SectionHeader
+                title="Featured Stores"
+                subtitle="Trusted storefronts worth following"
+              />
+              <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
+                {HOMEPAGE_FEATURED_STORES.map((store) => (
+                  <div
+                    key={store.id}
+                    className="w-[82vw] shrink-0 sm:w-[20rem]"
+                  >
+                    <StoreCard store={store} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          </Container>
+        </div>
 
         {/* CTA + footer region */}
         <div className="bg-gray-50 dark:bg-slate-900">
-          <LandingBanner
-            title="Sell something you no longer need"
-            subtitle="Post your item and connect with DIU students looking for it."
-            buttonText="+ Post Now"
-            titleAs="h2"
-          />
+          <Container className="py-8 sm:py-10">
+            <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 sm:p-6">
+              <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-xl">
+                Sell something you no longer need
+              </h2>
+              <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-slate-400">
+                Post your item and connect with DIU students who are actively
+                looking for it.
+              </p>
+              <button className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2F3FBF] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950">
+                + Post Now
+              </button>
+            </section>
+          </Container>
           <Footer />
         </div>
       </main>
