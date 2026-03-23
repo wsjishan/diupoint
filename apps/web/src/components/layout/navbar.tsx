@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import Button from '@/components/ui/button';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
 
@@ -194,15 +193,15 @@ export default function Navbar({
             </button>
 
             {/* Post Item */}
-            <Button
-              variant="primary"
-              className="h-9 gap-0.5 px-3 text-xs sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
+            <Link
+              href="/post-item"
+              className="inline-flex h-9 items-center justify-center gap-0.5 rounded-lg bg-[#2F3FBF] px-3 text-xs font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
             >
               <span className="text-sm font-light leading-none sm:text-base">
                 +
               </span>
               Post Item
-            </Button>
+            </Link>
 
             {/* Sign In */}
             {!isLoading && isAuthenticated ? (
@@ -222,6 +221,13 @@ export default function Navbar({
                       ? 'Pending'
                       : 'Unverified'}
                 </span>
+
+                <Link
+                  href="/my-listings"
+                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
+                >
+                  My Listings
+                </Link>
 
                 <Link
                   href={

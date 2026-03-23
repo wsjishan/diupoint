@@ -1,6 +1,7 @@
 export type ApiVerificationStatus = 'VERIFIED' | 'UNVERIFIED' | 'PENDING';
 export type ApiSellerType = 'PERSONAL' | 'STORE';
 export type ApiListingCondition = 'NEW' | 'USED';
+export type ApiListingStatus = 'DRAFT' | 'PUBLISHED' | 'SOLD' | 'ARCHIVED';
 
 export interface ApiListingImage {
   id: string;
@@ -29,6 +30,7 @@ export interface ApiStoreProfileSummary {
 export interface ApiListing {
   id: string;
   slug: string;
+  status: ApiListingStatus;
   title: string;
   description: string;
   category: string;

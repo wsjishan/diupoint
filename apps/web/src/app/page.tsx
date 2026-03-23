@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
@@ -238,9 +239,12 @@ export default function HomePage() {
                 Post your item and connect with DIU students who are actively
                 looking for it.
               </p>
-              <button className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2F3FBF] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950">
+              <Link
+                href="/post-item"
+                className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2F3FBF] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
+              >
                 + Post Now
-              </button>
+              </Link>
             </section>
           </Container>
           <Footer />

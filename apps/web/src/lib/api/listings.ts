@@ -4,8 +4,13 @@ import {
   type Listing,
 } from '@/data/mock-listings';
 import { mapApiListingToUi } from '@/lib/api/adapters';
-import { apiRequest } from '@/lib/api/http';
-import type { ApiListing } from '@/lib/api/types';
+import { apiRequest, apiRequestWithAuth } from '@/lib/api/http';
+import type {
+  ApiListing,
+  ApiListingCondition,
+  ApiListingStatus,
+  ApiSellerType,
+} from '@/lib/api/types';
 
 export type ListingSort = 'latest' | 'price-asc' | 'price-desc';
 
@@ -14,6 +19,28 @@ export interface ListingQuery {
   category?: string;
   condition?: 'new' | 'used';
   sort?: ListingSort;
+}
+
+export interface CreateListingPayload {
+  sellerType: ApiSellerType;
+  storeProfileId?: string;
+  title: string;
+  description: string;
+  category: string;
+  condition: ApiListingCondition;
+  price: number;
+  location: string;
+  status?: ApiListingStatus;
+}
+
+export interface UpdateListingPayload {
+  title?: string;
+  description?: string;
+  category?: string;
+  condition?: ApiListingCondition;
+  price?: number;
+  location?: string;
+  status?: ApiListingStatus;
 }
 
 function mapSortForListings(
@@ -106,4 +133,45 @@ export async function fetchListingBySlug(
   } catch {
     return getListingBySlug(slug) ?? null;
   }
+}
+
+export async function createListing(
+  payload: CreateListingPayload
+): Promise<ApiListing> {
+  return apiRequestWithAuth<ApiListing>('/listings', {
+    method: 'POST',
+    body: payload,
+  });
+}
+
+export async function fetchMyListings(): Promise<ApiListing[]> {
+  return apiRequestWithAuth<ApiListing[]>('/users/me/listings', {
+    method: 'GET',
+  });
+}
+
+export async function fetchMyListingById(id: string): Promise<ApiListing> {
+  return apiRequestWithAuth<ApiListing>(`/users/me/listings/${id}`, {
+    method: 'GET',
+  });
+}
+
+export async function updateListing(
+  listingId: string,
+  payload: UpdateListingPayload
+): Promise<ApiListing> {
+  return apiRequestWithAuth<ApiListing>(`/listings/${listingId}`, {
+    method: 'PATCH',
+    body: payload,
+  });
+}
+
+export async function markListingSold(listingId: string): Promise<ApiListing> {
+  return updateListing(listingId, { status: 'SOLD' });
+}
+
+export async function archiveListing(listingId: string): Promise<void> {
+  await apiRequestWithAuth(`/listings/${listingId}`, {
+    method: 'DELETE',
+  });
 }
