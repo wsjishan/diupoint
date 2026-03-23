@@ -130,12 +130,12 @@ export default function Navbar() {
             </Button>
 
             {/* Sign In */}
-            <button
-              type="button"
+            <Link
+              href="/sign-in"
               className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
             >
               Sign In
-            </button>
+            </Link>
           </div>
         </div>
 
