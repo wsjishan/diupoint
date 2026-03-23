@@ -49,38 +49,29 @@ export default function ListingImageGallery({
     }));
   }
 
+  const showThumbnails = validImages.length > 1;
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900 sm:p-4">
-      <div
-        className="relative aspect-4/3 overflow-hidden rounded-xl"
-        style={
-          showActiveImage
-            ? undefined
-            : {
-                background: fallbackBackground,
-              }
-        }
-      >
+    <div className="rounded-2xl border border-gray-200 bg-white p-2.5 shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900 sm:p-3">
+      <div className="relative flex w-full aspect-4/3 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-linear-to-br from-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 lg:aspect-5/4">
         {showActiveImage ? (
           <Image
             src={activeImage}
             alt={title}
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
             onError={() => markImageFailed(activeImage)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <div className="rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm">
-              Image unavailable
-            </div>
+          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+            Image unavailable
           </div>
         )}
       </div>
 
-      {validImages.length > 1 ? (
-        <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
+      {showThumbnails ? (
+        <div className="mt-2.5 grid grid-cols-4 gap-1.5 sm:grid-cols-5 sm:gap-2">
           {validImages.map((image, index) => {
             const isActive = index === activeIndex;
             const showThumb = !failedImages[image];
