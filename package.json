@@ -3,9 +3,12 @@
   "private": true,
   "packageManager": "pnpm@10.32.0",
   "scripts": {
-    "dev": "turbo run dev --filter=web",
-    "build": "turbo run build --filter=web",
-    "lint": "turbo run lint --filter=web"
+    "dev": "turbo run dev --parallel",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:api": "turbo run dev --filter=api",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "prisma:generate": "pnpm --filter @diupoint/db prisma:generate"
   },
   "devDependencies": {
     "turbo": "^2.8.15"
