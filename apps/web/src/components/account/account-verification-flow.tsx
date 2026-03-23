@@ -2,18 +2,17 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@/components/ui/button';
+import { isDiuEmailDomain } from '@/lib/auth-account';
 
 type VerificationStep = 'email' | 'otp' | 'success';
 
 interface AccountVerificationFlowProps {
-  onVerified?: () => void;
+  onVerified?: (verifiedEmail: string) => void;
   onCancel?: () => void;
   autoCompleteOnSuccess?: boolean;
   autoCompleteDelayMs?: number;
   className?: string;
 }
-
-const DIU_EMAIL_PATTERN = /@diu\.edu(\.bd)?$/i;
 
 export default function AccountVerificationFlow({
   onVerified,
@@ -42,7 +41,7 @@ export default function AccountVerificationFlow({
   function handleSendOtp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!trimmedEmail || !DIU_EMAIL_PATTERN.test(trimmedEmail)) {
+    if (!trimmedEmail || !isDiuEmailDomain(trimmedEmail)) {
       setError('Please use a valid DIU email address.');
       return;
     }
@@ -73,7 +72,7 @@ export default function AccountVerificationFlow({
 
       if (autoCompleteOnSuccess && onVerified) {
         completionTimerRef.current = window.setTimeout(() => {
-          onVerified();
+          onVerified(trimmedEmail);
         }, autoCompleteDelayMs);
       }
     }, 350);
@@ -253,7 +252,7 @@ export default function AccountVerificationFlow({
             <div className="pt-1">
               <Button
                 type="button"
-                onClick={onVerified}
+                onClick={() => onVerified(trimmedEmail)}
                 className="h-10 px-4"
               >
                 Continue

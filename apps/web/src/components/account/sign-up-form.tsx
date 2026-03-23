@@ -3,6 +3,10 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import Button from '@/components/ui/button';
+import {
+  getVerificationStatusByEmail,
+  saveAuthFromEmail,
+} from '@/lib/auth-account';
 
 interface SignUpSubmitPayload {
   fullName: string;
@@ -35,6 +39,15 @@ export default function SignUpForm({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authStatusMessage, setAuthStatusMessage] = useState<string | null>(
+    null
+  );
+
+  const trimmedEmail = email.trim();
+  const hasTypedEmail = trimmedEmail.length > 0;
+  const verificationStatus = hasTypedEmail
+    ? getVerificationStatusByEmail(trimmedEmail)
+    : null;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,9 +68,27 @@ export default function SignUpForm({
         // Mock submit behavior until backend auth is wired.
         await wait(500);
       }
+
+      const account = saveAuthFromEmail(payload.email, 'password');
+      setAuthStatusMessage(
+        account.verificationStatus === 'verified'
+          ? 'Account created with a DIU email. Your account is verified.'
+          : 'Account created. You can verify later with a DIU email.'
+      );
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleGoogleSignUp() {
+    const providerEmail = trimmedEmail || 'user@gmail.com';
+    const account = saveAuthFromEmail(providerEmail, 'google');
+
+    setAuthStatusMessage(
+      account.verificationStatus === 'verified'
+        ? 'Google sign-up detected a DIU email. Your account is verified.'
+        : 'Google sign-up completed. You can verify later with a DIU email.'
+    );
   }
 
   return (
@@ -107,6 +138,14 @@ export default function SignUpForm({
           <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
             Use your DIU email to get a verified account
           </p>
+
+          {hasTypedEmail ? (
+            <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+              {verificationStatus === 'verified'
+                ? 'DIU email detected. This account will be verified automatically.'
+                : 'Non-DIU email detected. You can verify later with a DIU email.'}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -170,6 +209,7 @@ export default function SignUpForm({
 
         <button
           type="button"
+          onClick={handleGoogleSignUp}
           className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-gray-200/90 bg-white/95 px-3 text-sm font-medium text-gray-700 shadow-[0_1px_0_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-gray-300 hover:bg-white hover:shadow-sm active:translate-y-px active:shadow-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF]/25 focus-visible:ring-offset-2 dark:border-white/12 dark:bg-slate-950/90 dark:text-slate-200 dark:hover:border-white/20 dark:hover:bg-slate-900"
         >
           <svg
@@ -197,6 +237,12 @@ export default function SignUpForm({
           </svg>
           Continue with Google
         </button>
+
+        {authStatusMessage ? (
+          <p className="text-xs text-gray-500 dark:text-slate-400">
+            {authStatusMessage}
+          </p>
+        ) : null}
       </div>
 
       <p className="pt-0.5 text-center text-xs text-gray-500 dark:text-slate-400">

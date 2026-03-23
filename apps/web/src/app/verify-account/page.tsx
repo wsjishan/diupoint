@@ -6,6 +6,7 @@ import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Container from '@/components/ui/container';
+import { upgradeStoredAccountToVerified } from '@/lib/auth-account';
 
 function withVerifiedViewer(returnTo: string): string {
   const safeTarget = returnTo.startsWith('/') ? returnTo : '/';
@@ -46,7 +47,8 @@ export default function VerifyAccountPage() {
               <AccountVerificationFlow
                 autoCompleteOnSuccess
                 autoCompleteDelayMs={900}
-                onVerified={() => {
+                onVerified={(verifiedEmail) => {
+                  upgradeStoredAccountToVerified(verifiedEmail);
                   router.replace(withVerifiedViewer(returnTo));
                 }}
                 className="border-0 bg-transparent p-0"

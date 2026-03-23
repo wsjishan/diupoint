@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Button from '@/components/ui/button';
+import {
+  getStoredAuthAccount,
+  upgradeStoredAccountToVerified,
+} from '@/lib/auth-account';
 
 type GateModalType =
   | 'login-required'
@@ -37,13 +41,28 @@ export default function PersonalSellerActions({
   isVerified,
   viewerState,
 }: PersonalSellerActionsProps) {
+  const storedAccount = getStoredAuthAccount();
+  const hasStoredAuthenticatedViewer = Boolean(storedAccount?.isAuthenticated);
+  const initialViewerState: 'guest' | 'unverified' | 'verified' =
+    hasStoredAuthenticatedViewer
+      ? storedAccount?.verificationStatus === 'verified'
+        ? 'verified'
+        : 'unverified'
+      : (viewerState ??
+        (isLoggedIn ? (isVerified ? 'verified' : 'unverified') : 'guest'));
+
   const [showContactOptions, setShowContactOptions] = useState(false);
-  const [isAccountVerified, setIsAccountVerified] = useState(isVerified);
+  const [isAccountVerified, setIsAccountVerified] = useState(
+    initialViewerState === 'verified'
+  );
+  const [isViewerLoggedIn, setIsViewerLoggedIn] = useState(
+    initialViewerState !== 'guest'
+  );
+  const [effectiveViewerState, setEffectiveViewerState] = useState<
+    'guest' | 'unverified' | 'verified'
+  >(initialViewerState);
   const [gateModal, setGateModal] = useState<GateModalType>(null);
 
-  const effectiveViewerState =
-    viewerState ??
-    (isLoggedIn ? (isVerified ? 'verified' : 'unverified') : 'guest');
   const viewerLabel =
     effectiveViewerState === 'verified'
       ? 'Viewer: Verified'
@@ -51,8 +70,16 @@ export default function PersonalSellerActions({
         ? 'Viewer: Unverified'
         : 'Viewer: Guest';
 
+  const loginHref = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return '/sign-in';
+    }
+
+    return `/sign-in?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+  }, []);
+
   function handleContactSellerClick() {
-    if (!isLoggedIn) {
+    if (!isViewerLoggedIn) {
       setGateModal('login-required');
       return;
     }
@@ -86,7 +113,7 @@ export default function PersonalSellerActions({
           title: 'Sign in to continue',
           message: 'Contact options are available for verified accounts.',
           primaryLabel: 'Sign In',
-          primaryHref: '/signin',
+          primaryHref: '/sign-in',
           secondaryLabel: 'Cancel',
         }
       : gateModal === 'verification-required'
@@ -220,7 +247,7 @@ export default function PersonalSellerActions({
 
               {gateModal === 'login-required' ? (
                 <Link
-                  href="/signin"
+                  href={loginHref}
                   onClick={() => setGateModal(null)}
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
                 >
@@ -263,8 +290,11 @@ export default function PersonalSellerActions({
             <div className="mt-3">
               <AccountVerificationFlow
                 onCancel={() => setGateModal(null)}
-                onVerified={() => {
+                onVerified={(verifiedEmail) => {
+                  upgradeStoredAccountToVerified(verifiedEmail);
                   setIsAccountVerified(true);
+                  setIsViewerLoggedIn(true);
+                  setEffectiveViewerState('verified');
                   setGateModal(null);
                   setShowContactOptions(true);
                 }}
