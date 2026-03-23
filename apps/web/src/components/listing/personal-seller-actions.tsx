@@ -1,14 +1,21 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Button from '@/components/ui/button';
 
-type GateModalType = 'login-required' | 'verification-required' | null;
+type GateModalType =
+  | 'login-required'
+  | 'verification-required'
+  | 'verification-flow'
+  | null;
 
 interface PersonalSellerActionsProps {
   sellerPhone?: string;
   isLoggedIn: boolean;
   isVerified: boolean;
+  viewerState?: 'guest' | 'unverified' | 'verified';
 }
 
 function toWhatsAppHref(phone?: string): string {
@@ -28,9 +35,21 @@ export default function PersonalSellerActions({
   sellerPhone,
   isLoggedIn,
   isVerified,
+  viewerState,
 }: PersonalSellerActionsProps) {
   const [showContactOptions, setShowContactOptions] = useState(false);
+  const [isAccountVerified, setIsAccountVerified] = useState(isVerified);
   const [gateModal, setGateModal] = useState<GateModalType>(null);
+
+  const effectiveViewerState =
+    viewerState ??
+    (isLoggedIn ? (isVerified ? 'verified' : 'unverified') : 'guest');
+  const viewerLabel =
+    effectiveViewerState === 'verified'
+      ? 'Viewer: Verified'
+      : effectiveViewerState === 'unverified'
+        ? 'Viewer: Unverified'
+        : 'Viewer: Guest';
 
   function handleContactSellerClick() {
     if (!isLoggedIn) {
@@ -38,7 +57,7 @@ export default function PersonalSellerActions({
       return;
     }
 
-    if (!isVerified) {
+    if (!isAccountVerified) {
       setGateModal('verification-required');
       return;
     }
@@ -64,18 +83,19 @@ export default function PersonalSellerActions({
   const modalContent =
     gateModal === 'login-required'
       ? {
-          title: 'Login required',
-          message: 'To contact the seller, please sign in to your account.',
+          title: 'Sign in to continue',
+          message: 'Contact options are available for verified accounts.',
           primaryLabel: 'Sign In',
           primaryHref: '/signin',
+          secondaryLabel: 'Cancel',
         }
       : gateModal === 'verification-required'
         ? {
-            title: 'Verification required',
+            title: 'Verify your account to contact sellers',
             message:
-              'To protect both buyers and sellers, you need to verify your account before contacting sellers.',
+              'Use your DIU email to unlock calling and WhatsApp access and help keep DIUPoint safe for everyone.',
             primaryLabel: 'Verify Now',
-            primaryHref: '/verify',
+            secondaryLabel: 'Maybe Later',
           }
         : null;
 
@@ -85,6 +105,10 @@ export default function PersonalSellerActions({
         <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Contact seller
         </p>
+
+        <div className="mt-1.5 inline-flex items-center rounded-full border border-dashed border-[#2F3FBF]/35 bg-[#2F3FBF]/6 px-2.5 py-1 text-[11px] font-semibold text-[#2F3FBF] dark:border-indigo-300/35 dark:bg-indigo-400/12 dark:text-indigo-200">
+          {viewerLabel}
+        </div>
 
         <div className="mt-2 flex items-center gap-2.5">
           <Button
@@ -106,42 +130,81 @@ export default function PersonalSellerActions({
         </div>
 
         <p className="mt-1.5 text-xs text-gray-500 dark:text-slate-400">
-          Login & verification required
+          {isAccountVerified
+            ? 'Verified account: click Contact Seller to reveal WhatsApp and Call.'
+            : 'Login and verification are required to unlock WhatsApp and Call.'}
         </p>
 
         <div
           id="personal-contact-options"
           className={`overflow-hidden transition-all duration-200 ${
             showContactOptions
-              ? 'mt-2.5 max-h-14 opacity-100'
+              ? 'mt-2.5 max-h-32 opacity-100'
               : 'mt-0 max-h-0 opacity-0 pointer-events-none'
           }`}
         >
-          <div className="grid w-full grid-cols-2 gap-2">
-            <a
-              href={toWhatsAppHref(sellerPhone)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
-            >
-              WhatsApp
-            </a>
-            <a
-              href={toCallHref(sellerPhone)}
-              className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
-            >
-              Call
-            </a>
+          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/70 p-2.5 dark:border-emerald-400/35 dark:bg-emerald-500/10">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-700/90 dark:text-emerald-300">
+              Contact Options Unlocked
+            </p>
+            <div className="grid w-full grid-cols-2 gap-2">
+              <a
+                href={toWhatsAppHref(sellerPhone)}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
+              >
+                WhatsApp
+              </a>
+              <a
+                href={toCallHref(sellerPhone)}
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
+              >
+                Call
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       {modalContent ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-4 shadow-xl shadow-slate-900/15 dark:border-white/10 dark:bg-slate-900">
-            <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
-              {modalContent.title}
-            </h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-[2px]"
+          onClick={() => setGateModal(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-4 shadow-xl shadow-slate-900/15 dark:border-white/10 dark:bg-slate-900"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label={modalContent.title}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
+                {modalContent.title}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setGateModal(null)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-colors hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
+                aria-label="Close modal"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.9}
+                  className="h-4 w-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 6l12 12M18 6l-12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <p className="mt-2 text-sm text-gray-600 dark:text-slate-300">
               {modalContent.message}
             </p>
@@ -152,14 +215,63 @@ export default function PersonalSellerActions({
                 onClick={() => setGateModal(null)}
                 className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
               >
-                Cancel
+                {modalContent.secondaryLabel}
               </button>
-              <a
-                href={modalContent.primaryHref}
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
-              >
-                {modalContent.primaryLabel}
-              </a>
+
+              {gateModal === 'login-required' ? (
+                <Link
+                  href="/signin"
+                  onClick={() => setGateModal(null)}
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
+                >
+                  {modalContent.primaryLabel}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setGateModal('verification-flow')}
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
+                >
+                  {modalContent.primaryLabel}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {gateModal === 'verification-flow' ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-[2px]"
+          onClick={() => setGateModal(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-4 shadow-xl shadow-slate-900/15 dark:border-white/10 dark:bg-slate-900"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Verify your account to contact sellers"
+          >
+            <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
+              Verify your account to contact sellers
+            </h3>
+            <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
+              Use your DIU email to unlock calling and WhatsApp access and help
+              keep DIUPoint safe for everyone.
+            </p>
+
+            <div className="mt-3">
+              <AccountVerificationFlow
+                onCancel={() => setGateModal(null)}
+                onVerified={() => {
+                  setIsAccountVerified(true);
+                  setGateModal(null);
+                  setShowContactOptions(true);
+                }}
+                autoCompleteOnSuccess
+                autoCompleteDelayMs={900}
+                className="border-0 bg-transparent p-0 shadow-none"
+              />
             </div>
           </div>
         </div>

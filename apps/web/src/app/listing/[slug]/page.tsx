@@ -18,6 +18,10 @@ interface ListingPageProps {
   params: Promise<{
     slug: string;
   }>;
+  searchParams: Promise<{
+    viewer?: 'guest' | 'unverified' | 'verified';
+    verified?: string;
+  }>;
 }
 
 function formatPostedDate(isoDate?: string): string {
@@ -92,8 +96,12 @@ function getRelatedListings(listing: Listing): Listing[] {
   ).slice(0, 6);
 }
 
-export default async function ListingPage({ params }: ListingPageProps) {
+export default async function ListingPage({
+  params,
+  searchParams,
+}: ListingPageProps) {
   const { slug } = await params;
+  const viewerSearchParams = await searchParams;
   const listing = getListingBySlug(slug);
 
   if (!listing) {
@@ -114,9 +122,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const stockStatus = listing.stockStatus ?? 'in-stock';
   const paymentMethods = listing.paymentSupported ?? [];
   const relatedListings = getRelatedListings(listing);
-  // Temporary viewer auth state for mock-only gated contact flow.
-  const isLoggedIn = false;
-  const isAccountVerified = false;
+  const viewerState = viewerSearchParams.viewer ?? 'guest';
+  const isLoggedIn = viewerState === 'unverified' || viewerState === 'verified';
+  const isAccountVerified =
+    viewerState === 'verified' ||
+    (viewerSearchParams.verified === '1' && isLoggedIn);
 
   return (
     <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
@@ -311,6 +321,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                   sellerPhone={listing.sellerPhone}
                   isLoggedIn={isLoggedIn}
                   isVerified={isAccountVerified}
+                  viewerState={viewerState}
                 />
               )}
             </article>
