@@ -114,6 +114,9 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const stockStatus = listing.stockStatus ?? 'in-stock';
   const paymentMethods = listing.paymentSupported ?? [];
   const relatedListings = getRelatedListings(listing);
+  // Temporary viewer auth state for mock-only gated contact flow.
+  const isLoggedIn = false;
+  const isAccountVerified = false;
 
   return (
     <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
@@ -199,12 +202,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3.5 dark:border-white/10 dark:bg-slate-800/70">
+              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-slate-800/70">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   {isStoreSeller ? 'Store Identity' : 'Seller Identity'}
                 </p>
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+                  <p className="text-[15px] font-semibold text-gray-900 dark:text-slate-100">
                     {isStoreSeller ? (
                       listing.storeSlug ? (
                         <Link
@@ -243,7 +246,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
                   <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
                     {`Sold by ${store?.name ?? listing.seller}. ${sellerSummary}`}
                   </p>
-                ) : null}
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                    Responds directly via phone or WhatsApp
+                  </p>
+                )}
 
                 {isStoreSeller && listing.storeSlug ? (
                   <Link
@@ -300,7 +307,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
                   ) : null}
                 </div>
               ) : (
-                <PersonalSellerActions />
+                <PersonalSellerActions
+                  sellerPhone={listing.sellerPhone}
+                  isLoggedIn={isLoggedIn}
+                  isVerified={isAccountVerified}
+                />
               )}
             </article>
           </section>

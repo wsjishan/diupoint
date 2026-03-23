@@ -9,6 +9,7 @@ export interface Listing {
   title: string;
   price: number;
   seller: string;
+  sellerPhone?: string;
   sellerType?: SellerType;
   storeSlug?: string;
   storeLabel?: string;
@@ -1460,7 +1461,13 @@ function defaultPostedAt(listingId: string): string {
 }
 
 function defaultDescription(listing: Listing): string {
-  return `${listing.title} listed by ${listing.seller}. Condition: ${listing.condition === 'new' ? 'New' : 'Used'}. Great fit for DIU students looking for reliable campus marketplace deals.`;
+  const conditionLabel = listing.condition === 'new' ? 'brand new' : 'used';
+
+  if (listing.sellerType === 'store' || listing.storeSlug) {
+    return `${listing.title} from ${listing.seller}. ${conditionLabel === 'brand new' ? 'Brand new item' : 'Quality checked used item'} with student-friendly pricing for DIU buyers.`;
+  }
+
+  return `${listing.title} in ${conditionLabel} condition. Kept by a DIU student and ready for quick handover on campus.`;
 }
 
 function defaultSellerSummary(listing: Listing): string {
@@ -1469,6 +1476,17 @@ function defaultSellerSummary(listing: Listing): string {
   }
 
   return 'DIU student seller.';
+}
+
+function defaultSellerPhone(listing: Listing): string | undefined {
+  const isStoreSeller =
+    listing.sellerType === 'store' || Boolean(listing.storeSlug);
+
+  if (isStoreSeller) return undefined;
+
+  const seed = getStableHash(listing.id + listing.seller);
+  const digits = String(10000000 + (seed % 90000000));
+  return `+8801${digits}`;
 }
 
 function withListingDetails(listing: Listing): Listing {
@@ -1499,6 +1517,10 @@ function withListingDetails(listing: Listing): Listing {
       override.sellerSummary ??
       listing.sellerSummary ??
       defaultSellerSummary(listing),
+    sellerPhone:
+      override.sellerPhone ??
+      listing.sellerPhone ??
+      defaultSellerPhone(listing),
     isSellerVerified:
       override.isSellerVerified ?? listing.isSellerVerified ?? false,
     stockStatus:
