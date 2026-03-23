@@ -25,7 +25,7 @@ function wait(ms: number) {
 
 export default function SignInForm({
   onSubmit,
-  forgotPasswordHref = '#',
+  forgotPasswordHref = '/forgot-password',
   createAccountHref = '/sign-up',
   showSocialDivider = true,
   className = '',
@@ -80,10 +80,6 @@ export default function SignInForm({
             className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
             required
           />
-
-          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-            Use your DIU email to get a verified account
-          </p>
         </div>
 
         <div className="space-y-1.5">
