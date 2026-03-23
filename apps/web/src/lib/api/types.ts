@@ -106,3 +106,57 @@ export interface ApiFavorite {
   createdAt: string;
   listing: ApiListing;
 }
+
+export interface ApiCartItem {
+  id: string;
+  cartId: string;
+  listingId: string;
+  quantity: number;
+  unitPrice: number | string;
+  createdAt: string;
+  updatedAt: string;
+  listing: ApiListing;
+}
+
+export interface ApiCartResponse {
+  id: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  items: ApiCartItem[];
+  summary: {
+    itemCount: number;
+  };
+}
+
+export type ApiCheckoutPaymentMethod = 'COD' | 'BKASH';
+
+export interface ApiOrderItem {
+  id: string;
+  orderId: string;
+  listingId: string;
+  quantity: number;
+  unitPrice: number | string;
+  listing?: ApiListing;
+}
+
+export interface ApiOrder {
+  id: string;
+  userId: string;
+  storeProfileId: string;
+  paymentMethod: string;
+  status: string;
+  subtotal: number | string;
+  total: number | string;
+  createdAt: string;
+  updatedAt: string;
+  items: ApiOrderItem[];
+}
+
+export interface ApiCreateOrderResponse {
+  message: string;
+  orders: ApiOrder[];
+  summary: {
+    orderCount: number;
+  };
+}

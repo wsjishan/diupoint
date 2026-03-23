@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
+import { useCart } from '@/lib/cart/cart-context';
 
 interface SearchInputProps {
   className?: string;
@@ -107,6 +108,7 @@ export default function Navbar({
     isLoading,
     logout,
   } = useAuth();
+  const { quantityCount } = useCart();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0);
@@ -227,6 +229,18 @@ export default function Navbar({
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                 >
                   My Listings
+                </Link>
+
+                <Link
+                  href="/cart"
+                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
+                >
+                  Cart
+                  {quantityCount > 0 ? (
+                    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#2F3FBF] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                      {quantityCount}
+                    </span>
+                  ) : null}
                 </Link>
 
                 <Link

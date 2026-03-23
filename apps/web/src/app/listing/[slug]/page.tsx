@@ -5,7 +5,7 @@ import Footer from '@/components/layout/footer';
 import FavoriteToggleButton from '@/components/listing/favorite-toggle-button';
 import ListingImageGallery from '@/components/listing/listing-image-gallery';
 import PersonalSellerActions from '@/components/listing/personal-seller-actions';
-import Button from '@/components/ui/button';
+import StorePurchaseActions from '@/components/listing/store-purchase-actions';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
@@ -304,20 +304,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
                     ))}
                   </div>
 
-                  <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <Button
-                      variant="secondary"
-                      className="h-10 w-full border-indigo-300 bg-white text-[#2F3FBF] hover:bg-indigo-100/80 dark:border-indigo-400/35 dark:bg-slate-900 dark:text-indigo-300 dark:hover:bg-indigo-500/20"
-                      disabled={stockStatus === 'out-of-stock'}
-                    >
-                      Add to Cart
-                    </Button>
-                    <Button
-                      className="h-10 w-full bg-[#2F3FBF] text-white shadow-md shadow-indigo-900/20 hover:bg-[#2535a8]"
-                      disabled={stockStatus === 'out-of-stock'}
-                    >
-                      Buy Now
-                    </Button>
+                  <div className="mt-3">
+                    <StorePurchaseActions
+                      listingId={listing.id}
+                      stockStatus={stockStatus}
+                    />
                   </div>
 
                   {stockStatus === 'out-of-stock' ? (
@@ -381,19 +372,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
               </p>
             </div>
 
-            <Button
-              variant="secondary"
-              className="h-10 px-4 text-xs"
-              disabled={stockStatus === 'out-of-stock'}
-            >
-              Add to Cart
-            </Button>
-            <Button
-              className="h-10 px-4 text-xs shadow-md shadow-indigo-900/20"
-              disabled={stockStatus === 'out-of-stock'}
-            >
-              Buy Now
-            </Button>
+            <StorePurchaseActions
+              listingId={listing.id}
+              stockStatus={stockStatus}
+              compact
+            />
           </div>
         </div>
       ) : null}
