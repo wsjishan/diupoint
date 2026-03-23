@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import ListingImageGallery from '@/components/listing/listing-image-gallery';
+import PersonalSellerActions from '@/components/listing/personal-seller-actions';
 import Button from '@/components/ui/button';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
@@ -238,11 +239,11 @@ export default async function ListingPage({ params }: ListingPageProps) {
                     {isStoreSeller ? 'Store Seller' : 'Personal Seller'}
                   </span>
                 </div>
-                <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
-                  {isStoreSeller
-                    ? `Sold by ${store?.name ?? listing.seller}. ${sellerSummary}`
-                    : `Listed by ${listing.seller}. ${sellerSummary}`}
-                </p>
+                {isStoreSeller ? (
+                  <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
+                    {`Sold by ${store?.name ?? listing.seller}. ${sellerSummary}`}
+                  </p>
+                ) : null}
 
                 {isStoreSeller && listing.storeSlug ? (
                   <Link
@@ -299,31 +300,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                   ) : null}
                 </div>
               ) : (
-                <div className="mt-4">
-                  <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-                    <Button className="h-10 flex-1 sm:px-5">
-                      Message Seller
-                    </Button>
-                    <button
-                      type="button"
-                      className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
-                    >
-                      WhatsApp
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
-                    >
-                      Call
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-3.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
-                    >
-                      Share
-                    </button>
-                  </div>
-                </div>
+                <PersonalSellerActions />
               )}
             </article>
           </section>
