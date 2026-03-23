@@ -53,7 +53,7 @@ export default function ListingImageGallery({
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-2.5 shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900 sm:p-3">
-      <div className="relative flex w-full aspect-4/3 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-linear-to-br from-slate-50 to-slate-100 dark:border-slate-800 dark:from-slate-900 dark:to-slate-800 lg:aspect-5/4">
+      <div className="relative flex w-full aspect-4/3 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900 lg:aspect-5/4">
         {showActiveImage ? (
           <Image
             src={activeImage}
@@ -64,8 +64,18 @@ export default function ListingImageGallery({
             onError={() => markImageFailed(activeImage)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
-            Image unavailable
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="absolute inset-0 bg-linear-to-br from-indigo-200 via-blue-100 to-slate-100 opacity-40 blur-2xl dark:from-slate-800 dark:to-slate-900" />
+
+            <div className="relative z-10 rounded-lg border border-slate-200 bg-white/80 px-4 py-3 text-center shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-800/80">
+              <div className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                Image unavailable
+              </div>
+
+              <div className="mt-1 text-xs text-slate-400">
+                This listing image is not available right now.
+              </div>
+            </div>
           </div>
         )}
       </div>
