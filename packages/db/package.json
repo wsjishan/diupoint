@@ -12,13 +12,20 @@
     "build": "tsc -p tsconfig.json",
     "prisma:generate": "prisma generate --schema ./prisma/schema.prisma",
     "prisma:migrate:dev": "prisma migrate dev --schema ./prisma/schema.prisma",
-    "prisma:migrate:deploy": "prisma migrate deploy --schema ./prisma/schema.prisma"
+    "prisma:migrate:deploy": "prisma migrate deploy --schema ./prisma/schema.prisma",
+    "prisma:seed": "prisma db seed --schema ./prisma/schema.prisma"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.8.2"
+    "@prisma/client": "^6.8.2",
+    "bcrypt": "^5.1.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "prisma": "^6.8.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
 }
