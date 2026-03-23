@@ -8,7 +8,7 @@ import CategoryChip from '@/components/ui/category-chip';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
 import { ALL_LISTINGS, CATEGORIES, type Listing } from '@/data/mock-listings';
-import { searchMarketplaceListings } from '@/lib/api/marketplace';
+import { searchListings } from '@/lib/api/search';
 
 type ConditionFilter = 'all' | 'new' | 'used';
 type SortOption = 'latest' | 'price-asc' | 'price-desc';
@@ -147,7 +147,7 @@ function SearchPageContent() {
             ? undefined
             : CATEGORY_LABEL_BY_ID[activeCategory];
 
-        const results = await searchMarketplaceListings({
+        const results = await searchListings({
           q: searchQuery,
           category,
           condition: conditionFilter === 'all' ? undefined : conditionFilter,

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import SignInForm from '@/components/account/sign-in-form';
@@ -21,7 +22,9 @@ export default function SignInPage() {
             </div>
 
             <div className="mt-4">
-              <SignInForm />
+              <Suspense fallback={null}>
+                <SignInForm />
+              </Suspense>
             </div>
           </section>
         </Container>

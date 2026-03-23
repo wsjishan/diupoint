@@ -9,19 +9,12 @@ import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
-import {
-  fetchListingBySlug,
-  fetchMarketplaceListings,
-  fetchStorefrontBySlug,
-} from '@/lib/api/marketplace';
+import { fetchListingBySlug, fetchListings } from '@/lib/api/listings';
+import { fetchStoreBySlug } from '@/lib/api/stores';
 
 interface ListingPageProps {
   params: Promise<{
     slug: string;
-  }>;
-  searchParams: Promise<{
-    viewer?: 'guest' | 'unverified' | 'verified';
-    verified?: string;
   }>;
 }
 
@@ -102,12 +95,8 @@ function getRelatedListings(
     .slice(0, 6);
 }
 
-export default async function ListingPage({
-  params,
-  searchParams,
-}: ListingPageProps) {
+export default async function ListingPage({ params }: ListingPageProps) {
   const { slug } = await params;
-  const viewerSearchParams = await searchParams;
   const listing = await fetchListingBySlug(slug);
 
   if (!listing) {
@@ -115,9 +104,9 @@ export default async function ListingPage({
   }
 
   const [relatedSource, storefront] = await Promise.all([
-    fetchMarketplaceListings({ category: listing.category }),
+    fetchListings({ category: listing.category }),
     listing.storeSlug
-      ? fetchStorefrontBySlug(listing.storeSlug)
+      ? fetchStoreBySlug(listing.storeSlug)
       : Promise.resolve(null),
   ]);
 
@@ -140,11 +129,6 @@ export default async function ListingPage({
     listing,
     relatedSource.length > 0 ? relatedSource : ALL_LISTINGS
   );
-  const viewerState = viewerSearchParams.viewer ?? 'guest';
-  const isLoggedIn = viewerState === 'unverified' || viewerState === 'verified';
-  const isAccountVerified =
-    viewerState === 'verified' ||
-    (viewerSearchParams.verified === '1' && isLoggedIn);
 
   return (
     <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
@@ -335,12 +319,7 @@ export default async function ListingPage({
                   ) : null}
                 </div>
               ) : (
-                <PersonalSellerActions
-                  sellerPhone={listing.sellerPhone}
-                  isLoggedIn={isLoggedIn}
-                  isVerified={isAccountVerified}
-                  viewerState={viewerState}
-                />
+                <PersonalSellerActions sellerPhone={listing.sellerPhone} />
               )}
             </article>
           </section>

@@ -1,4 +1,5 @@
 import { fetchAuthMe } from '@/lib/api/auth';
+import { clearToken, getToken, setToken } from '@/lib/auth/token';
 
 export type AccountVerificationStatus = 'verified' | 'unverified';
 
@@ -11,7 +12,6 @@ export interface AuthAccountState {
 }
 
 const AUTH_ACCOUNT_STORAGE_KEY = 'diupoint.auth.account';
-const AUTH_ACCESS_TOKEN_STORAGE_KEY = 'diupoint.auth.access-token';
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'] as const;
 
 function canUseStorage(): boolean {
@@ -49,21 +49,15 @@ export function getStoredAuthAccount(): AuthAccountState | null {
 }
 
 export function getStoredAuthAccessToken(): string | null {
-  if (!canUseStorage()) return null;
-
-  return window.localStorage.getItem(AUTH_ACCESS_TOKEN_STORAGE_KEY);
+  return getToken();
 }
 
 export function setStoredAuthAccessToken(accessToken: string): void {
-  if (!canUseStorage()) return;
-
-  window.localStorage.setItem(AUTH_ACCESS_TOKEN_STORAGE_KEY, accessToken);
+  setToken(accessToken);
 }
 
 export function clearStoredAuthAccessToken(): void {
-  if (!canUseStorage()) return;
-
-  window.localStorage.removeItem(AUTH_ACCESS_TOKEN_STORAGE_KEY);
+  clearToken();
 }
 
 export function setStoredAuthAccount(account: AuthAccountState): void {

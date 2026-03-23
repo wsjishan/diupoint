@@ -1,4 +1,5 @@
 const DEFAULT_API_BASE_URL = 'http://localhost:4000';
+import { getToken } from '@/lib/auth/token';
 
 function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
@@ -50,4 +51,20 @@ export async function apiRequest<T>(
   }
 
   return (await response.json()) as T;
+}
+
+export async function apiRequestWithAuth<T>(
+  path: string,
+  options: Omit<ApiRequestOptions, 'accessToken'> = {}
+): Promise<T> {
+  const token = getToken();
+
+  if (!token) {
+    throw new Error('Missing auth token.');
+  }
+
+  return apiRequest<T>(path, {
+    ...options,
+    accessToken: token,
+  });
 }

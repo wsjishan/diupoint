@@ -17,7 +17,7 @@ import {
 } from '@/data/mock-listings';
 import { FEATURED_STORES } from '@/data/mock-stores';
 import { buildMixedLatestFeed } from '@/lib/api/home';
-import { fetchMarketplaceListings } from '@/lib/api/marketplace';
+import { fetchListings } from '@/lib/api/listings';
 
 const LATEST_LISTINGS_FEED = buildMixedLatestFeed(ALL_LISTINGS).slice(0, 18);
 
@@ -116,7 +116,7 @@ export default function HomePage() {
     let cancelled = false;
 
     async function loadListings() {
-      const listings = await fetchMarketplaceListings();
+      const listings = await fetchListings();
 
       if (cancelled || listings.length === 0) {
         return;

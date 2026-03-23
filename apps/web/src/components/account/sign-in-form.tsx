@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/button';
-import {
-  getVerificationStatusByEmail,
-  saveAuthFromEmail,
-} from '@/lib/auth-account';
+import { useAuth } from '@/lib/auth/auth-context';
+import { getVerificationStatusByEmail } from '@/lib/auth-account';
 
 interface SignInSubmitPayload {
   email: string;
@@ -21,12 +20,6 @@ interface SignInFormProps {
   className?: string;
 }
 
-function wait(ms: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
-
 export default function SignInForm({
   onSubmit,
   forgotPasswordHref = '/forgot-password',
@@ -34,12 +27,16 @@ export default function SignInForm({
   showSocialDivider = true,
   className = '',
 }: SignInFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authStatusMessage, setAuthStatusMessage] = useState<string | null>(
     null
   );
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const trimmedEmail = email.trim();
   const hasTypedEmail = trimmedEmail.length > 0;
@@ -56,35 +53,49 @@ export default function SignInForm({
     };
 
     setIsSubmitting(true);
+    setAuthError(null);
 
     try {
+      let signedInVerificationStatus:
+        | 'VERIFIED'
+        | 'UNVERIFIED'
+        | 'PENDING'
+        | null = null;
+
       if (onSubmit) {
         await onSubmit(payload);
       } else {
-        // Mock submit behavior until backend auth is wired.
-        await wait(500);
+        const user = await signIn(payload);
+        signedInVerificationStatus = user.verificationStatus;
       }
 
-      const account = saveAuthFromEmail(payload.email, 'password');
+      const effectiveVerificationStatus =
+        signedInVerificationStatus === 'VERIFIED'
+          ? 'verified'
+          : signedInVerificationStatus === 'UNVERIFIED'
+            ? 'unverified'
+            : signedInVerificationStatus === 'PENDING'
+              ? 'unverified'
+              : getVerificationStatusByEmail(payload.email);
+
       setAuthStatusMessage(
-        account.verificationStatus === 'verified'
+        effectiveVerificationStatus === 'verified'
           ? 'Signed in with a DIU email. Your account is verified.'
           : 'Signed in successfully. You can verify later with a DIU email.'
       );
+
+      const returnTo = searchParams.get('returnTo');
+      const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+      router.replace(nextPath);
+    } catch {
+      setAuthError('Sign-in failed. Please check your email and password.');
     } finally {
       setIsSubmitting(false);
     }
   }
 
   async function handleGoogleSignIn() {
-    const providerEmail = trimmedEmail || 'user@gmail.com';
-    const account = saveAuthFromEmail(providerEmail, 'google');
-
-    setAuthStatusMessage(
-      account.verificationStatus === 'verified'
-        ? 'Google sign-in detected a DIU email. Your account is verified.'
-        : 'Google sign-in completed. You can verify later with a DIU email.'
-    );
+    setAuthError('Google sign-in is not wired to backend yet.');
   }
 
   return (
@@ -203,6 +214,12 @@ export default function SignInForm({
         {authStatusMessage ? (
           <p className="text-xs text-gray-500 dark:text-slate-400">
             {authStatusMessage}
+          </p>
+        ) : null}
+
+        {authError ? (
+          <p className="text-xs font-medium text-rose-600 dark:text-rose-300">
+            {authError}
           </p>
         ) : null}
       </div>

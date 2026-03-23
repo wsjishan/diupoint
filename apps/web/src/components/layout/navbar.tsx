@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Button from '@/components/ui/button';
 import Container from '@/components/ui/container';
+import { useAuth } from '@/lib/auth/auth-context';
 
 interface SearchInputProps {
   className?: string;
@@ -100,6 +101,13 @@ export default function Navbar({
   onSearchSubmit,
 }: NavbarProps) {
   const { theme, setTheme } = useTheme();
+  const {
+    isAuthenticated,
+    currentUser,
+    verificationStatus,
+    isLoading,
+    logout,
+  } = useAuth();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0);
@@ -197,12 +205,52 @@ export default function Navbar({
             </Button>
 
             {/* Sign In */}
-            <Link
-              href="/sign-in"
-              className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
-            >
-              Sign In
-            </Link>
+            {!isLoading && isAuthenticated ? (
+              <>
+                <span
+                  className={`hidden rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${
+                    verificationStatus === 'VERIFIED'
+                      ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-500/15 dark:text-emerald-300'
+                      : verificationStatus === 'PENDING'
+                        ? 'border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/40 dark:bg-sky-500/15 dark:text-sky-300'
+                        : 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-300'
+                  }`}
+                >
+                  {verificationStatus === 'VERIFIED'
+                    ? 'Verified'
+                    : verificationStatus === 'PENDING'
+                      ? 'Pending'
+                      : 'Unverified'}
+                </span>
+
+                <Link
+                  href={
+                    verificationStatus === 'VERIFIED'
+                      ? '/'
+                      : `/verify-account?returnTo=${encodeURIComponent('/')}`
+                  }
+                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
+                  title={currentUser?.email}
+                >
+                  {currentUser?.fullName?.split(' ')[0] ?? 'Account'}
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
 

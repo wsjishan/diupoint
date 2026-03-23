@@ -1,4 +1,4 @@
-export type ApiVerificationStatus = 'VERIFIED' | 'UNVERIFIED';
+export type ApiVerificationStatus = 'VERIFIED' | 'UNVERIFIED' | 'PENDING';
 export type ApiSellerType = 'PERSONAL' | 'STORE';
 export type ApiListingCondition = 'NEW' | 'USED';
 

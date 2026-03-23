@@ -2,24 +2,13 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Button from '@/components/ui/button';
-import {
-  getStoredAuthAccount,
-  upgradeStoredAccountToVerified,
-} from '@/lib/auth-account';
+import { useAuth } from '@/lib/auth/auth-context';
 
-type GateModalType =
-  | 'login-required'
-  | 'verification-required'
-  | 'verification-flow'
-  | null;
+type GateModalType = 'login-required' | 'verification-required' | null;
 
 interface PersonalSellerActionsProps {
   sellerPhone?: string;
-  isLoggedIn: boolean;
-  isVerified: boolean;
-  viewerState?: 'guest' | 'unverified' | 'verified';
 }
 
 function toWhatsAppHref(phone?: string): string {
@@ -37,31 +26,21 @@ function toCallHref(phone?: string): string {
 
 export default function PersonalSellerActions({
   sellerPhone,
-  isLoggedIn,
-  isVerified,
-  viewerState,
 }: PersonalSellerActionsProps) {
-  const storedAccount = getStoredAuthAccount();
-  const hasStoredAuthenticatedViewer = Boolean(storedAccount?.isAuthenticated);
-  const initialViewerState: 'guest' | 'unverified' | 'verified' =
-    hasStoredAuthenticatedViewer
-      ? storedAccount?.verificationStatus === 'verified'
-        ? 'verified'
-        : 'unverified'
-      : (viewerState ??
-        (isLoggedIn ? (isVerified ? 'verified' : 'unverified') : 'guest'));
+  const { isAuthenticated, verificationStatus } = useAuth();
 
   const [showContactOptions, setShowContactOptions] = useState(false);
-  const [isAccountVerified, setIsAccountVerified] = useState(
-    initialViewerState === 'verified'
-  );
-  const [isViewerLoggedIn, setIsViewerLoggedIn] = useState(
-    initialViewerState !== 'guest'
-  );
-  const [effectiveViewerState, setEffectiveViewerState] = useState<
-    'guest' | 'unverified' | 'verified'
-  >(initialViewerState);
   const [gateModal, setGateModal] = useState<GateModalType>(null);
+
+  const effectiveViewerState: 'guest' | 'unverified' | 'verified' =
+    isAuthenticated
+      ? verificationStatus === 'VERIFIED'
+        ? 'verified'
+        : 'unverified'
+      : 'guest';
+
+  const isViewerLoggedIn = effectiveViewerState !== 'guest';
+  const isAccountVerified = effectiveViewerState === 'verified';
 
   const viewerLabel =
     effectiveViewerState === 'verified'
@@ -122,6 +101,7 @@ export default function PersonalSellerActions({
             message:
               'Use your DIU email to unlock calling and WhatsApp access and help keep DIUPoint safe for everyone.',
             primaryLabel: 'Verify Now',
+            primaryHref: '/verify-account',
             secondaryLabel: 'Maybe Later',
           }
         : null;
@@ -254,54 +234,14 @@ export default function PersonalSellerActions({
                   {modalContent.primaryLabel}
                 </Link>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setGateModal('verification-flow')}
+                <Link
+                  href={modalContent.primaryHref}
+                  onClick={() => setGateModal(null)}
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
                 >
                   {modalContent.primaryLabel}
-                </button>
+                </Link>
               )}
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {gateModal === 'verification-flow' ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-[2px]"
-          onClick={() => setGateModal(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-4 shadow-xl shadow-slate-900/15 dark:border-white/10 dark:bg-slate-900"
-            onClick={(event) => event.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Verify your account to contact sellers"
-          >
-            <h3 className="text-base font-bold text-gray-900 dark:text-slate-100">
-              Verify your account to contact sellers
-            </h3>
-            <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
-              Use your DIU email to unlock calling and WhatsApp access and help
-              keep DIUPoint safe for everyone.
-            </p>
-
-            <div className="mt-3">
-              <AccountVerificationFlow
-                onCancel={() => setGateModal(null)}
-                onVerified={(verifiedEmail) => {
-                  upgradeStoredAccountToVerified(verifiedEmail);
-                  setIsAccountVerified(true);
-                  setIsViewerLoggedIn(true);
-                  setEffectiveViewerState('verified');
-                  setGateModal(null);
-                  setShowContactOptions(true);
-                }}
-                autoCompleteOnSuccess
-                autoCompleteDelayMs={900}
-                className="border-0 bg-transparent p-0 shadow-none"
-              />
             </div>
           </div>
         </div>

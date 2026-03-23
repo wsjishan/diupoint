@@ -5,7 +5,7 @@ import Container from '@/components/ui/container';
 import StorefrontProducts from '@/components/store/storefront-products';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug as getMockStoreBySlug } from '@/data/mock-stores';
-import { fetchStorefrontBySlug } from '@/lib/api/marketplace';
+import { fetchStoreBySlug } from '@/lib/api/stores';
 
 interface StorePageProps {
   params: Promise<{
@@ -66,7 +66,7 @@ const HERO_META_CHIP_ICON_CLASS =
 
 export default async function StorePage({ params }: StorePageProps) {
   const { slug } = await params;
-  const apiStorefront = await fetchStorefrontBySlug(slug);
+  const apiStorefront = await fetchStoreBySlug(slug);
   const store = apiStorefront?.store ?? getMockStoreBySlug(slug);
 
   if (!store) {

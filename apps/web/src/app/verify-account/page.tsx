@@ -6,7 +6,7 @@ import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Container from '@/components/ui/container';
-import { upgradeStoredAccountToVerified } from '@/lib/auth-account';
+import { useAuth } from '@/lib/auth/auth-context';
 
 function withVerifiedViewer(returnTo: string): string {
   const safeTarget = returnTo.startsWith('/') ? returnTo : '/';
@@ -23,6 +23,7 @@ function withVerifiedViewer(returnTo: string): string {
 function VerifyAccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refreshCurrentUser } = useAuth();
 
   const returnTo = useMemo(() => {
     return searchParams.get('returnTo') ?? '/';
@@ -47,8 +48,8 @@ function VerifyAccountPageContent() {
               <AccountVerificationFlow
                 autoCompleteOnSuccess
                 autoCompleteDelayMs={900}
-                onVerified={(verifiedEmail) => {
-                  upgradeStoredAccountToVerified(verifiedEmail);
+                onVerified={async () => {
+                  await refreshCurrentUser();
                   router.replace(withVerifiedViewer(returnTo));
                 }}
                 className="border-0 bg-transparent p-0"
