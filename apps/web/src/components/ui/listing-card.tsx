@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FavoriteToggleButton from '@/components/listing/favorite-toggle-button';
 import { getListingSlug, type Listing } from '@/data/mock-listings';
+
+const IMAGE_LOAD_TIMEOUT_MS = 9000;
 
 type ConditionBadge = 'new' | 'used';
 
@@ -55,12 +57,39 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const imageSrc = listing.imageUrl?.trim() ?? '';
   const hasImage = imageSrc.length > 0;
   const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
+  const [loadedImageSrc, setLoadedImageSrc] = useState<string | null>(null);
   const showImage = hasImage && failedImageSrc !== imageSrc;
   const fallbackBackground = getFallbackGradient(listing.id);
   const isStoreSeller =
     listing.sellerType === 'store' || Boolean(listing.storeSlug);
   const storeHref = `/store/${toStoreSlug(listing)}`;
   const conditionBadge: ConditionBadge = listing.condition ?? 'used';
+
+  useEffect(() => {
+    if (!showImage || !imageSrc) {
+      return;
+    }
+
+    if (loadedImageSrc === imageSrc) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setFailedImageSrc((current) =>
+        current === imageSrc ? current : imageSrc
+      );
+    }, IMAGE_LOAD_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [imageSrc, loadedImageSrc, showImage]);
+
+  useEffect(() => {
+    if (loadedImageSrc && loadedImageSrc !== imageSrc) {
+      setLoadedImageSrc(null);
+    }
+  }, [imageSrc, loadedImageSrc]);
 
   return (
     <article className="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-slate-800/90 shadow-sm shadow-gray-900/5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-gray-200 dark:hover:border-white/20 hover:shadow-xl hover:shadow-gray-900/12 dark:hover:shadow-black/35">
@@ -87,6 +116,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               fill
               className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+              onLoad={() => setLoadedImageSrc(imageSrc)}
               onError={() => setFailedImageSrc(imageSrc)}
             />
           </Link>

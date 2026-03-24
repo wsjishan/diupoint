@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
+
+const IMAGE_LOAD_TIMEOUT_MS = 9000;
 
 const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #eef2ff, #e0e7ff)',
@@ -37,6 +39,7 @@ export default function ListingImageGallery({
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Record<string, true>>({});
+  const [loadedImages, setLoadedImages] = useState<Record<string, true>>({});
 
   const activeImage = validImages[activeIndex] ?? '';
   const showActiveImage = activeImage.length > 0 && !failedImages[activeImage];
@@ -49,7 +52,28 @@ export default function ListingImageGallery({
     }));
   }
 
+  function markImageLoaded(image: string) {
+    setLoadedImages((previous) => ({
+      ...previous,
+      [image]: true,
+    }));
+  }
+
   const showThumbnails = validImages.length > 1;
+
+  useEffect(() => {
+    if (!showActiveImage || !activeImage || loadedImages[activeImage]) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      markImageFailed(activeImage);
+    }, IMAGE_LOAD_TIMEOUT_MS);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [activeImage, loadedImages, showActiveImage]);
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-2.5 shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900 sm:p-3">
@@ -61,6 +85,7 @@ export default function ListingImageGallery({
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="h-full w-full object-contain"
+            onLoad={() => markImageLoaded(activeImage)}
             onError={() => markImageFailed(activeImage)}
           />
         ) : (
@@ -105,6 +130,7 @@ export default function ListingImageGallery({
                     fill
                     sizes="120px"
                     className="h-full w-full object-cover"
+                    onLoad={() => markImageLoaded(image)}
                     onError={() => markImageFailed(image)}
                   />
                 ) : (

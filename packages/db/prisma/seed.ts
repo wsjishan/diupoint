@@ -213,7 +213,7 @@ async function main() {
       logoUrl:
         'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=400&q=80',
       bannerUrl:
-        'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1400&q=80',
+        'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1400&q=80',
       isFeatured: true,
     },
     {
@@ -307,7 +307,7 @@ async function main() {
       location: 'DIU AB4, Dhanmondi',
       status: ListingStatus.PUBLISHED,
       images: [
-        'https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
       ],
     },
     {
@@ -389,7 +389,7 @@ async function main() {
       status: ListingStatus.PUBLISHED,
       images: [
         'https://images.unsplash.com/photo-1588423771073-b8903fbb85b5?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
       ],
     },
     {
@@ -421,7 +421,7 @@ async function main() {
       location: 'DIU Shukrabad',
       status: ListingStatus.PUBLISHED,
       images: [
-        'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1200&q=80',
       ],
     },
     {
@@ -437,7 +437,7 @@ async function main() {
       location: 'DIU AB4, Dhanmondi',
       status: ListingStatus.PUBLISHED,
       images: [
-        'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
       ],
     },
     {
@@ -610,7 +610,7 @@ async function main() {
       location: 'Mirpur 10',
       status: ListingStatus.PUBLISHED,
       images: [
-        'https://images.unsplash.com/photo-1580894742597-87bc8789db3d?auto=format&fit=crop&w=1200&q=80',
+        'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80',
       ],
     },
     {

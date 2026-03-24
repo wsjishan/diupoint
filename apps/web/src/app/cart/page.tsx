@@ -15,6 +15,25 @@ function toPrice(value: number | string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+const THUMBNAIL_FALLBACK_GRADIENTS = [
+  'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+  'linear-gradient(135deg, #eff6ff, #e2e8f0)',
+  'linear-gradient(135deg, #f8fafc, #e0e7ff)',
+];
+
+function getThumbnailFallbackGradient(seed: string): string {
+  let hash = 0;
+
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+
+  return THUMBNAIL_FALLBACK_GRADIENTS[
+    Math.abs(hash) % THUMBNAIL_FALLBACK_GRADIENTS.length
+  ];
+}
+
 export default function CartPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
@@ -29,6 +48,9 @@ export default function CartPage() {
 
   const [busyItemId, setBusyItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [failedThumbnailUrls, setFailedThumbnailUrls] = useState<
+    Record<string, true>
+  >({});
 
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
@@ -157,7 +179,14 @@ export default function CartPage() {
                     const unitPrice = toPrice(item.unitPrice);
                     const itemSubtotal = unitPrice * item.quantity;
                     const isBusy = busyItemId === item.id;
-                    const thumbnailUrl = listing.images?.[0]?.imageUrl;
+                    const thumbnailUrl =
+                      listing.images?.[0]?.imageUrl?.trim() ?? '';
+                    const hasThumbnail =
+                      thumbnailUrl.length > 0 &&
+                      !failedThumbnailUrls[thumbnailUrl];
+                    const thumbnailFallback = getThumbnailFallbackGradient(
+                      listing.id
+                    );
 
                     return (
                       <article
@@ -166,14 +195,26 @@ export default function CartPage() {
                       >
                         <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
                           <div className="h-24 w-full shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 dark:border-slate-700 dark:bg-slate-800 sm:h-24 sm:w-24">
-                            {thumbnailUrl ? (
+                            {hasThumbnail ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={thumbnailUrl}
                                 alt={listing.title}
                                 className="h-full w-full object-cover"
+                                loading="lazy"
+                                onError={() => {
+                                  setFailedThumbnailUrls((previous) => ({
+                                    ...previous,
+                                    [thumbnailUrl]: true,
+                                  }));
+                                }}
                               />
-                            ) : null}
+                            ) : (
+                              <div
+                                className="h-full w-full"
+                                style={{ background: thumbnailFallback }}
+                              />
+                            )}
                           </div>
 
                           <div className="min-w-0 flex-1">

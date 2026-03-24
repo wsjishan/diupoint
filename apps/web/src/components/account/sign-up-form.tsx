@@ -6,10 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { isApiRequestError } from '@/lib/api/http';
 import { useAuth } from '@/lib/auth/auth-context';
-import {
-  getVerificationStatusByEmail,
-  saveAuthFromEmail,
-} from '@/lib/auth-account';
+import { getVerificationStatusByEmail } from '@/lib/auth-account';
 
 interface SignUpSubmitPayload {
   fullName: string;
@@ -130,14 +127,7 @@ export default function SignUpForm({
   }
 
   async function handleGoogleSignUp() {
-    const providerEmail = trimmedEmail || 'user@gmail.com';
-    const account = saveAuthFromEmail(providerEmail, 'google');
-
-    setAuthStatusMessage(
-      account.verificationStatus === 'verified'
-        ? 'Google sign-up detected a DIU email. Your account is verified.'
-        : 'Google sign-up completed. You can verify later with a DIU email.'
-    );
+    setAuthError('Google sign-up is not wired to backend yet.');
   }
 
   return (
