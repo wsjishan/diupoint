@@ -16,6 +16,7 @@ async function bootstrap() {
         forbidUnknownValues: true,
         transformOptions: { enableImplicitConversion: true },
     }));
+    app.setGlobalPrefix('api');
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('PORT', 4000);
     await app.listen(port);

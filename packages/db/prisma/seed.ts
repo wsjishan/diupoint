@@ -9,7 +9,24 @@ import {
   VerificationStatus,
   OrderStatus,
 } from '@prisma/client';
-import bcrypt from 'bcrypt';
+
+type BcryptLike = {
+  hash: (data: string, saltOrRounds: number) => Promise<string>;
+};
+
+function loadHasher(): BcryptLike {
+  try {
+    // Prefer native bcrypt where available.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('bcrypt') as BcryptLike;
+  } catch {
+    // Fallback keeps local seed runnable when native bindings are missing.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('bcryptjs') as BcryptLike;
+  }
+}
+
+const hasher = loadHasher();
 
 const prisma = new PrismaClient();
 
@@ -69,8 +86,8 @@ async function clearTables() {
 }
 
 async function main() {
-  const passwordHash = await bcrypt.hash(TEST_PASSWORD, 12);
-  const otpHash = await bcrypt.hash('123456', 10);
+  const passwordHash = await hasher.hash(TEST_PASSWORD, 12);
+  const otpHash = await hasher.hash('123456', 10);
 
   await clearTables();
 

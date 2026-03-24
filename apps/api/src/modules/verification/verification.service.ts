@@ -8,10 +8,10 @@ import {
   VerificationRequestStatus,
   VerificationStatus,
 } from '@prisma/client';
-import bcrypt from 'bcrypt';
 
 import { ConfirmVerificationDto } from './dto/confirm-verification.dto';
 import { RequestVerificationDto } from './dto/request-verification.dto';
+import { comparePassword, hashPassword } from '../auth/password-hasher';
 
 const prisma = new PrismaClient();
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
@@ -40,7 +40,7 @@ export class VerificationService {
     this.assertDiuEmail(verificationEmail);
 
     const otp = this.generateOtp();
-    const otpCodeHash = await bcrypt.hash(otp, 10);
+    const otpCodeHash = await hashPassword(otp);
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
     await prisma.$transaction([
@@ -97,7 +97,7 @@ export class VerificationService {
       throw new BadRequestException('No valid verification request found.');
     }
 
-    const isOtpValid = await bcrypt.compare(
+    const isOtpValid = await comparePassword(
       dto.otp,
       verificationRequest.otpCodeHash
     );

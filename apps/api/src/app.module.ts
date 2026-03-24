@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { resolve } from 'node:path';
 
 import { validateEnv } from './config/env.validation';
 import { AuthModule } from './modules/auth/auth.module';
@@ -17,6 +18,11 @@ import { VerificationModule } from './modules/verification/verification.module';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
+      envFilePath: [
+        resolve(process.cwd(), 'apps/api/.env'),
+        resolve(process.cwd(), '.env'),
+        resolve(__dirname, '../.env'),
+      ],
       validate: validateEnv,
     }),
     AuthModule,

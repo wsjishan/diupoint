@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import SignUpForm from '@/components/account/sign-up-form';
@@ -21,7 +22,9 @@ export default function SignUpPage() {
             </div>
 
             <div className="mt-4">
-              <SignUpForm />
+              <Suspense fallback={null}>
+                <SignUpForm />
+              </Suspense>
             </div>
           </section>
         </Container>

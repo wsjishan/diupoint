@@ -11,7 +11,9 @@ import {
 import {
   fetchAuthMe,
   signInWithPassword,
+  signUpWithPassword,
   type SignInPayload,
+  type SignUpPayload,
 } from '@/lib/api/auth';
 import { clearToken, getToken, setToken } from '@/lib/auth/token';
 import type { ApiAuthUser } from '@/lib/api/types';
@@ -27,6 +29,7 @@ interface AuthContextValue {
   accountType: AccountType;
   isLoading: boolean;
   hydrateAuth: () => Promise<void>;
+  signUp: (payload: SignUpPayload) => Promise<ApiAuthUser>;
   signIn: (payload: SignInPayload) => Promise<ApiAuthUser>;
   refreshCurrentUser: () => Promise<ApiAuthUser | null>;
   logout: () => void;
@@ -92,9 +95,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setToken(response.accessToken);
     setTokenState(response.accessToken);
-    setCurrentUser(response.user);
+    const hydratedUser = await fetchAuthMe(response.accessToken).catch(
+      () => response.user
+    );
+    setCurrentUser(hydratedUser);
 
-    return response.user;
+    return hydratedUser;
+  }, []);
+
+  const signUp = useCallback(async (payload: SignUpPayload) => {
+    const response = await signUpWithPassword(payload);
+
+    setToken(response.accessToken);
+    setTokenState(response.accessToken);
+    const hydratedUser = await fetchAuthMe(response.accessToken).catch(
+      () => response.user
+    );
+    setCurrentUser(hydratedUser);
+
+    return hydratedUser;
   }, []);
 
   useEffect(() => {
@@ -119,6 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       accountType: currentUser?.accountType ?? null,
       isLoading,
       hydrateAuth,
+      signUp,
       signIn,
       refreshCurrentUser,
       logout,
@@ -128,6 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     currentUser,
     isLoading,
     hydrateAuth,
+    signUp,
     signIn,
     refreshCurrentUser,
     logout,

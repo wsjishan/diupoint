@@ -11,6 +11,10 @@
     "prisma:generate": "pnpm --filter @diupoint/db prisma:generate"
   },
   "devDependencies": {
+    "prisma": "^7.5.0",
     "turbo": "^2.8.15"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1"
   }
 }

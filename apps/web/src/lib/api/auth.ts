@@ -1,9 +1,29 @@
 import { apiRequest } from '@/lib/api/http';
-import type { ApiAuthUser, ApiSignInResponse } from '@/lib/api/types';
+import type {
+  ApiAuthUser,
+  ApiSignInResponse,
+  ApiSignUpResponse,
+} from '@/lib/api/types';
+
+export interface SignUpPayload {
+  fullName: string;
+  email: string;
+  password: string;
+  accountType: 'PERSONAL' | 'STORE';
+}
 
 export interface SignInPayload {
   email: string;
   password: string;
+}
+
+export async function signUpWithPassword(
+  payload: SignUpPayload
+): Promise<ApiSignUpResponse> {
+  return apiRequest<ApiSignUpResponse>('/auth/signup', {
+    method: 'POST',
+    body: payload,
+  });
 }
 
 export async function signInWithPassword(

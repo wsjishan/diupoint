@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/auth-context';
 import { getVerificationStatusByEmail } from '@/lib/auth-account';
+import { isApiRequestError } from '@/lib/api/http';
 
 interface SignInSubmitPayload {
   email: string;
@@ -44,11 +45,37 @@ export default function SignInForm({
     ? getVerificationStatusByEmail(trimmedEmail)
     : null;
 
+  function toSignInErrorMessage(error: unknown): string {
+    if (!isApiRequestError(error)) {
+      return 'Sign-in failed. Please check your email and password.';
+    }
+
+    if (error.status === 401) {
+      return 'Invalid email or password.';
+    }
+
+    if (error.status === 400) {
+      return (
+        error.message || 'Invalid sign-in request. Please check your input.'
+      );
+    }
+
+    if (error.status === 0) {
+      return 'Backend is unavailable. Please ensure the API is running.';
+    }
+
+    if (error.status === 503 || error.status >= 500) {
+      return 'Authentication service is temporarily unavailable. Please try again.';
+    }
+
+    return error.message || 'Unable to sign in right now. Please try again.';
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const payload = {
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
     };
 
@@ -87,8 +114,8 @@ export default function SignInForm({
       const returnTo = searchParams.get('returnTo');
       const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
       router.replace(nextPath);
-    } catch {
-      setAuthError('Sign-in failed. Please check your email and password.');
+    } catch (error) {
+      setAuthError(toSignInErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

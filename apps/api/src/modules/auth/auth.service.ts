@@ -1,14 +1,18 @@
 import { AccountType, PrismaClient, VerificationStatus } from '@prisma/client';
 import {
+  BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
 
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { comparePassword, hashPassword } from './password-hasher';
 
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const prisma = new PrismaClient();
@@ -38,113 +42,134 @@ export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
   async signUp(dto: SignUpDto) {
-    const email = dto.email.trim().toLowerCase();
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    return this.withAuthAvailability(async () => {
+      const email = this.normalizeEmail(dto.email);
+      const fullName = this.normalizeName(dto.fullName);
 
-    if (existingUser) {
-      throw new ConflictException('Email is already registered.');
-    }
+      if (!fullName) {
+        throw new BadRequestException('Full name is required.');
+      }
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
-    const isDiuEmail = this.isDiuEmail(email);
+      const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    const createdUser = await prisma.user.create({
-      data: {
-        fullName: dto.fullName.trim(),
-        email,
-        passwordHash,
-        accountType: dto.accountType,
-        verificationStatus: isDiuEmail
-          ? VerificationStatus.VERIFIED
-          : VerificationStatus.UNVERIFIED,
-        verifiedAt: isDiuEmail ? new Date() : null,
-      },
-      include: {
-        storeProfile: {
-          select: {
-            id: true,
-            storeName: true,
-            slug: true,
-            isFeatured: true,
-            logoUrl: true,
-            bannerUrl: true,
+      if (existingUser) {
+        throw new ConflictException('Email is already registered.');
+      }
+
+      const passwordHash = await hashPassword(dto.password);
+      const isDiuEmail = this.isDiuEmail(email);
+
+      const createdUser = await prisma.user.create({
+        data: {
+          fullName,
+          email,
+          passwordHash,
+          accountType: dto.accountType,
+          verificationStatus: isDiuEmail
+            ? VerificationStatus.VERIFIED
+            : VerificationStatus.UNVERIFIED,
+          verifiedAt: isDiuEmail ? new Date() : null,
+        },
+        include: {
+          storeProfile: {
+            select: {
+              id: true,
+              storeName: true,
+              slug: true,
+              isFeatured: true,
+              logoUrl: true,
+              bannerUrl: true,
+            },
           },
         },
-      },
+      });
+
+      return this.buildAuthSuccessResponse(createdUser.id, createdUser.email, {
+        id: createdUser.id,
+        fullName: createdUser.fullName,
+        email: createdUser.email,
+        accountType: createdUser.accountType,
+        verificationStatus: createdUser.verificationStatus,
+        verifiedAt: createdUser.verifiedAt,
+        isActive: createdUser.isActive,
+        createdAt: createdUser.createdAt,
+        updatedAt: createdUser.updatedAt,
+        storeProfile: createdUser.storeProfile,
+      });
     });
-
-    const accessToken = await this.signAccessToken(
-      createdUser.id,
-      createdUser.email
-    );
-
-    return {
-      accessToken,
-      user: this.toSafeUser(createdUser),
-    };
   }
 
   async signIn(dto: SignInDto) {
-    const email = dto.email.trim().toLowerCase();
+    return this.withAuthAvailability(async () => {
+      const email = this.normalizeEmail(dto.email);
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        storeProfile: {
-          select: {
-            id: true,
-            storeName: true,
-            slug: true,
-            isFeatured: true,
-            logoUrl: true,
-            bannerUrl: true,
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          storeProfile: {
+            select: {
+              id: true,
+              storeName: true,
+              slug: true,
+              isFeatured: true,
+              logoUrl: true,
+              bannerUrl: true,
+            },
           },
         },
-      },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid email or password.');
+      }
+
+      const isPasswordValid = await comparePassword(
+        dto.password,
+        user.passwordHash
+      );
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid email or password.');
+      }
+
+      return this.buildAuthSuccessResponse(user.id, user.email, {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        accountType: user.accountType,
+        verificationStatus: user.verificationStatus,
+        verifiedAt: user.verifiedAt,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        storeProfile: user.storeProfile,
+      });
     });
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password.');
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      dto.password,
-      user.passwordHash
-    );
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password.');
-    }
-
-    const accessToken = await this.signAccessToken(user.id, user.email);
-
-    return {
-      accessToken,
-      user: this.toSafeUser(user),
-    };
   }
 
   async me(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        storeProfile: {
-          select: {
-            id: true,
-            storeName: true,
-            slug: true,
-            isFeatured: true,
-            logoUrl: true,
-            bannerUrl: true,
+    return this.withAuthAvailability(async () => {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          storeProfile: {
+            select: {
+              id: true,
+              storeName: true,
+              slug: true,
+              isFeatured: true,
+              logoUrl: true,
+              bannerUrl: true,
+            },
           },
         },
-      },
+      });
+
+      if (!user) {
+        throw new UnauthorizedException('Invalid access token.');
+      }
+
+      return this.toSafeUser(user);
     });
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid access token.');
-    }
-
-    return this.toSafeUser(user);
   }
 
   private async signAccessToken(userId: string, email: string) {
@@ -154,8 +179,69 @@ export class AuthService {
     });
   }
 
+  private async buildAuthSuccessResponse(
+    userId: string,
+    email: string,
+    user: {
+      id: string;
+      fullName: string;
+      email: string;
+      accountType: AccountType;
+      verificationStatus: VerificationStatus;
+      verifiedAt: Date | null;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+      storeProfile: {
+        id: string;
+        storeName: string;
+        slug: string;
+        isFeatured: boolean;
+        logoUrl: string | null;
+        bannerUrl: string | null;
+      } | null;
+    }
+  ) {
+    const accessToken = await this.signAccessToken(userId, email);
+
+    return {
+      accessToken,
+      user: this.toSafeUser(user),
+    };
+  }
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private normalizeName(fullName: string): string {
+    return fullName.trim().replace(/\s+/g, ' ');
+  }
+
+  private async withAuthAvailability<T>(action: () => Promise<T>): Promise<T> {
+    try {
+      return await action();
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientInitializationError ||
+        error instanceof Prisma.PrismaClientRustPanicError ||
+        error instanceof Prisma.PrismaClientUnknownRequestError
+      ) {
+        throw new ServiceUnavailableException(
+          'Authentication service is temporarily unavailable.'
+        );
+      }
+
+      throw error;
+    }
+  }
+
   private isDiuEmail(email: string): boolean {
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = this.normalizeEmail(email);
     return DIU_EMAIL_DOMAINS.some((domain) => normalizedEmail.endsWith(domain));
   }
 

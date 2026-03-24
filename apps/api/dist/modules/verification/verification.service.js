@@ -5,14 +5,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VerificationService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const password_hasher_1 = require("../auth/password-hasher");
 const prisma = new client_1.PrismaClient();
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const OTP_EXPIRY_MINUTES = 10;
@@ -34,7 +31,7 @@ let VerificationService = class VerificationService {
         const verificationEmail = dto.verificationEmail.trim().toLowerCase();
         this.assertDiuEmail(verificationEmail);
         const otp = this.generateOtp();
-        const otpCodeHash = await bcrypt_1.default.hash(otp, 10);
+        const otpCodeHash = await (0, password_hasher_1.hashPassword)(otp);
         const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
         await prisma.$transaction([
             prisma.verificationRequest.updateMany({
@@ -83,7 +80,7 @@ let VerificationService = class VerificationService {
         if (!verificationRequest) {
             throw new common_1.BadRequestException('No valid verification request found.');
         }
-        const isOtpValid = await bcrypt_1.default.compare(dto.otp, verificationRequest.otpCodeHash);
+        const isOtpValid = await (0, password_hasher_1.comparePassword)(dto.otp, verificationRequest.otpCodeHash);
         if (!isOtpValid) {
             throw new common_1.BadRequestException('Invalid OTP code.');
         }

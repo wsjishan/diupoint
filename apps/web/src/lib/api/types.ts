@@ -89,6 +89,11 @@ export interface ApiSignInResponse {
   user: ApiAuthUser;
 }
 
+export interface ApiSignUpResponse {
+  accessToken: string;
+  user: ApiAuthUser;
+}
+
 export interface ApiVerificationRequestResponse {
   message: string;
   verificationEmail: string;

@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/button';
+import { isApiRequestError } from '@/lib/api/http';
+import { useAuth } from '@/lib/auth/auth-context';
 import {
   getVerificationStatusByEmail,
   saveAuthFromEmail,
@@ -12,7 +15,7 @@ interface SignUpSubmitPayload {
   fullName: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  accountType: 'PERSONAL' | 'STORE';
 }
 
 interface SignUpFormProps {
@@ -22,19 +25,19 @@ interface SignUpFormProps {
   className?: string;
 }
 
-function wait(ms: number) {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
-  });
-}
-
 export default function SignUpForm({
   onSubmit,
   signInHref = '/sign-in',
   showSocialDivider = true,
   className = '',
 }: SignUpFormProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signUp } = useAuth();
   const [fullName, setFullName] = useState('');
+  const [accountType, setAccountType] = useState<'PERSONAL' | 'STORE'>(
+    'PERSONAL'
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -42,6 +45,7 @@ export default function SignUpForm({
   const [authStatusMessage, setAuthStatusMessage] = useState<string | null>(
     null
   );
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const trimmedEmail = email.trim();
   const hasTypedEmail = trimmedEmail.length > 0;
@@ -49,32 +53,77 @@ export default function SignUpForm({
     ? getVerificationStatusByEmail(trimmedEmail)
     : null;
 
+  function toSignUpErrorMessage(error: unknown): string {
+    if (!isApiRequestError(error)) {
+      return 'Unable to create account. Please try again.';
+    }
+
+    if (error.status === 409) {
+      return 'Email already in use. Please sign in or use a different email.';
+    }
+
+    if (error.status === 400) {
+      return error.message || 'Invalid signup data. Please check your input.';
+    }
+
+    if (error.status === 0) {
+      return 'Backend is unavailable. Please ensure the API is running.';
+    }
+
+    if (error.status === 503 || error.status >= 500) {
+      return 'Authentication service is temporarily unavailable. Please try again.';
+    }
+
+    return error.message || 'Unable to create account right now.';
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedFullName = fullName.trim();
+
+    if (password !== confirmPassword) {
+      setAuthError('Password and confirm password do not match.');
+      return;
+    }
+
+    if (normalizedFullName.length < 2) {
+      setAuthError('Please enter your full name.');
+      return;
+    }
+
     const payload = {
-      fullName: fullName.trim(),
-      email: email.trim(),
+      fullName: normalizedFullName,
+      email: normalizedEmail,
       password,
-      confirmPassword,
+      accountType,
     };
 
     setIsSubmitting(true);
+    setAuthError(null);
+    setAuthStatusMessage(null);
 
     try {
       if (onSubmit) {
         await onSubmit(payload);
       } else {
-        // Mock submit behavior until backend auth is wired.
-        await wait(500);
+        const user = await signUp(payload);
+        const signedUpVerificationStatus =
+          user.verificationStatus === 'VERIFIED' ? 'verified' : 'unverified';
+
+        setAuthStatusMessage(
+          signedUpVerificationStatus === 'verified'
+            ? 'Account created with a DIU email. Your account is verified.'
+            : 'Account created. You can verify later with a DIU email.'
+        );
       }
 
-      const account = saveAuthFromEmail(payload.email, 'password');
-      setAuthStatusMessage(
-        account.verificationStatus === 'verified'
-          ? 'Account created with a DIU email. Your account is verified.'
-          : 'Account created. You can verify later with a DIU email.'
-      );
+      const returnTo = searchParams.get('returnTo');
+      const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+      router.replace(nextPath);
+    } catch (error) {
+      setAuthError(toSignUpErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -115,6 +164,26 @@ export default function SignUpForm({
             className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 placeholder:text-gray-400 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
             required
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="account-type"
+            className="block text-sm font-medium text-gray-900 dark:text-slate-100"
+          >
+            Account type
+          </label>
+          <select
+            id="account-type"
+            value={accountType}
+            onChange={(event) =>
+              setAccountType(event.target.value as 'PERSONAL' | 'STORE')
+            }
+            className="mt-1.5 h-11 w-full rounded-xl border border-gray-200/95 bg-white px-3 text-sm text-gray-900 outline-none transition-[border-color,box-shadow,background-color] duration-200 focus:border-[#2F3FBF]/75 focus:ring-2 focus:ring-[#2F3FBF]/12 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-indigo-300/75 dark:focus:ring-indigo-300/14"
+          >
+            <option value="PERSONAL">Personal</option>
+            <option value="STORE">Store</option>
+          </select>
         </div>
 
         <div>
@@ -241,6 +310,12 @@ export default function SignUpForm({
         {authStatusMessage ? (
           <p className="text-xs text-gray-500 dark:text-slate-400">
             {authStatusMessage}
+          </p>
+        ) : null}
+
+        {authError ? (
+          <p className="text-xs font-medium text-rose-600 dark:text-rose-300">
+            {authError}
           </p>
         ) : null}
       </div>
