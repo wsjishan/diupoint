@@ -4,15 +4,19 @@ import {
   ConflictException,
   HttpException,
   Injectable,
+  InternalServerErrorException,
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'node:crypto';
 
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { comparePassword, hashPassword } from './password-hasher';
+import { GoogleAuthUser } from './strategies/google.strategy';
 
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const prisma = new PrismaClient();
@@ -39,7 +43,10 @@ type SafeUser = {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
+  ) {}
 
   async signUp(dto: SignUpDto) {
     return this.withAuthAvailability(async () => {
@@ -172,6 +179,129 @@ export class AuthService {
     });
   }
 
+  async signInWithGoogle(googleUser: GoogleAuthUser) {
+    return this.withAuthAvailability(async () => {
+      const email = this.normalizeEmail(googleUser.email);
+      const fullName = this.normalizeName(googleUser.fullName) || 'Google User';
+
+      if (!email) {
+        throw new BadRequestException('Google account email is unavailable.');
+      }
+
+      let user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          storeProfile: {
+            select: {
+              id: true,
+              storeName: true,
+              slug: true,
+              isFeatured: true,
+              logoUrl: true,
+              bannerUrl: true,
+            },
+          },
+        },
+      });
+
+      if (!user) {
+        const isDiuEmail = this.isDiuEmail(email);
+        const oauthPlaceholderHash = await hashPassword(
+          `google-oauth:${randomUUID()}`
+        );
+
+        user = await prisma.user.create({
+          data: {
+            fullName,
+            email,
+            passwordHash: oauthPlaceholderHash,
+            accountType: AccountType.PERSONAL,
+            verificationStatus: isDiuEmail
+              ? VerificationStatus.VERIFIED
+              : VerificationStatus.UNVERIFIED,
+            verifiedAt: isDiuEmail ? new Date() : null,
+          },
+          include: {
+            storeProfile: {
+              select: {
+                id: true,
+                storeName: true,
+                slug: true,
+                isFeatured: true,
+                logoUrl: true,
+                bannerUrl: true,
+              },
+            },
+          },
+        });
+      }
+
+      return this.buildAuthSuccessResponse(user.id, user.email, {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        accountType: user.accountType,
+        verificationStatus: user.verificationStatus,
+        verifiedAt: user.verifiedAt,
+        isActive: user.isActive,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        storeProfile: user.storeProfile,
+      });
+    });
+  }
+
+  isGoogleOAuthConfigured(): boolean {
+    const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID')?.trim();
+    const clientSecret = this.configService
+      .get<string>('GOOGLE_CLIENT_SECRET')
+      ?.trim();
+    const callbackUrl = this.configService
+      .get<string>('GOOGLE_CALLBACK_URL')
+      ?.trim();
+
+    return Boolean(clientId && clientSecret && callbackUrl);
+  }
+
+  sanitizeReturnTo(returnTo?: string): string {
+    if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+      return returnTo;
+    }
+
+    return '/';
+  }
+
+  buildFrontendCallbackUrl(params: {
+    token?: string;
+    error?: string;
+    returnTo?: string;
+  }): string {
+    const frontendUrl = this.getFrontendUrl();
+
+    let callbackUrl: URL;
+
+    try {
+      callbackUrl = new URL('/auth/callback', frontendUrl);
+    } catch {
+      throw new InternalServerErrorException(
+        'Invalid FRONTEND_URL configuration.'
+      );
+    }
+
+    if (params.token) {
+      callbackUrl.searchParams.set('token', params.token);
+    }
+
+    if (params.error) {
+      callbackUrl.searchParams.set('error', params.error);
+    }
+
+    const safeReturnTo = this.sanitizeReturnTo(params.returnTo);
+    callbackUrl.searchParams.set('returnTo', safeReturnTo);
+
+    return callbackUrl.toString();
+  }
+
   private async signAccessToken(userId: string, email: string) {
     return this.jwtService.signAsync({
       sub: userId,
@@ -216,6 +346,16 @@ export class AuthService {
 
   private normalizeName(fullName: string): string {
     return fullName.trim().replace(/\s+/g, ' ');
+  }
+
+  private getFrontendUrl(): string {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL')?.trim();
+
+    if (!frontendUrl || frontendUrl.length === 0) {
+      return 'http://localhost:3000';
+    }
+
+    return frontendUrl;
   }
 
   private async withAuthAvailability<T>(action: () => Promise<T>): Promise<T> {

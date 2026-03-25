@@ -158,6 +158,18 @@ export interface ApiOrder {
   items: ApiOrderItem[];
 }
 
+export interface ApiOrderStoreProfile {
+  id: string;
+  storeName: string;
+  slug: string;
+  logoUrl: string | null;
+  isFeatured: boolean;
+}
+
+export interface ApiMyOrder extends ApiOrder {
+  storeProfile: ApiOrderStoreProfile;
+}
+
 export interface ApiCreateOrderResponse {
   message: string;
   orders: ApiOrder[];

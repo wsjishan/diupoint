@@ -13,14 +13,18 @@ exports.AuthService = void 0;
 const client_1 = require("@prisma/client");
 const common_1 = require("@nestjs/common");
 const client_2 = require("@prisma/client");
+const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
+const node_crypto_1 = require("node:crypto");
 const password_hasher_1 = require("./password-hasher");
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const prisma = new client_1.PrismaClient();
 let AuthService = class AuthService {
     jwtService;
-    constructor(jwtService) {
+    configService;
+    constructor(jwtService, configService) {
         this.jwtService = jwtService;
+        this.configService = configService;
     }
     async signUp(dto) {
         return this.withAuthAvailability(async () => {
@@ -135,6 +139,105 @@ let AuthService = class AuthService {
             return this.toSafeUser(user);
         });
     }
+    async signInWithGoogle(googleUser) {
+        return this.withAuthAvailability(async () => {
+            const email = this.normalizeEmail(googleUser.email);
+            const fullName = this.normalizeName(googleUser.fullName) || 'Google User';
+            if (!email) {
+                throw new common_1.BadRequestException('Google account email is unavailable.');
+            }
+            let user = await prisma.user.findUnique({
+                where: { email },
+                include: {
+                    storeProfile: {
+                        select: {
+                            id: true,
+                            storeName: true,
+                            slug: true,
+                            isFeatured: true,
+                            logoUrl: true,
+                            bannerUrl: true,
+                        },
+                    },
+                },
+            });
+            if (!user) {
+                const isDiuEmail = this.isDiuEmail(email);
+                const oauthPlaceholderHash = await (0, password_hasher_1.hashPassword)(`google-oauth:${(0, node_crypto_1.randomUUID)()}`);
+                user = await prisma.user.create({
+                    data: {
+                        fullName,
+                        email,
+                        passwordHash: oauthPlaceholderHash,
+                        accountType: client_1.AccountType.PERSONAL,
+                        verificationStatus: isDiuEmail
+                            ? client_1.VerificationStatus.VERIFIED
+                            : client_1.VerificationStatus.UNVERIFIED,
+                        verifiedAt: isDiuEmail ? new Date() : null,
+                    },
+                    include: {
+                        storeProfile: {
+                            select: {
+                                id: true,
+                                storeName: true,
+                                slug: true,
+                                isFeatured: true,
+                                logoUrl: true,
+                                bannerUrl: true,
+                            },
+                        },
+                    },
+                });
+            }
+            return this.buildAuthSuccessResponse(user.id, user.email, {
+                id: user.id,
+                fullName: user.fullName,
+                email: user.email,
+                accountType: user.accountType,
+                verificationStatus: user.verificationStatus,
+                verifiedAt: user.verifiedAt,
+                isActive: user.isActive,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                storeProfile: user.storeProfile,
+            });
+        });
+    }
+    isGoogleOAuthConfigured() {
+        const clientId = this.configService.get('GOOGLE_CLIENT_ID')?.trim();
+        const clientSecret = this.configService
+            .get('GOOGLE_CLIENT_SECRET')
+            ?.trim();
+        const callbackUrl = this.configService
+            .get('GOOGLE_CALLBACK_URL')
+            ?.trim();
+        return Boolean(clientId && clientSecret && callbackUrl);
+    }
+    sanitizeReturnTo(returnTo) {
+        if (typeof returnTo === 'string' && returnTo.startsWith('/')) {
+            return returnTo;
+        }
+        return '/';
+    }
+    buildFrontendCallbackUrl(params) {
+        const frontendUrl = this.getFrontendUrl();
+        let callbackUrl;
+        try {
+            callbackUrl = new URL('/auth/callback', frontendUrl);
+        }
+        catch {
+            throw new common_1.InternalServerErrorException('Invalid FRONTEND_URL configuration.');
+        }
+        if (params.token) {
+            callbackUrl.searchParams.set('token', params.token);
+        }
+        if (params.error) {
+            callbackUrl.searchParams.set('error', params.error);
+        }
+        const safeReturnTo = this.sanitizeReturnTo(params.returnTo);
+        callbackUrl.searchParams.set('returnTo', safeReturnTo);
+        return callbackUrl.toString();
+    }
     async signAccessToken(userId, email) {
         return this.jwtService.signAsync({
             sub: userId,
@@ -153,6 +256,13 @@ let AuthService = class AuthService {
     }
     normalizeName(fullName) {
         return fullName.trim().replace(/\s+/g, ' ');
+    }
+    getFrontendUrl() {
+        const frontendUrl = this.configService.get('FRONTEND_URL')?.trim();
+        if (!frontendUrl || frontendUrl.length === 0) {
+            return 'http://localhost:3000';
+        }
+        return frontendUrl;
     }
     async withAuthAvailability(action) {
         try {
@@ -201,5 +311,6 @@ let AuthService = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [jwt_1.JwtService])
+    __metadata("design:paramtypes", [jwt_1.JwtService,
+        config_1.ConfigService])
 ], AuthService);

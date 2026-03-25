@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/auth-context';
 import { getVerificationStatusByEmail } from '@/lib/auth-account';
-import { isApiRequestError } from '@/lib/api/http';
+import { getApiBaseUrl, isApiRequestError } from '@/lib/api/http';
 
 interface SignInSubmitPayload {
   email: string;
@@ -121,8 +121,12 @@ export default function SignInForm({
     }
   }
 
-  async function handleGoogleSignIn() {
-    setAuthError('Google sign-in is not wired to backend yet.');
+  function handleGoogleSignIn() {
+    const returnTo = searchParams.get('returnTo');
+    const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+    const authUrl = `${getApiBaseUrl()}/auth/google?returnTo=${encodeURIComponent(nextPath)}`;
+
+    window.location.assign(authUrl);
   }
 
   return (

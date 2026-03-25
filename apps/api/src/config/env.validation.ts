@@ -2,6 +2,7 @@ import { Type, plainToInstance } from 'class-transformer';
 import {
   IsInt,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Max,
   Min,
@@ -16,6 +17,26 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   JWT_SECRET!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  GOOGLE_CLIENT_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  GOOGLE_CLIENT_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  GOOGLE_CALLBACK_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  FRONTEND_URL?: string;
 
   @Type(() => Number)
   @IsInt()

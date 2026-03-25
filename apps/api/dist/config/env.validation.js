@@ -15,6 +15,10 @@ const class_validator_1 = require("class-validator");
 class EnvironmentVariables {
     DATABASE_URL;
     JWT_SECRET;
+    GOOGLE_CLIENT_ID;
+    GOOGLE_CLIENT_SECRET;
+    GOOGLE_CALLBACK_URL;
+    FRONTEND_URL;
     PORT = 4000;
 }
 __decorate([
@@ -27,6 +31,30 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], EnvironmentVariables.prototype, "JWT_SECRET", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "GOOGLE_CLIENT_ID", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "GOOGLE_CLIENT_SECRET", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "GOOGLE_CALLBACK_URL", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "FRONTEND_URL", void 0);
 __decorate([
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),

@@ -16,12 +16,47 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const sign_in_dto_1 = require("./dto/sign-in.dto");
 const sign_up_dto_1 = require("./dto/sign-up.dto");
+const google_auth_guard_1 = require("./guards/google-auth.guard");
+const google_callback_auth_guard_1 = require("./guards/google-callback-auth.guard");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const auth_service_1 = require("./auth.service");
 let AuthController = class AuthController {
     authService;
     constructor(authService) {
         this.authService = authService;
+    }
+    googleAuthEntry(response, returnTo) {
+        if (!this.authService.isGoogleOAuthConfigured()) {
+            return response.redirect(this.authService.buildFrontendCallbackUrl({
+                error: 'google_oauth_not_configured',
+                returnTo,
+            }));
+        }
+        const safeReturnTo = this.authService.sanitizeReturnTo(returnTo);
+        return response.redirect(`/api/auth/google/start?returnTo=${encodeURIComponent(safeReturnTo)}`);
+    }
+    googleAuthStart() {
+        return;
+    }
+    async googleAuthCallback(req, response) {
+        try {
+            if (!req.user) {
+                return response.redirect(this.authService.buildFrontendCallbackUrl({
+                    error: 'google_auth_failed',
+                }));
+            }
+            const authResult = await this.authService.signInWithGoogle(req.user);
+            return response.redirect(this.authService.buildFrontendCallbackUrl({
+                token: authResult.accessToken,
+                returnTo: req.user.returnTo,
+            }));
+        }
+        catch {
+            return response.redirect(this.authService.buildFrontendCallbackUrl({
+                error: 'google_callback_failed',
+                returnTo: req.user?.returnTo,
+            }));
+        }
     }
     signUp(dto) {
         return this.authService.signUp(dto);
@@ -34,6 +69,30 @@ let AuthController = class AuthController {
     }
 };
 exports.AuthController = AuthController;
+__decorate([
+    (0, common_1.Get)('google'),
+    __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Query)('returnTo')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "googleAuthEntry", null);
+__decorate([
+    (0, common_1.Get)('google/start'),
+    (0, common_1.UseGuards)(google_auth_guard_1.GoogleAuthGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "googleAuthStart", null);
+__decorate([
+    (0, common_1.Get)('google/callback'),
+    (0, common_1.UseGuards)(google_callback_auth_guard_1.GoogleCallbackAuthGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "googleAuthCallback", null);
 __decorate([
     (0, common_1.Post)('signup'),
     __param(0, (0, common_1.Body)()),
