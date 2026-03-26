@@ -27,14 +27,11 @@ jobs:
         run: |
 
       - name: Create Isolated Production Folder
-        run: pnpm --filter ./apps/api --prod deploy out
+        # The --legacy flag is required for pnpm v10+ in workspaces
+        run: pnpm --filter ./apps/api --prod deploy out --legacy
 
       - name: Bundle Build and Prisma
         run: |
-          # Copy the compiled code
-          cp -r apps/api/dist out/dist
-          # Ensure the generated Prisma client is included in the bundle
-          cp -r node_modules/.prisma out/node_modules/ || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
