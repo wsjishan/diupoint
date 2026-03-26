@@ -23,16 +23,18 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Generate Prisma and Build
+      - name: Build Database and API
         run: |
-          pnpm --filter ./packages/db prisma:generate
-          pnpm --filter ./apps/api run build
 
       - name: Create Isolated Production Folder
         run: pnpm --filter ./apps/api --prod deploy out
 
-      - name: Copy Build Files
-        run: cp -r apps/api/dist out/dist
+      - name: Bundle Build and Prisma
+        run: |
+          # Copy the compiled code
+          cp -r apps/api/dist out/dist
+          # Ensure the generated Prisma client is included in the bundle
+          cp -r node_modules/.prisma out/node_modules/ || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
