@@ -36,7 +36,8 @@ jobs:
           cp -r apps/api/dist deploy_ready/dist
           cp -RL node_modules deploy_ready/node_modules
           cp package.json deploy_ready/
-          cp -r packages/db/node_modules/.prisma deploy_ready/node_modules/ || true
+
+          cp -r node_modules/.pnpm/@prisma+client*/node_modules/.prisma deploy_ready/node_modules/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
