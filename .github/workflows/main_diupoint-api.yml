@@ -18,26 +18,28 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '24.x'
-          cache: 'pnpm'
 
-      - name: Install Dependencies
+      - name: Install All Dependencies
         run: pnpm install
 
       - name: Build Database and API
         run: |
+          npx prisma generate --schema ./packages/db/prisma/schema.prisma
+          pnpm --filter ./apps/api run build
 
-      - name: Create Isolated Production Folder
-        # The --legacy flag is required for pnpm v10+ in workspaces
-        run: pnpm --filter ./apps/api --prod deploy out --legacy
-
-      - name: Bundle Build and Prisma
+      - name: Manual Brute-Force Bundle
         run: |
+          mkdir -p deploy_ready
+          cp -r apps/api/dist deploy_ready/dist
+          cp -r node_modules deploy_ready/node_modules
+          cp package.json deploy_ready/
+          cp -r node_modules/.prisma deploy_ready/node_modules/ || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: out
+          path: deploy_ready
 
   deploy:
     runs-on: ubuntu-latest
