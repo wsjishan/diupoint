@@ -37,7 +37,13 @@ jobs:
           cp -RL node_modules deploy_ready/node_modules
           cp package.json deploy_ready/
 
-          cp -r node_modules/.pnpm/@prisma+client*/node_modules/.prisma deploy_ready/node_modules/
+          echo "Hunting down the hidden .prisma folder..."
+
+          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
+
+          echo "Found it exactly at: $PRISMA_DIR"
+
+          cp -r "$PRISMA_DIR" deploy_ready/node_modules/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
