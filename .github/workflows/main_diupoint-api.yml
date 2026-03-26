@@ -30,22 +30,13 @@ jobs:
         env:
           DATABASE_URL: 'postgresql://dummy:dummy@localhost/mydb'
 
-      - name: Prepare Flat Azure Bundle
+      - name: Manual Brute-Force Bundle
         run: |
           mkdir -p deploy_ready
-
-          # API runtime entrypoint
           cp -r apps/api/dist deploy_ready/dist
-
-          # Use API package.json so Azure can run `npm start` -> node dist/main.js
-          cp apps/api/package.json deploy_ready/package.json
-
-          # Copy and dereference workspace symlinks so local packages are fully present
           cp -RL node_modules deploy_ready/node_modules
-
-          # Stage Prisma schema for native server-side client generation on Azure
-          mkdir -p deploy_ready/prisma
-          cp packages/db/prisma/schema.prisma deploy_ready/prisma/schema.prisma
+          cp package.json deploy_ready/
+          cp -r packages/db/node_modules/.prisma deploy_ready/node_modules/ || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -77,4 +68,5 @@ jobs:
         with:
           app-name: 'diupoint-api'
           package: .
-          startup-command: 'npm install prisma@6 && npx prisma generate && node dist/main.js'
+          # FIX: We only run Node, because GitHub already packed the Prisma client!
+          startup-command: 'node dist/main.js'
