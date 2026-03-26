@@ -26,6 +26,8 @@ jobs:
         run: |
           npx prisma generate --schema ./packages/db/prisma/schema.prisma
           pnpm --filter ./apps/api run build
+        env:
+          DATABASE_URL: "postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public"
 
       - name: Manual Brute-Force Bundle
         run: |
