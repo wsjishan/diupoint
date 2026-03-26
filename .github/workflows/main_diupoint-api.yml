@@ -43,14 +43,9 @@ jobs:
           # Copy and dereference workspace symlinks so local packages are fully present
           cp -RL node_modules deploy_ready/node_modules
 
-          # Ensure Prisma generated engines/client metadata are present in final artifact
-          mkdir -p deploy_ready/node_modules/.prisma
-          if [ -d packages/db/node_modules/.prisma ]; then
-            cp -RL packages/db/node_modules/.prisma/. deploy_ready/node_modules/.prisma/
-          fi
-          if [ -d node_modules/.prisma ]; then
-            cp -RL node_modules/.prisma/. deploy_ready/node_modules/.prisma/
-          fi
+          # Stage Prisma schema for native server-side client generation on Azure
+          mkdir -p deploy_ready/prisma
+          cp packages/db/prisma/schema.prisma deploy_ready/prisma/schema.prisma
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
