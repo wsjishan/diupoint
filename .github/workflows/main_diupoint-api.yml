@@ -6,62 +6,22 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '24.x'
-
-      - name: Install All Dependencies
-        run: pnpm install
-
-      - name: Generate Prisma Client and Build API
-        run: |
-          pnpm --filter @diupoint/db exec prisma generate --schema ./prisma/schema.prisma
-          pnpm --filter @diupoint/db run build
-          pnpm --filter ./apps/api run build
-        env:
-          DATABASE_URL: 'postgresql://dummy:dummy@localhost/mydb'
-
-      - name: Manual Brute-Force Bundle
-        run: |
-          mkdir -p deploy_ready
-          cp -r apps/api/dist deploy_ready/dist
-          cp -RL node_modules deploy_ready/node_modules
-          cp package.json deploy_ready/
-
-          echo "Hunting down the hidden .prisma folder..."
-
-          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
-
-          echo "Found it exactly at: $PRISMA_DIR"
-
-          cp -r "$PRISMA_DIR" deploy_ready/node_modules/
+      - name: Create Clean Zip
+        run: zip -r deploy_ready.zip . -x "*.git*" "node_modules/*" ".pnpm-store/*"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: deploy_ready
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: node-app
+          path: deploy_ready.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -74,6 +34,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'diupoint-api'
-          package: .
-          # FIX: We only run Node, because GitHub already packed the Prisma client!
-          startup-command: 'node dist/main.js'
+          package: deploy_ready.zip
