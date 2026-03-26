@@ -24,8 +24,10 @@ jobs:
 
       - name: Build Database and API
         run: |
+          npx prisma@6 generate --schema ./packages/db/prisma/schema.prisma
+          pnpm --filter ./apps/api run build
         env:
-          DATABASE_URL: "postgresql://johndoe:mypass@localhost:5432/mydb"
+          DATABASE_URL: "postgresql://dummy:dummy@localhost/mydb"
 
       - name: Manual Brute-Force Bundle
         run: |
@@ -33,8 +35,7 @@ jobs:
           cp -r apps/api/dist deploy_ready/dist
           cp -r node_modules deploy_ready/node_modules
           cp package.json deploy_ready/
-          # Ensure Prisma binary is physically inside the bundle
-          cp -r node_modules/.prisma deploy_ready/node_modules/ || true
+          
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
