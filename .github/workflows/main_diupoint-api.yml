@@ -22,20 +22,35 @@ jobs:
       - name: Install All Dependencies
         run: pnpm install
 
-      - name: Build Database and API
+      - name: Generate Prisma Client and Build API
         run: |
-          npx prisma@6 generate --schema ./packages/db/prisma/schema.prisma
+          pnpm --filter @diupoint/db exec prisma generate --schema ./prisma/schema.prisma
+          pnpm --filter @diupoint/db run build
           pnpm --filter ./apps/api run build
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost/mydb"
+          DATABASE_URL: 'postgresql://dummy:dummy@localhost/mydb'
 
-      - name: Manual Brute-Force Bundle
+      - name: Prepare Flat Azure Bundle
         run: |
           mkdir -p deploy_ready
+
+          # API runtime entrypoint
           cp -r apps/api/dist deploy_ready/dist
-          cp -r node_modules deploy_ready/node_modules
-          cp package.json deploy_ready/
-          
+
+          # Use API package.json so Azure can run `npm start` -> node dist/main.js
+          cp apps/api/package.json deploy_ready/package.json
+
+          # Copy and dereference workspace symlinks so local packages are fully present
+          cp -RL node_modules deploy_ready/node_modules
+
+          # Ensure Prisma generated engines/client metadata are present in final artifact
+          mkdir -p deploy_ready/node_modules/.prisma
+          if [ -d packages/db/node_modules/.prisma ]; then
+            cp -RL packages/db/node_modules/.prisma/. deploy_ready/node_modules/.prisma/
+          fi
+          if [ -d node_modules/.prisma ]; then
+            cp -RL node_modules/.prisma/. deploy_ready/node_modules/.prisma/
+          fi
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
