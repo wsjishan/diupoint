@@ -38,9 +38,15 @@ jobs:
           cp -r apps/api/dist/. deploy_ready/dist/
           cp apps/api/package.json deploy_ready/
           cp -RL apps/api/node_modules deploy_ready/node_modules
-          mkdir -p deploy_ready/prisma
-          cp packages/db/prisma/schema.prisma deploy_ready/prisma/schema.prisma
-          DATABASE_URL='postgresql://dummy:dummy@localhost/mydb' pnpm exec prisma generate --schema deploy_ready/prisma/schema.prisma
+
+          # Copy generated Prisma runtime client metadata from pnpm store into final artifact
+          PRISMA_DEFAULT_JS=$(find node_modules -type f -path "*/.prisma/client/default.js" | head -n 1 || true)
+          if [ -z "$PRISMA_DEFAULT_JS" ]; then
+            echo "ERROR: Could not locate generated .prisma/client/default.js in workspace node_modules"
+            exit 1
+          fi
+          PRISMA_DIR=$(dirname "$(dirname "$PRISMA_DEFAULT_JS")")
+          cp -r "$PRISMA_DIR" deploy_ready/node_modules/
 
       - name: Smoke Test Standalone Bundle
         run: |
