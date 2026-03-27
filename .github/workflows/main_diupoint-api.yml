@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '24.x'
+          node-version: '22.x'
 
       - name: Install All Dependencies
         run: pnpm install --frozen-lockfile
@@ -37,10 +37,24 @@ jobs:
           cp apps/api/package.json deploy_ready/
           cp -RL apps/api/node_modules deploy_ready/node_modules
           echo "Hunting down the hidden .prisma folder..."
-          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
+          PRISMA_DIR=$(find node_modules/.pnpm -type d -path "*/node_modules/.prisma" | head -n 1 || true)
+          if [ -z "$PRISMA_DIR" ]; then
+            echo "ERROR: .prisma folder not found under node_modules/.pnpm after prisma generate"
+            exit 1
+          fi
           echo "Found it exactly at: $PRISMA_DIR"
           cp -r "$PRISMA_DIR" deploy_ready/node_modules/
 
+      - name: Smoke Test Standalone Bundle
+        run: |
+          test -f deploy_ready/dist/main.js
+          test -f deploy_ready/node_modules/@nestjs/common/package.json
+          test -f deploy_ready/node_modules/.prisma/client/default.js
+          DATABASE_URL='postgresql://dummy:dummy@localhost/mydb' JWT_SECRET='ci-smoke-secret' PORT=8080 node deploy_ready/dist/main.js &
+          APP_PID=$!
+          sleep 8
+          kill "$APP_PID" 2>/dev/null || true
+          wait "$APP_PID" 2>/dev/null || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
