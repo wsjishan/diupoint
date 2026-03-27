@@ -34,7 +34,12 @@ jobs:
         run: |
           mkdir -p deploy_ready
           cp -r apps/api/dist deploy_ready/dist
-          cp package.json deploy_ready/
+          cp apps/api/package.json deploy_ready/
+          cp -RL apps/api/node_modules deploy_ready/node_modules
+          echo "Hunting down the hidden .prisma folder..."
+          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
+          echo "Found it exactly at: $PRISMA_DIR"
+          cp -r "$PRISMA_DIR" deploy_ready/node_modules/
           
 
       - name: Upload Artifact
