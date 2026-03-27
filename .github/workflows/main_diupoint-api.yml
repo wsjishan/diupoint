@@ -33,7 +33,9 @@ jobs:
       - name: Materialize Standalone Deployment
         run: |
           mkdir -p deploy_ready
-          cp -r apps/api/dist deploy_ready/dist
+          test -f apps/api/dist/main.js
+          mkdir -p deploy_ready/dist
+          cp -r apps/api/dist/. deploy_ready/dist/
           cp apps/api/package.json deploy_ready/
           cp -RL apps/api/node_modules deploy_ready/node_modules
           mkdir -p deploy_ready/prisma
@@ -42,6 +44,9 @@ jobs:
 
       - name: Smoke Test Standalone Bundle
         run: |
+          echo "Inspecting deploy_ready layout..."
+          ls -la deploy_ready
+          ls -la deploy_ready/dist || true
           test -f deploy_ready/dist/main.js
           test -f deploy_ready/node_modules/@nestjs/common/package.json
           test -f deploy_ready/node_modules/.prisma/client/default.js

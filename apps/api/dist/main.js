@@ -19,6 +19,6 @@ async function bootstrap() {
     app.setGlobalPrefix('api');
     const configService = app.get(config_1.ConfigService);
     const port = configService.get('PORT', 4000);
-    await app.listen(port);
+    await app.listen(process.env.PORT || 8080);
 }
 bootstrap();
