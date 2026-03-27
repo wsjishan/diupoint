@@ -20,7 +20,7 @@ jobs:
           node-version: '24.x'
 
       - name: Install All Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client and Build API
         run: |
@@ -30,17 +30,24 @@ jobs:
         env:
           DATABASE_URL: 'postgresql://dummy:dummy@localhost/mydb'
 
-      - name: The Flawless Monorepo Bundle
+      - name: Materialize Standalone Deployment
         run: |
-          mkdir -p deploy_ready
-          cp -r apps/api/dist deploy_ready/dist
-          cp apps/api/package.json deploy_ready/
-          cp -RL apps/api/node_modules deploy_ready/node_modules
-          echo "Hunting down the hidden .prisma folder..."
-          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
-          echo "Found it exactly at: $PRISMA_DIR"
-          cp -r "$PRISMA_DIR" deploy_ready/node_modules/
+          STAGE_DIR="$PWD/.stage_api_deploy"
+          DEPLOY_DIR="$PWD/deploy_ready"
           
+          pnpm --filter ./apps/api deploy --legacy --prod "$STAGE_DIR"
+          
+          mkdir -p "$DEPLOY_DIR"
+          cp -aL "$STAGE_DIR"/. "$DEPLOY_DIR"/
+          
+          PRISMA_DIR=$(find "$DEPLOY_DIR/node_modules/.pnpm" -type d -path "*/node_modules/.prisma" | head -n 1)
+          cp -a "$PRISMA_DIR" "$DEPLOY_DIR/node_modules/"
+          
+          echo "Running hard validation checks..."
+          test -f "$DEPLOY_DIR/dist/main.js" || { echo "Validation Failed: Missing main.js"; exit 1; }
+          test -f "$DEPLOY_DIR/node_modules/@nestjs/common/package.json" || { echo "Validation Failed: Missing @nestjs/common"; exit 1; }
+          test -d "$DEPLOY_DIR/node_modules/.prisma/client" || { echo "Validation Failed: Missing Prisma Client"; exit 1; }
+          echo "Validation Passed. Artifact is ready."
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
