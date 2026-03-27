@@ -37,10 +37,13 @@ jobs:
           cp apps/api/package.json deploy_ready/
           cp -RL apps/api/node_modules deploy_ready/node_modules
           echo "Hunting down the hidden .prisma folder..."
-          PRISMA_DIR=$(find . -type d -name ".prisma" ! -path "*/deploy_ready/*" | head -n 1)
+          PRISMA_DIR=$(find node_modules/.pnpm -type d -path "*/node_modules/.prisma" | head -n 1 || true)
+          if [ -z "$PRISMA_DIR" ]; then
+            echo "ERROR: .prisma folder not found under node_modules/.pnpm after prisma generate"
+            exit 1
+          fi
           echo "Found it exactly at: $PRISMA_DIR"
           cp -r "$PRISMA_DIR" deploy_ready/node_modules/
-          
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
