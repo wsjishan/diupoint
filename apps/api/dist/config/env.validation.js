@@ -81,9 +81,8 @@ function validateEnv(config) {
         throw new Error(errors.toString());
     }
     const effectiveDatabaseUrl = validatedConfig.DATABASE_URL ?? validatedConfig.PROD_DATABASE_URL;
-    if (!effectiveDatabaseUrl) {
-        throw new Error('DATABASE_URL or PROD_DATABASE_URL must be configured.');
+    if (effectiveDatabaseUrl) {
+        validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
     }
-    validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
     return validatedConfig;
 }

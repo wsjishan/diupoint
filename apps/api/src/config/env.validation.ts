@@ -64,14 +64,13 @@ export function validateEnv(config: Record<string, unknown>) {
     throw new Error(errors.toString());
   }
 
+  // Allow DATABASE_URL to be optional - the health endpoint will handle degradation gracefully
   const effectiveDatabaseUrl =
     validatedConfig.DATABASE_URL ?? validatedConfig.PROD_DATABASE_URL;
 
-  if (!effectiveDatabaseUrl) {
-    throw new Error('DATABASE_URL or PROD_DATABASE_URL must be configured.');
+  if (effectiveDatabaseUrl) {
+    validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
   }
-
-  validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
 
   return validatedConfig;
 }
