@@ -159,7 +159,7 @@ export default function HomePage() {
 
   const latestListingsSubtitle =
     activeCategory === 'all'
-      ? 'A live mix of student and store listings across DIU'
+      ? 'A mix of student and store listings'
       : `Latest ${CATEGORY_LABEL_BY_ID[activeCategory]?.toLowerCase() ?? 'category'} listings across DIU`;
 
   return (
@@ -190,7 +190,7 @@ export default function HomePage() {
             <section>
               <SectionHeader
                 title="Fresh from Stores"
-                subtitle="Quick picks from student-run stores"
+                subtitle="Picks from student-run stores"
                 viewAllHref="/listings?type=store"
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
@@ -212,7 +212,7 @@ export default function HomePage() {
             <section>
               <SectionHeader
                 title="Featured Stores"
-                subtitle="Trusted storefronts worth following"
+                subtitle="Trusted storefronts to follow"
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
                 {HOMEPAGE_FEATURED_STORES.map((store) => (
@@ -233,11 +233,10 @@ export default function HomePage() {
           <Container className="py-8 sm:py-10">
             <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 sm:p-6">
               <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-xl">
-                Sell something you no longer need
+                Sell your item
               </h2>
               <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-slate-400">
-                Post your item and connect with DIU students who are actively
-                looking for it.
+                Connect with students who are looking for it.
               </p>
               <Link
                 href="/post-item"

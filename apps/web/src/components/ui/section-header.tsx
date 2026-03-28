@@ -15,7 +15,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <div className="mb-6 flex items-start justify-between gap-4">
-      <div>
+      <div className="whitespace-nowrap">
         <h2 className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-2xl">
           {icon ? (
             <span
@@ -36,9 +36,9 @@ export default function SectionHeader({
       {viewAllHref ? (
         <Link
           href={viewAllHref}
-          className="group inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/70 hover:text-[#2535a8] dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-300/40 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-200"
+          className="group ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/70 hover:text-[#2535a8] dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-300/40 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-200"
         >
-          View all
+          <span className="whitespace-nowrap">View all</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
