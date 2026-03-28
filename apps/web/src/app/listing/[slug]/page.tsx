@@ -128,7 +128,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const paymentMethods = listing.paymentSupported ?? [];
   const relatedListings = getRelatedListings(
     listing,
-    relatedSource.length > 0 ? relatedSource : ALL_LISTINGS
+    relatedSource.listings.length > 0 ? relatedSource.listings : ALL_LISTINGS
   );
 
   return (

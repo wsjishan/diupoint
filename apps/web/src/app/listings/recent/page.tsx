@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
@@ -10,19 +10,17 @@ import { fetchListings } from '@/lib/api/listings';
 import Navbar from '@/components/layout/navbar';
 import Footer from '@/components/layout/footer';
 import SectionHeader from '@/components/ui/section-header';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 
-export default function RecentListingsPage() {
+function RecentListingsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [listings, setListings] = useState<Listing[]>([]);
-  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const pageParam = searchParams.get('page');
-    const page = pageParam ? parseInt(pageParam, 10) : 1;
-    setPage(page);
-  }, [searchParams]);
+  // Get page from URL params
+  const pageParam = searchParams.get('page');
+  const page = pageParam ? parseInt(pageParam, 10) : 1;
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +41,12 @@ export default function RecentListingsPage() {
       cancelled = true;
     };
   }, [page]);
+
+  const navigateToPage = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage.toString());
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
@@ -68,7 +72,7 @@ export default function RecentListingsPage() {
             <div className="flex items-center space-x-2">
               <Button
                 disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
+                onClick={() => navigateToPage(page - 1)}
               >
                 Previous
               </Button>
@@ -77,7 +81,7 @@ export default function RecentListingsPage() {
               </span>
               <Button
                 disabled={page >= totalPages}
-                onClick={() => setPage(page + 1)}
+                onClick={() => navigateToPage(page + 1)}
               >
                 Next
               </Button>
@@ -87,5 +91,13 @@ export default function RecentListingsPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function RecentListingsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RecentListingsContent />
+    </Suspense>
   );
 }
