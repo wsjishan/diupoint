@@ -19,11 +19,15 @@ import { VerificationModule } from './modules/verification/verification.module';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: [
-        resolve(process.cwd(), 'apps/api/.env'),
-        resolve(process.cwd(), '.env'),
-        resolve(__dirname, '../.env'),
-      ],
+      // App Service should use portal/app settings; local dev can still use .env files.
+      ignoreEnvFile: Boolean(process.env.WEBSITE_INSTANCE_ID),
+      envFilePath: process.env.WEBSITE_INSTANCE_ID
+        ? []
+        : [
+            resolve(process.cwd(), 'apps/api/.env'),
+            resolve(process.cwd(), '.env'),
+            resolve(__dirname, '../.env'),
+          ],
       validate: validateEnv,
     }),
     HealthModule,

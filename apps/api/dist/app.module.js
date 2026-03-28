@@ -30,11 +30,14 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
                 cache: true,
-                envFilePath: [
-                    (0, node_path_1.resolve)(process.cwd(), 'apps/api/.env'),
-                    (0, node_path_1.resolve)(process.cwd(), '.env'),
-                    (0, node_path_1.resolve)(__dirname, '../.env'),
-                ],
+                ignoreEnvFile: Boolean(process.env.WEBSITE_INSTANCE_ID),
+                envFilePath: process.env.WEBSITE_INSTANCE_ID
+                    ? []
+                    : [
+                        (0, node_path_1.resolve)(process.cwd(), 'apps/api/.env'),
+                        (0, node_path_1.resolve)(process.cwd(), '.env'),
+                        (0, node_path_1.resolve)(__dirname, '../.env'),
+                    ],
                 validate: env_validation_1.validateEnv,
             }),
             health_module_1.HealthModule,
