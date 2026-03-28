@@ -4,10 +4,6 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 
-if (!process.env.DATABASE_URL && process.env.PROD_DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.PROD_DATABASE_URL;
-}
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -33,6 +29,10 @@ async function bootstrap() {
   );
 
   await app.listen(port, '0.0.0.0');
+  console.log(`🚀 Application is running on: ${await app.getUrl()}`);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('💥 Application failed to start:', err);
+  process.exit(1);
+});

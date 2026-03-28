@@ -64,10 +64,13 @@ export function validateEnv(config: Record<string, unknown>) {
     throw new Error(errors.toString());
   }
 
-  // Allow DATABASE_URL to be optional - the health endpoint will handle degradation gracefully
+  // Consolidate database URL. Azure App Service might set PROD_DATABASE_URL.
+  // We'll prioritize it and fall back to DATABASE_URL, then set it as the definitive DATABASE_URL.
   const effectiveDatabaseUrl =
-    validatedConfig.DATABASE_URL ?? validatedConfig.PROD_DATABASE_URL;
+    validatedConfig.PROD_DATABASE_URL ?? validatedConfig.DATABASE_URL;
 
+  // The comment in the original code stated that the DB URL is optional and the
+  // health endpoint would handle graceful degradation. We will respect that.
   if (effectiveDatabaseUrl) {
     validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
   }
