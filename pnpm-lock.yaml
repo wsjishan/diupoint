@@ -23,6 +23,9 @@ importers:
       fast-safe-stringify:
         specifier: ^2.1.1
         version: 2.1.1
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
       libphonenumber-js:
         specifier: ^1.12.41
         version: 1.12.41
