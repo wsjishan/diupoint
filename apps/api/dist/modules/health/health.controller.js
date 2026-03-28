@@ -21,8 +21,16 @@ let HealthController = class HealthController {
     }
     async getHealth() {
         const databaseUrl = this.configService.get('DATABASE_URL');
+        const timestamp = new Date().toISOString();
         if (!databaseUrl) {
-            throw new common_1.ServiceUnavailableException('DATABASE_URL is not configured.');
+            return {
+                status: 'degraded',
+                app: 'up',
+                env: 'missing_database_url',
+                database: 'unknown',
+                message: 'DATABASE_URL is not configured.',
+                timestamp,
+            };
         }
         try {
             await prisma.$queryRaw `SELECT 1`;
@@ -31,17 +39,18 @@ let HealthController = class HealthController {
                 app: 'up',
                 env: 'loaded',
                 database: 'up',
-                timestamp: new Date().toISOString(),
+                timestamp,
             };
         }
         catch {
-            throw new common_1.ServiceUnavailableException({
-                status: 'error',
+            return {
+                status: 'degraded',
                 app: 'up',
                 env: 'loaded',
                 database: 'down',
                 message: 'Database connectivity check failed.',
-            });
+                timestamp,
+            };
         }
     }
 };

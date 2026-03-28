@@ -82,7 +82,7 @@ jobs:
 
       - name: Verify Live API Health
         run: |
-          HEALTH_URL='https://diupoint-api-fxd5h2b8audxbscm.eastasia-01.azurewebsites.net/api/health'
+          HEALTH_URL='https://diupoint-api.azurewebsites.net/api/health'
           ATTEMPTS=12
           SLEEP_SECONDS=10
 

@@ -1,4 +1,4 @@
-import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
@@ -11,9 +11,17 @@ export class HealthController {
   @Get()
   async getHealth() {
     const databaseUrl = this.configService.get<string>('DATABASE_URL');
+    const timestamp = new Date().toISOString();
 
     if (!databaseUrl) {
-      throw new ServiceUnavailableException('DATABASE_URL is not configured.');
+      return {
+        status: 'degraded',
+        app: 'up',
+        env: 'missing_database_url',
+        database: 'unknown',
+        message: 'DATABASE_URL is not configured.',
+        timestamp,
+      };
     }
 
     try {
@@ -24,16 +32,17 @@ export class HealthController {
         app: 'up',
         env: 'loaded',
         database: 'up',
-        timestamp: new Date().toISOString(),
+        timestamp,
       };
     } catch {
-      throw new ServiceUnavailableException({
-        status: 'error',
+      return {
+        status: 'degraded',
         app: 'up',
         env: 'loaded',
         database: 'down',
         message: 'Database connectivity check failed.',
-      });
+        timestamp,
+      };
     }
   }
 }
