@@ -54,9 +54,11 @@ jobs:
           ls -la deploy_ready/dist || true
           test -f deploy_ready/dist/main.js
           test -f deploy_ready/node_modules/@nestjs/common/package.json
+          test -f deploy_ready/node_modules/tslib/tslib.js
           test -f deploy_ready/prisma/schema.prisma
           test -f deploy_ready/node_modules/.bin/prisma
           test ! -f deploy_ready/.env
+          node -e "require('./deploy_ready/node_modules/tslib/tslib.js'); console.log('tslib ok')"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
