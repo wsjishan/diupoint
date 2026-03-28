@@ -14,6 +14,7 @@ const env_validation_1 = require("./config/env.validation");
 const auth_module_1 = require("./modules/auth/auth.module");
 const cart_module_1 = require("./modules/cart/cart.module");
 const favorites_module_1 = require("./modules/favorites/favorites.module");
+const health_module_1 = require("./modules/health/health.module");
 const listings_module_1 = require("./modules/listings/listings.module");
 const orders_module_1 = require("./modules/orders/orders.module");
 const search_module_1 = require("./modules/search/search.module");
@@ -36,6 +37,7 @@ exports.AppModule = AppModule = __decorate([
                 ],
                 validate: env_validation_1.validateEnv,
             }),
+            health_module_1.HealthModule,
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             stores_module_1.StoresModule,
