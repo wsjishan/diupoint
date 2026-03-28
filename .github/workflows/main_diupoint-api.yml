@@ -74,6 +74,7 @@ jobs:
           name: node-app
 
       - name: 'Deploy to Azure Web App'
+        id: deploy_to_azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'diupoint-api'
@@ -81,12 +82,26 @@ jobs:
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
 
       - name: Verify Live API Health
+        env:
+          DEPLOYED_APP_URL: ${{ steps.deploy_to_azure.outputs.webapp-url }}
         run: |
-          HEALTH_URL='https://diupoint-api.azurewebsites.net/api/health'
-          ATTEMPTS=12
+          if [ -n "$DEPLOYED_APP_URL" ]; then
+            HEALTH_URL="${DEPLOYED_APP_URL%/}/api/health"
+          else
+            echo 'Unable to determine health URL from deployment output (webapp-url).'
+            exit 1
+          fi
+
+          ATTEMPTS=18
           SLEEP_SECONDS=10
 
           echo "Waiting for healthy response from: $HEALTH_URL"
+
+          HEALTH_HOST=$(printf '%s' "$HEALTH_URL" | sed -E 's#^https?://([^/]+).*$#\1#')
+          getent hosts "$HEALTH_HOST" >/dev/null || {
+            echo "DNS lookup failed for $HEALTH_HOST"
+            exit 1
+          }
 
           for i in $(seq 1 "$ATTEMPTS"); do
             status_code=$(curl -sS -o /tmp/health.json -w '%{http_code}' "$HEALTH_URL" || true)
@@ -98,10 +113,11 @@ jobs:
             fi
 
             echo "Attempt $i/$ATTEMPTS returned HTTP $status_code. Retrying in ${SLEEP_SECONDS}s..."
+            [ -f /tmp/health.json ] && cat /tmp/health.json || true
             sleep "$SLEEP_SECONDS"
           done
 
-          echo 'Health check failed: API did not return HTTP 200 within 2 minutes.'
+          echo 'Health check failed: API did not return HTTP 200 in time.'
           echo 'Last health response body:'
-          cat /tmp/health.json || true
+          [ -f /tmp/health.json ] && cat /tmp/health.json || true
           exit 1
