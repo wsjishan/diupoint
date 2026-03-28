@@ -10,9 +10,15 @@ import {
 } from 'class-validator';
 
 class EnvironmentVariables {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  DATABASE_URL!: string;
+  DATABASE_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  PROD_DATABASE_URL?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -57,6 +63,15 @@ export function validateEnv(config: Record<string, unknown>) {
   if (errors.length > 0) {
     throw new Error(errors.toString());
   }
+
+  const effectiveDatabaseUrl =
+    validatedConfig.DATABASE_URL ?? validatedConfig.PROD_DATABASE_URL;
+
+  if (!effectiveDatabaseUrl) {
+    throw new Error('DATABASE_URL or PROD_DATABASE_URL must be configured.');
+  }
+
+  validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
 
   return validatedConfig;
 }

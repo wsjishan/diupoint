@@ -4,6 +4,10 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 
+if (!process.env.DATABASE_URL && process.env.PROD_DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.PROD_DATABASE_URL;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -26,7 +30,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT', 4000);
 
-  await app.listen(process.env.PORT || 8080);
+  await app.listen(port);
 }
 
 bootstrap();

@@ -14,6 +14,7 @@ const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class EnvironmentVariables {
     DATABASE_URL;
+    PROD_DATABASE_URL;
     JWT_SECRET;
     GOOGLE_CLIENT_ID;
     GOOGLE_CLIENT_SECRET;
@@ -22,10 +23,17 @@ class EnvironmentVariables {
     PORT = 4000;
 }
 __decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], EnvironmentVariables.prototype, "DATABASE_URL", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "PROD_DATABASE_URL", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
@@ -72,5 +80,10 @@ function validateEnv(config) {
     if (errors.length > 0) {
         throw new Error(errors.toString());
     }
+    const effectiveDatabaseUrl = validatedConfig.DATABASE_URL ?? validatedConfig.PROD_DATABASE_URL;
+    if (!effectiveDatabaseUrl) {
+        throw new Error('DATABASE_URL or PROD_DATABASE_URL must be configured.');
+    }
+    validatedConfig.DATABASE_URL = effectiveDatabaseUrl;
     return validatedConfig;
 }

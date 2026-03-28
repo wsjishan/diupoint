@@ -35,6 +35,9 @@ jobs:
           STAGE_DIR="$PWD/.stage_api_deploy"
           pnpm --filter ./apps/api deploy --legacy "$STAGE_DIR"
 
+          # Never ship local env files to Azure; rely on App Service settings.
+          find "$STAGE_DIR" -maxdepth 1 -type f -name '.env*' -delete
+
           mkdir -p "$STAGE_DIR/prisma"
           cp packages/db/prisma/schema.prisma "$STAGE_DIR/prisma/schema.prisma"
 
@@ -53,13 +56,13 @@ jobs:
           test -f deploy_ready/node_modules/@nestjs/common/package.json
           test -f deploy_ready/prisma/schema.prisma
           test -f deploy_ready/node_modules/.bin/prisma
+          test ! -f deploy_ready/.env
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
           path: deploy_ready
-          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -99,4 +102,6 @@ jobs:
           done
 
           echo 'Health check failed: API did not return HTTP 200 within 2 minutes.'
+          echo 'Last health response body:'
+          cat /tmp/health.json || true
           exit 1
