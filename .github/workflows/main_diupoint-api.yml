@@ -56,6 +56,7 @@ jobs:
           test -f deploy_ready/package.json
           node -e "const p=require('./deploy_ready/package.json'); if(!p.scripts||!p.scripts.start){ throw new Error('Missing scripts.start in deploy_ready/package.json'); } console.log('start script:', p.scripts.start)"
           test -f deploy_ready/node_modules/@nestjs/common/package.json
+          test -f deploy_ready/node_modules/iterare/package.json
           test -f deploy_ready/node_modules/tslib/tslib.js
           test -f deploy_ready/prisma/schema.prisma
           test -f deploy_ready/node_modules/.bin/prisma
