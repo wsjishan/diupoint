@@ -22,41 +22,38 @@ let HealthController = class HealthController {
     async getHealth() {
         const databaseUrl = this.configService.get('DATABASE_URL');
         const timestamp = new Date().toISOString();
+        const healthInfo = {
+            status: 'ok',
+            app: 'up',
+            timestamp,
+        };
         if (!databaseUrl) {
-            return {
-                status: 'degraded',
-                app: 'up',
-                env: 'missing_database_url',
-                database: 'unknown',
-                message: 'DATABASE_URL is not configured.',
-                timestamp,
-            };
+            healthInfo.status = 'degraded';
+            healthInfo.env = 'missing_database_url';
+            healthInfo.database = 'unknown';
+            healthInfo.message = 'DATABASE_URL is not configured';
+            return healthInfo;
         }
         try {
             await prisma.$queryRaw `SELECT 1`;
-            return {
-                status: 'ok',
-                app: 'up',
-                env: 'loaded',
-                database: 'up',
-                timestamp,
-            };
+            healthInfo.env = 'loaded';
+            healthInfo.database = 'up';
+            return healthInfo;
         }
-        catch {
-            return {
-                status: 'degraded',
-                app: 'up',
-                env: 'loaded',
-                database: 'down',
-                message: 'Database connectivity check failed.',
-                timestamp,
-            };
+        catch (error) {
+            healthInfo.status = 'degraded';
+            healthInfo.env = 'loaded';
+            healthInfo.database = 'down';
+            healthInfo.message = 'Database connectivity check failed';
+            healthInfo.error = process.env.NODE_ENV === 'development' ? error.message : undefined;
+            return healthInfo;
         }
     }
 };
 exports.HealthController = HealthController;
 __decorate([
     (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

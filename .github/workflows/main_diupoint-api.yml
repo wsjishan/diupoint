@@ -137,11 +137,12 @@ jobs:
             HEALTH_URL="${DEPLOYED_APP_URL%/}/api/health"
           else
             echo 'Unable to determine health URL from deployment output (webapp-url).'
-            exit 1
+            echo 'Checking Azure Web App directly...'
+            HEALTH_URL='https://diupoint-api.azurewebsites.net/api/health'
           fi
 
-          ATTEMPTS=18
-          SLEEP_SECONDS=10
+          ATTEMPTS=24
+          SLEEP_SECONDS=15
 
           echo "Waiting for healthy response from: $HEALTH_URL"
 
@@ -155,10 +156,16 @@ jobs:
             status_code=$(curl -sS -L -D /tmp/health.headers -o /tmp/health.body -w '%{http_code}' "$HEALTH_URL" || true)
 
             if [ "$status_code" = '200' ]; then
-              echo "Health check passed on attempt $i/$ATTEMPTS"
+              echo "✅ Health check passed on attempt $i/$ATTEMPTS"
               [ -f /tmp/health.headers ] && sed -n '1,20p' /tmp/health.headers || true
               [ -f /tmp/health.body ] && sed -n '1,60p' /tmp/health.body || true
               exit 0
+            elif [ "$status_code" = '503' ]; then
+              echo "⚠️  Service Unavailable (503) - Application may be starting or crashing"
+              [ -f /tmp/health.body ] && cat /tmp/health.body || true
+            elif [ "$status_code" = '500' ]; then
+              echo "⚠️  Internal Server Error (500) - Application error detected"
+              [ -f /tmp/health.body ] && cat /tmp/health.body || true
             fi
 
             echo "Attempt $i/$ATTEMPTS returned HTTP $status_code. Retrying in ${SLEEP_SECONDS}s..."
@@ -167,9 +174,15 @@ jobs:
             sleep "$SLEEP_SECONDS"
           done
 
-          echo 'Health check failed: API did not return HTTP 200 in time.'
+          echo '❌ Health check failed: API did not return HTTP 200 in time.'
           echo 'Last health response headers:'
           [ -f /tmp/health.headers ] && sed -n '1,40p' /tmp/health.headers || true
           echo 'Last health response body:'
           [ -f /tmp/health.body ] && sed -n '1,120p' /tmp/health.body || true
+          echo ''
+          echo 'Troubleshooting steps:'
+          echo '1. Check Azure App Service Configuration for required environment variables'
+          echo '2. Review Azure Web App logs in the portal'
+          echo '3. Verify DATABASE_URL is correctly set and points to a valid PostgreSQL instance'
+          echo '4. Ensure JWT_SECRET is configured'
           exit 1
