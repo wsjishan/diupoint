@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StoresService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const prisma = new client_1.PrismaClient();
 let StoresService = class StoresService {
     async getPublicStore(slug) {
@@ -31,7 +32,7 @@ let StoresService = class StoresService {
         const listings = await prisma.listing.findMany({
             where: {
                 storeProfileId: storeProfile.id,
-                status: client_1.ListingStatus.PUBLISHED,
+                status: legacy_prisma_enums_1.ListingStatus.PUBLISHED,
             },
             orderBy: { createdAt: 'desc' },
             include: {
@@ -84,7 +85,7 @@ let StoresService = class StoresService {
         if (!user) {
             throw new common_1.NotFoundException('User not found.');
         }
-        if (user.accountType !== client_1.AccountType.STORE) {
+        if (user.accountType !== legacy_prisma_enums_1.AccountType.STORE) {
             throw new common_1.ForbiddenException('Only STORE accounts can access this endpoint.');
         }
         if (!user.storeProfile) {
@@ -94,7 +95,7 @@ let StoresService = class StoresService {
             prisma.listing.count({
                 where: {
                     storeProfileId: user.storeProfile.id,
-                    status: { not: client_1.ListingStatus.ARCHIVED },
+                    status: { not: legacy_prisma_enums_1.ListingStatus.ARCHIVED },
                 },
             }),
             prisma.order.count({
@@ -137,7 +138,7 @@ let StoresService = class StoresService {
         if (!user) {
             throw new common_1.NotFoundException('User not found.');
         }
-        if (user.accountType !== client_1.AccountType.STORE) {
+        if (user.accountType !== legacy_prisma_enums_1.AccountType.STORE) {
             throw new common_1.ForbiddenException('Only STORE accounts can access this endpoint.');
         }
         if (!user.storeProfile) {

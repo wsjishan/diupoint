@@ -1,4 +1,7 @@
-import { ListingCondition, ListingStatus } from '@prisma/client';
+import {
+  ListingCondition,
+  ListingStatus,
+} from '../../../common/legacy-prisma-enums';
 import { Transform } from 'class-transformer';
 import {
   IsEnum,

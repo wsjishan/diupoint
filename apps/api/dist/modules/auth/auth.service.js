@@ -12,10 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const client_1 = require("@prisma/client");
 const common_1 = require("@nestjs/common");
-const client_2 = require("@prisma/client");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const node_crypto_1 = require("node:crypto");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const password_hasher_1 = require("./password-hasher");
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const prisma = new client_1.PrismaClient();
@@ -46,8 +46,8 @@ let AuthService = class AuthService {
                     passwordHash,
                     accountType: dto.accountType,
                     verificationStatus: isDiuEmail
-                        ? client_1.VerificationStatus.VERIFIED
-                        : client_1.VerificationStatus.UNVERIFIED,
+                        ? legacy_prisma_enums_1.VerificationStatus.VERIFIED
+                        : legacy_prisma_enums_1.VerificationStatus.UNVERIFIED,
                     verifiedAt: isDiuEmail ? new Date() : null,
                 },
                 include: {
@@ -169,10 +169,10 @@ let AuthService = class AuthService {
                         fullName,
                         email,
                         passwordHash: oauthPlaceholderHash,
-                        accountType: client_1.AccountType.PERSONAL,
+                        accountType: legacy_prisma_enums_1.AccountType.PERSONAL,
                         verificationStatus: isDiuEmail
-                            ? client_1.VerificationStatus.VERIFIED
-                            : client_1.VerificationStatus.UNVERIFIED,
+                            ? legacy_prisma_enums_1.VerificationStatus.VERIFIED
+                            : legacy_prisma_enums_1.VerificationStatus.UNVERIFIED,
                         verifiedAt: isDiuEmail ? new Date() : null,
                     },
                     include: {
@@ -272,9 +272,9 @@ let AuthService = class AuthService {
             if (error instanceof common_1.HttpException) {
                 throw error;
             }
-            if (error instanceof client_2.Prisma.PrismaClientInitializationError ||
-                error instanceof client_2.Prisma.PrismaClientRustPanicError ||
-                error instanceof client_2.Prisma.PrismaClientUnknownRequestError) {
+            if (error instanceof client_1.Prisma.PrismaClientInitializationError ||
+                error instanceof client_1.Prisma.PrismaClientRustPanicError ||
+                error instanceof client_1.Prisma.PrismaClientUnknownRequestError) {
                 throw new common_1.ServiceUnavailableException('Authentication service is temporarily unavailable.');
             }
             throw error;

@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FavoritesService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const prisma = new client_1.PrismaClient();
 let FavoritesService = class FavoritesService {
     async list(userId) {
@@ -17,7 +18,7 @@ let FavoritesService = class FavoritesService {
                 userId,
                 listing: {
                     status: {
-                        not: client_1.ListingStatus.ARCHIVED,
+                        not: legacy_prisma_enums_1.ListingStatus.ARCHIVED,
                     },
                 },
             },

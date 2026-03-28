@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchQueryDto = exports.SearchSort = void 0;
-const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../../common/legacy-prisma-enums");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 var SearchSort;
@@ -42,7 +42,7 @@ __decorate([
 ], SearchQueryDto.prototype, "category", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(client_1.ListingCondition),
+    (0, class_validator_1.IsEnum)(legacy_prisma_enums_1.ListingCondition),
     __metadata("design:type", String)
 ], SearchQueryDto.prototype, "condition", void 0);
 __decorate([

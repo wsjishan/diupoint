@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ListingStatus, PrismaClient, SellerType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { ListingStatus, SellerType } from '../../common/legacy-prisma-enums';
 
 import { AddCartItemDto } from './dto/add-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class CartService {

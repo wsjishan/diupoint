@@ -4,13 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import {
   ListingCondition,
   ListingStatus,
-  Prisma,
-  PrismaClient,
   SellerType,
-} from '@prisma/client';
+} from '../../common/legacy-prisma-enums';
 
 import {
   ListListingsQueryDto,
@@ -19,12 +18,12 @@ import {
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class ListingsService {
   async list(query: ListListingsQueryDto) {
-    const where: Prisma.ListingWhereInput = {
+    const where: any = {
       status: { not: ListingStatus.ARCHIVED },
     };
 
@@ -46,7 +45,7 @@ export class ListingsService {
       where.condition = query.condition as ListingCondition;
     }
 
-    let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: 'desc' };
+    let orderBy: any = { createdAt: 'desc' };
 
     if (query.sort === ListingSort.PRICE_ASC) {
       orderBy = { price: 'asc' };
@@ -198,7 +197,7 @@ export class ListingsService {
       throw new ForbiddenException('You can only edit your own listings.');
     }
 
-    const data: Prisma.ListingUpdateInput = {
+    const data: any = {
       title: dto.title,
       description: dto.description,
       category: dto.category,

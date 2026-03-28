@@ -9,12 +9,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const search_query_dto_1 = require("./dto/search-query.dto");
 const prisma = new client_1.PrismaClient();
 let SearchService = class SearchService {
     async search(query) {
         const where = {
-            status: client_1.ListingStatus.PUBLISHED,
+            status: legacy_prisma_enums_1.ListingStatus.PUBLISHED,
         };
         if (query.q) {
             where.OR = [

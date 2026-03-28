@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class UsersService {

@@ -3,17 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import {
-  PrismaClient,
   VerificationRequestStatus,
   VerificationStatus,
-} from '@prisma/client';
+} from '../../common/legacy-prisma-enums';
 
 import { ConfirmVerificationDto } from './dto/confirm-verification.dto';
 import { RequestVerificationDto } from './dto/request-verification.dto';
 import { comparePassword, hashPassword } from '../auth/password-hasher';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
 const OTP_EXPIRY_MINUTES = 10;
 

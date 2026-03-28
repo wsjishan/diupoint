@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const create_order_dto_1 = require("./dto/create-order.dto");
 const prisma = new client_1.PrismaClient();
 let OrdersService = class OrdersService {
@@ -60,7 +61,7 @@ let OrdersService = class OrdersService {
                         userId,
                         storeProfileId,
                         paymentMethod,
-                        status: client_1.OrderStatus.PENDING,
+                        status: legacy_prisma_enums_1.OrderStatus.PENDING,
                         subtotal: subtotal.toFixed(2),
                         total: total.toFixed(2),
                         items: {
@@ -149,7 +150,7 @@ let OrdersService = class OrdersService {
         if (!user) {
             throw new common_1.NotFoundException('User not found.');
         }
-        if (user.accountType !== client_1.AccountType.STORE) {
+        if (user.accountType !== legacy_prisma_enums_1.AccountType.STORE) {
             throw new common_1.ForbiddenException('Only STORE accounts can access this endpoint.');
         }
         if (!user.storeProfile) {
@@ -183,9 +184,9 @@ let OrdersService = class OrdersService {
     }
     mapPaymentMethod(method) {
         if (method === create_order_dto_1.CheckoutPaymentMethod.COD) {
-            return client_1.PaymentMethod.CASH_ON_DELIVERY;
+            return legacy_prisma_enums_1.PaymentMethod.CASH_ON_DELIVERY;
         }
-        return client_1.PaymentMethod.ONLINE_PAYMENT;
+        return legacy_prisma_enums_1.PaymentMethod.ONLINE_PAYMENT;
     }
 };
 exports.OrdersService = OrdersService;

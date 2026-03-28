@@ -10,7 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SignUpDto = void 0;
-const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../../common/legacy-prisma-enums");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 class SignUpDto {
@@ -38,6 +38,6 @@ __decorate([
     __metadata("design:type", String)
 ], SignUpDto.prototype, "password", void 0);
 __decorate([
-    (0, class_validator_1.IsEnum)(client_1.AccountType),
+    (0, class_validator_1.IsEnum)(legacy_prisma_enums_1.AccountType),
     __metadata("design:type", String)
 ], SignUpDto.prototype, "accountType", void 0);

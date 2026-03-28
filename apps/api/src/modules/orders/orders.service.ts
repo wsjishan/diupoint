@@ -4,16 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import {
   AccountType,
   OrderStatus,
   PaymentMethod,
-  PrismaClient,
-} from '@prisma/client';
+} from '../../common/legacy-prisma-enums';
 
 import { CheckoutPaymentMethod, CreateOrderDto } from './dto/create-order.dto';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class OrdersService {
@@ -72,7 +72,7 @@ export class OrdersService {
 
     const paymentMethod = this.mapPaymentMethod(dto.paymentMethod);
 
-    const createdOrders = await prisma.$transaction(async (tx) => {
+    const createdOrders = await prisma.$transaction(async (tx: any) => {
       const orders = [];
 
       for (const [storeProfileId, items] of storeGroups.entries()) {

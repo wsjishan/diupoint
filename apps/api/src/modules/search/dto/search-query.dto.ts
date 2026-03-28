@@ -1,4 +1,4 @@
-import { ListingCondition } from '@prisma/client';
+import { ListingCondition } from '../../../common/legacy-prisma-enums';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 

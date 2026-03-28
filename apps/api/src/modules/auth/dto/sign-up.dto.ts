@@ -1,4 +1,4 @@
-import { AccountType } from '@prisma/client';
+import { AccountType } from '../../../common/legacy-prisma-enums';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,

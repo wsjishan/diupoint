@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const prisma = new client_1.PrismaClient();
 let CartService = class CartService {
     async getCart(userId) {
@@ -67,10 +68,10 @@ let CartService = class CartService {
         if (!listing) {
             throw new common_1.NotFoundException('Listing not found.');
         }
-        if (listing.sellerType !== client_1.SellerType.STORE || !listing.storeProfileId) {
+        if (listing.sellerType !== legacy_prisma_enums_1.SellerType.STORE || !listing.storeProfileId) {
             throw new common_1.BadRequestException('Only STORE listings can be added to cart.');
         }
-        if (listing.status !== client_1.ListingStatus.PUBLISHED) {
+        if (listing.status !== legacy_prisma_enums_1.ListingStatus.PUBLISHED) {
             throw new common_1.BadRequestException('Only active listings can be added to cart.');
         }
         const existing = await prisma.cartItem.findUnique({

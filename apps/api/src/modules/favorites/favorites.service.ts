@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ListingStatus, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { ListingStatus } from '../../common/legacy-prisma-enums';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class FavoritesService {

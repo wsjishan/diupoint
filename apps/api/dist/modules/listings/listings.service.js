@@ -9,12 +9,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListingsService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const list_listings_query_dto_1 = require("./dto/list-listings-query.dto");
 const prisma = new client_1.PrismaClient();
 let ListingsService = class ListingsService {
     async list(query) {
         const where = {
-            status: { not: client_1.ListingStatus.ARCHIVED },
+            status: { not: legacy_prisma_enums_1.ListingStatus.ARCHIVED },
         };
         if (query.q) {
             where.OR = [
@@ -98,10 +99,10 @@ let ListingsService = class ListingsService {
         return listing;
     }
     async create(userId, dto) {
-        if (dto.sellerType === client_1.SellerType.STORE && !dto.storeProfileId) {
+        if (dto.sellerType === legacy_prisma_enums_1.SellerType.STORE && !dto.storeProfileId) {
             throw new common_1.BadRequestException('storeProfileId is required for STORE listings.');
         }
-        if (dto.sellerType === client_1.SellerType.PERSONAL && dto.storeProfileId) {
+        if (dto.sellerType === legacy_prisma_enums_1.SellerType.PERSONAL && dto.storeProfileId) {
             throw new common_1.BadRequestException('storeProfileId must be omitted for PERSONAL listings.');
         }
         if (dto.storeProfileId) {
@@ -127,7 +128,7 @@ let ListingsService = class ListingsService {
                 condition: dto.condition,
                 price: dto.price,
                 location: dto.location,
-                status: dto.status ?? client_1.ListingStatus.DRAFT,
+                status: dto.status ?? legacy_prisma_enums_1.ListingStatus.DRAFT,
             },
             include: {
                 images: true,
@@ -209,7 +210,7 @@ let ListingsService = class ListingsService {
         }
         return prisma.listing.update({
             where: { id },
-            data: { status: client_1.ListingStatus.ARCHIVED },
+            data: { status: legacy_prisma_enums_1.ListingStatus.ARCHIVED },
             select: {
                 id: true,
                 slug: true,

@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { ListingStatus, Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { ListingStatus } from '../../common/legacy-prisma-enums';
 
 import { SearchQueryDto, SearchSort } from './dto/search-query.dto';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class SearchService {
   async search(query: SearchQueryDto) {
-    const where: Prisma.ListingWhereInput = {
+    const where: any = {
       status: ListingStatus.PUBLISHED,
     };
 
@@ -39,7 +40,7 @@ export class SearchService {
       where.condition = query.condition;
     }
 
-    let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: 'desc' };
+    let orderBy: any = { createdAt: 'desc' };
     if (query.sort === SearchSort.PRICE_ASC) {
       orderBy = { price: 'asc' };
     }

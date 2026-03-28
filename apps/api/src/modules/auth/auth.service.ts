@@ -1,4 +1,4 @@
-import { AccountType, PrismaClient, VerificationStatus } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import {
   BadRequestException,
   ConflictException,
@@ -8,10 +8,13 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'node:crypto';
+import {
+  AccountType,
+  VerificationStatus,
+} from '../../common/legacy-prisma-enums';
 
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -19,7 +22,7 @@ import { comparePassword, hashPassword } from './password-hasher';
 import { GoogleAuthUser } from './strategies/google.strategy';
 
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 type SafeUser = {
   id: string;

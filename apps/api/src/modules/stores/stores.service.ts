@@ -3,11 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AccountType, ListingStatus, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { AccountType, ListingStatus } from '../../common/legacy-prisma-enums';
 
 import { UpdateStoreDto } from './dto/update-store.dto';
 
-const prisma = new PrismaClient();
+const prisma: any = new PrismaClient();
 
 @Injectable()
 export class StoresService {

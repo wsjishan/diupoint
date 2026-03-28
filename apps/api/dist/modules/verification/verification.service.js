@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VerificationService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
+const legacy_prisma_enums_1 = require("../../common/legacy-prisma-enums");
 const password_hasher_1 = require("../auth/password-hasher");
 const prisma = new client_1.PrismaClient();
 const DIU_EMAIL_DOMAINS = ['@diu.edu.bd', '@s.diu.edu.bd'];
@@ -25,7 +26,7 @@ let VerificationService = class VerificationService {
         if (!user) {
             throw new common_1.NotFoundException('User not found.');
         }
-        if (user.verificationStatus === client_1.VerificationStatus.VERIFIED) {
+        if (user.verificationStatus === legacy_prisma_enums_1.VerificationStatus.VERIFIED) {
             throw new common_1.BadRequestException('Account is already verified.');
         }
         const verificationEmail = dto.verificationEmail.trim().toLowerCase();
@@ -37,10 +38,10 @@ let VerificationService = class VerificationService {
             prisma.verificationRequest.updateMany({
                 where: {
                     userId,
-                    status: client_1.VerificationRequestStatus.PENDING,
+                    status: legacy_prisma_enums_1.VerificationRequestStatus.PENDING,
                 },
                 data: {
-                    status: client_1.VerificationRequestStatus.CANCELLED,
+                    status: legacy_prisma_enums_1.VerificationRequestStatus.CANCELLED,
                 },
             }),
             prisma.verificationRequest.create({
@@ -49,7 +50,7 @@ let VerificationService = class VerificationService {
                     verificationEmail,
                     otpCodeHash,
                     expiresAt,
-                    status: client_1.VerificationRequestStatus.PENDING,
+                    status: legacy_prisma_enums_1.VerificationRequestStatus.PENDING,
                 },
             }),
         ]);
@@ -68,7 +69,7 @@ let VerificationService = class VerificationService {
             where: {
                 userId,
                 verificationEmail,
-                status: client_1.VerificationRequestStatus.PENDING,
+                status: legacy_prisma_enums_1.VerificationRequestStatus.PENDING,
                 expiresAt: {
                     gt: now,
                 },
@@ -88,7 +89,7 @@ let VerificationService = class VerificationService {
             prisma.user.update({
                 where: { id: userId },
                 data: {
-                    verificationStatus: client_1.VerificationStatus.VERIFIED,
+                    verificationStatus: legacy_prisma_enums_1.VerificationStatus.VERIFIED,
                     verifiedAt: now,
                 },
                 select: {
@@ -105,17 +106,17 @@ let VerificationService = class VerificationService {
             }),
             prisma.verificationRequest.update({
                 where: { id: verificationRequest.id },
-                data: { status: client_1.VerificationRequestStatus.VERIFIED },
+                data: { status: legacy_prisma_enums_1.VerificationRequestStatus.VERIFIED },
             }),
             prisma.verificationRequest.updateMany({
                 where: {
                     userId,
                     verificationEmail,
-                    status: client_1.VerificationRequestStatus.PENDING,
+                    status: legacy_prisma_enums_1.VerificationRequestStatus.PENDING,
                     id: { not: verificationRequest.id },
                 },
                 data: {
-                    status: client_1.VerificationRequestStatus.CANCELLED,
+                    status: legacy_prisma_enums_1.VerificationRequestStatus.CANCELLED,
                 },
             }),
         ]);
