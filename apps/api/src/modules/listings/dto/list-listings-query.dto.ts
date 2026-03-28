@@ -1,6 +1,13 @@
 import { ListingCondition } from '../../../common/legacy-prisma-enums';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export enum ListingSort {
   LATEST = 'latest',
@@ -28,4 +35,16 @@ export class ListListingsQueryDto {
   @IsOptional()
   @IsEnum(ListingSort)
   sort: ListingSort = ListingSort.LATEST;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
 }

@@ -117,7 +117,7 @@ export default function HomePage() {
     let cancelled = false;
 
     async function loadListings() {
-      const listings = await fetchListings();
+      const { listings } = await fetchListings();
 
       if (cancelled || listings.length === 0) {
         return;

@@ -19,6 +19,8 @@ export interface ListingQuery {
   category?: string;
   condition?: 'new' | 'used';
   sort?: ListingSort;
+  page?: number;
+  limit?: number;
 }
 
 export interface CreateListingPayload {
@@ -104,12 +106,14 @@ export function filterAndSortMockListings(
 
 export async function fetchListings(
   query: ListingQuery = {}
-): Promise<Listing[]> {
+): Promise<{ listings: Listing[]; total: number }> {
   const params = new URLSearchParams();
 
   if (query.q?.trim()) params.set('q', query.q.trim());
   if (query.category) params.set('category', query.category);
   if (query.condition) params.set('condition', query.condition.toUpperCase());
+  if (query.page) params.set('page', String(query.page));
+  if (query.limit) params.set('limit', String(query.limit));
 
   const sort = mapSortForListings(query.sort);
   if (sort) params.set('sort', sort);
@@ -117,10 +121,22 @@ export async function fetchListings(
   const path = `/listings${params.toString() ? `?${params.toString()}` : ''}`;
 
   try {
-    const listings = await apiRequest<ApiListing[]>(path);
-    return listings.map(mapApiListingToUi);
+    const result = await apiRequest<{ listings: ApiListing[]; total: number }>(
+      path
+    );
+    return {
+      listings: result.listings.map(mapApiListingToUi),
+      total: result.total,
+    };
   } catch {
-    return filterAndSortMockListings(ALL_LISTINGS, query);
+    const mockListings = filterAndSortMockListings(ALL_LISTINGS, query);
+    const { page = 1, limit = 20 } = query;
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    return {
+      listings: mockListings.slice(start, end),
+      total: mockListings.length,
+    };
   }
 }
 

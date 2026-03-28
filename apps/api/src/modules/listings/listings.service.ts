@@ -22,67 +22,76 @@ const prisma: any = new PrismaClient();
 
 @Injectable()
 export class ListingsService {
-  async list(query: ListListingsQueryDto) {
-    const where: any = {
-      status: { not: ListingStatus.ARCHIVED },
-    };
-
-    if (query.q) {
-      where.OR = [
-        { title: { contains: query.q, mode: 'insensitive' } },
-        { description: { contains: query.q, mode: 'insensitive' } },
-      ];
-    }
-
-    if (query.category) {
-      where.category = {
-        equals: query.category,
-        mode: 'insensitive',
+    async list(query: ListListingsQueryDto) {
+      const where: any = {
+        status: { not: ListingStatus.ARCHIVED },
       };
-    }
-
-    if (query.condition) {
-      where.condition = query.condition as ListingCondition;
-    }
-
-    let orderBy: any = { createdAt: 'desc' };
-
-    if (query.sort === ListingSort.PRICE_ASC) {
-      orderBy = { price: 'asc' };
-    }
-
-    if (query.sort === ListingSort.PRICE_DESC) {
-      orderBy = { price: 'desc' };
-    }
-
-    return prisma.listing.findMany({
-      where,
-      orderBy,
-      include: {
-        images: { orderBy: { sortOrder: 'asc' } },
-        user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            accountType: true,
-            verificationStatus: true,
+  
+      if (query.q) {
+        where.OR = [
+          { title: { contains: query.q, mode: 'insensitive' } },
+          { description: { contains: query.q, mode: 'insensitive' } },
+        ];
+      }
+  
+      if (query.category) {
+        where.category = {
+          equals: query.category,
+          mode: 'insensitive',
+        };
+      }
+  
+      if (query.condition) {
+        where.condition = query.condition as ListingCondition;
+      }
+  
+      let orderBy: any = { createdAt: 'desc' };
+  
+      if (query.sort === ListingSort.PRICE_ASC) {
+        orderBy = { price: 'asc' };
+      }
+  
+      if (query.sort === ListingSort.PRICE_DESC) {
+        orderBy = { price: 'desc' };
+      }
+  
+      const { page = 1, limit = 20 } = query;
+      const skip = (page - 1) * limit;
+  
+      const [listings, total] = await Promise.all([
+        prisma.listing.findMany({
+          where,
+          orderBy,
+          skip,
+          take: limit,
+          include: {
+            images: { orderBy: { sortOrder: 'asc' } },
+            user: {
+              select: {
+                id: true,
+                fullName: true,
+                email: true,
+                accountType: true,
+                verificationStatus: true,
+              },
+            },
+            storeProfile: {
+              select: {
+                id: true,
+                storeName: true,
+                slug: true,
+                isFeatured: true,
+                logoUrl: true,
+                bannerUrl: true,
+              },
+            },
           },
-        },
-        storeProfile: {
-          select: {
-            id: true,
-            storeName: true,
-            slug: true,
-            isFeatured: true,
-            logoUrl: true,
-            bannerUrl: true,
-          },
-        },
-      },
-    });
-  }
-
+        }),
+        prisma.listing.count({ where }),
+      ]);
+  
+      return { listings, total };
+    }
   async getBySlug(slug: string) {
     const listing = await prisma.listing.findUnique({
       where: { slug },
