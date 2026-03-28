@@ -13,6 +13,7 @@
   "devDependencies": {
     "@prisma/client": "6.19.2",
     "prisma": "^6.4.1",
+    "ts-loader": "^9.5.4",
     "turbo": "^2.8.15"
   },
   "dependencies": {
