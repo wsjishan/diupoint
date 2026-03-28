@@ -41,6 +41,9 @@ importers:
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
+      validator:
+        specifier: ^13.15.26
+        version: 13.15.26
     devDependencies:
       '@prisma/client':
         specifier: 6.19.2
