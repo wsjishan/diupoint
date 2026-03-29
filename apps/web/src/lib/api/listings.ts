@@ -8,6 +8,7 @@ import {
   apiRequest,
   apiRequestWithAuth,
   isApiRequestError,
+  logPublicApiFallback,
 } from '@/lib/api/http';
 import type {
   ApiListing,
@@ -143,9 +144,7 @@ export async function fetchListings(
       total: result.total,
     };
   } catch (error) {
-    if (process.env.NODE_ENV === 'production') {
-      throw error;
-    }
+    logPublicApiFallback('fetchListings', error);
 
     const mockListings = filterAndSortMockListings(ALL_LISTINGS, query);
     const { page = 1, limit = 20 } = query;
@@ -169,9 +168,7 @@ export async function fetchListingBySlug(
       return null;
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      throw error;
-    }
+    logPublicApiFallback(`fetchListingBySlug(${slug})`, error);
 
     return getListingBySlug(slug) ?? null;
   }

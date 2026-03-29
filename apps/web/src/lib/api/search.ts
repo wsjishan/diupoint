@@ -1,6 +1,6 @@
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { mapApiListingToUi } from '@/lib/api/adapters';
-import { apiRequest } from '@/lib/api/http';
+import { apiRequest, logPublicApiFallback } from '@/lib/api/http';
 import {
   filterAndSortMockListings,
   type ListingQuery,
@@ -33,9 +33,7 @@ export async function searchListings(
     const listings = await apiRequest<ApiListing[]>(path);
     return listings.map(mapApiListingToUi);
   } catch (error) {
-    if (process.env.NODE_ENV === 'production') {
-      throw error;
-    }
+    logPublicApiFallback('searchListings', error);
 
     return filterAndSortMockListings(ALL_LISTINGS, query);
   }

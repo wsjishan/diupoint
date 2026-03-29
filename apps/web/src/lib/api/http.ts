@@ -30,13 +30,45 @@ export function isApiRequestError(error: unknown): error is ApiRequestError {
   return error instanceof ApiRequestError;
 }
 
+let hasWarnedAboutMissingApiBaseUrl = false;
+
 function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 }
 
 export function getApiBaseUrl(): string {
-  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  return normalizeBaseUrl(configuredBaseUrl || DEFAULT_API_BASE_URL);
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+  if (configuredBaseUrl) {
+    return normalizeBaseUrl(configuredBaseUrl);
+  }
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    !hasWarnedAboutMissingApiBaseUrl
+  ) {
+    hasWarnedAboutMissingApiBaseUrl = true;
+    console.warn(
+      '[api] NEXT_PUBLIC_API_BASE_URL is not set. Falling back to localhost default.'
+    );
+  }
+
+  return normalizeBaseUrl(DEFAULT_API_BASE_URL);
+}
+
+export function logPublicApiFallback(scope: string, error: unknown): void {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+
+  if (isApiRequestError(error)) {
+    console.warn(
+      `[api:fallback] ${scope} using mock data (status=${error.status}, code=${error.code ?? 'N/A'})`
+    );
+    return;
+  }
+
+  console.warn(`[api:fallback] ${scope} using mock data`, error);
 }
 
 type ApiRequestOptions = Omit<RequestInit, 'body'> & {
