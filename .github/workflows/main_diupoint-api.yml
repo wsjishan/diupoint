@@ -111,7 +111,9 @@ jobs:
           test -d deploy_ready/node_modules
 
           pushd deploy_ready >/dev/null
-          tar -czf node_modules.tar.gz node_modules
+          # Oryx extracts node_modules.tar.gz into /node_modules.
+          # Archive module contents (not the parent folder) so runtime paths become /node_modules/<pkg>.
+          tar -czf node_modules.tar.gz -C node_modules .
           rm -rf node_modules
           test -f node_modules.tar.gz
           popd >/dev/null
@@ -145,9 +147,12 @@ jobs:
           mkdir -p /tmp/artifact_modules
           tar -xzf node_modules.tar.gz -C /tmp/artifact_modules
 
-          test -d /tmp/artifact_modules/node_modules
-          node -e "require('/tmp/artifact_modules/node_modules/jsonwebtoken'); console.log('jsonwebtoken + transitive deps resolvable')"
-          node -e "require('/tmp/artifact_modules/node_modules/@nestjs/jwt'); console.log('@nestjs/jwt resolvable')"
+          # Validate Oryx-like resolution from extracted /node_modules content.
+          test -d /tmp/artifact_modules/@nestjs
+          test -d /tmp/artifact_modules/.pnpm
+          NODE_PATH=/tmp/artifact_modules node -e "require('@nestjs/common'); console.log('@nestjs/common resolvable')"
+          NODE_PATH=/tmp/artifact_modules node -e "require('jsonwebtoken'); console.log('jsonwebtoken + transitive deps resolvable')"
+          NODE_PATH=/tmp/artifact_modules node -e "require('@nestjs/jwt'); console.log('@nestjs/jwt resolvable')"
 
       - name: 'Deploy to Azure Web App'
         id: deploy_to_azure
