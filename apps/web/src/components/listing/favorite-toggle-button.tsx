@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFavorites } from '@/lib/favorites/favorites-context';
+import { APP_ROUTES, createSignInHref } from '@/lib/routes';
 
 interface FavoriteToggleButtonProps {
   listingId: string;
@@ -29,12 +30,12 @@ export default function FavoriteToggleButton({
 
     if (result.requiresAuth) {
       if (typeof window === 'undefined') {
-        router.push('/sign-in');
+        router.push(APP_ROUTES.signIn);
         return;
       }
 
       const returnTo = `${window.location.pathname}${window.location.search}`;
-      router.push(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
+      router.push(createSignInHref(returnTo));
       return;
     }
 

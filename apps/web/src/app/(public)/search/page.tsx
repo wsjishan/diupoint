@@ -1,9 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
+import { useSearchParams } from 'next/navigation';
 import CategoryChip from '@/components/ui/category-chip';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
@@ -106,7 +104,6 @@ function FiltersPanel({
 }
 
 function SearchPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q') ?? '';
 
@@ -123,39 +120,31 @@ function SearchPageContent() {
     setSearchQuery(queryParam);
   }, [queryParam]);
 
-  function handleSearchSubmit(query: string) {
-    const nextParams = new URLSearchParams(searchParams.toString());
-    const normalized = query.trim();
-
-    if (normalized) {
-      nextParams.set('q', normalized);
-    } else {
-      nextParams.delete('q');
-    }
-
-    const nextQueryString = nextParams.toString();
-    router.push(nextQueryString ? `/search?${nextQueryString}` : '/search');
-  }
-
   useEffect(() => {
     let cancelled = false;
 
     const timeoutId = window.setTimeout(() => {
       void (async () => {
-        const category =
-          activeCategory === 'all'
-            ? undefined
-            : CATEGORY_LABEL_BY_ID[activeCategory];
+        try {
+          const category =
+            activeCategory === 'all'
+              ? undefined
+              : CATEGORY_LABEL_BY_ID[activeCategory];
 
-        const results = await searchListings({
-          q: searchQuery,
-          category,
-          condition: conditionFilter === 'all' ? undefined : conditionFilter,
-          sort: sortOption,
-        });
+          const results = await searchListings({
+            q: searchQuery,
+            category,
+            condition: conditionFilter === 'all' ? undefined : conditionFilter,
+            sort: sortOption,
+          });
 
-        if (!cancelled) {
-          setFilteredListings(results);
+          if (!cancelled) {
+            setFilteredListings(results);
+          }
+        } catch {
+          if (!cancelled) {
+            setFilteredListings([]);
+          }
         }
       })();
     }, 220);
@@ -189,35 +178,40 @@ function SearchPageContent() {
     conditionFilter !== 'all';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
-      <Navbar
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        onSearchSubmit={handleSearchSubmit}
-      />
+    <main className="bg-gray-50 transition-colors duration-200 dark:bg-slate-950">
+      <Container className="py-5 sm:py-7 lg:py-9">
+        <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-slate-100 sm:text-xl">
+            Search Marketplace
+          </h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
+            Browse listings from students and stores across DIU.
+          </p>
 
-      <main>
-        <Container className="py-5 sm:py-7 lg:py-9">
-          <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5">
-            <h1 className="text-lg font-bold text-gray-900 dark:text-slate-100 sm:text-xl">
-              Search Marketplace
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-              Browse listings from students and stores across DIU.
-            </p>
+          <div className="mt-4 sm:hidden">
+            <button
+              type="button"
+              onClick={() => setShowMobileFilters((current) => !current)}
+              className="inline-flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3.5 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
+            >
+              {showMobileFilters ? 'Hide filters' : 'Filters & sort'}
+            </button>
+          </div>
+        </section>
 
-            <div className="mt-4 sm:hidden">
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters((current) => !current)}
-                className="inline-flex items-center rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3.5 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
-              >
-                {showMobileFilters ? 'Hide filters' : 'Filters & sort'}
-              </button>
-            </div>
-          </section>
+        <div className="mt-4 hidden sm:block">
+          <FiltersPanel
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+            conditionFilter={conditionFilter}
+            onConditionChange={setConditionFilter}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+          />
+        </div>
 
-          <div className="mt-4 hidden sm:block">
+        {showMobileFilters && (
+          <div className="mt-4 sm:hidden">
             <FiltersPanel
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
@@ -227,68 +221,51 @@ function SearchPageContent() {
               onSortChange={setSortOption}
             />
           </div>
+        )}
 
-          {showMobileFilters && (
-            <div className="mt-4 sm:hidden">
-              <FiltersPanel
-                activeCategory={activeCategory}
-                onCategoryChange={setActiveCategory}
-                conditionFilter={conditionFilter}
-                onConditionChange={setConditionFilter}
-                sortOption={sortOption}
-                onSortChange={setSortOption}
-              />
+        <section className="mt-5 sm:mt-6">
+          <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-slate-400 sm:mb-4">
+            <p className="font-medium text-gray-700 dark:text-slate-200">
+              {resultsSummary}
+            </p>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setActiveCategory('all');
+                  setConditionFilter('all');
+                  setSortOption('latest');
+                }}
+                className="rounded-full border border-gray-200 dark:border-white/10 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-slate-300 transition-colors hover:border-[#2F3FBF]/30 hover:text-[#2F3FBF] dark:hover:border-white/20 dark:hover:text-slate-100"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+
+          {filteredListings.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+              {filteredListings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/15 bg-white dark:bg-slate-900 p-10 text-center sm:p-12">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
+                No listings found.
+              </h2>
+              <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
+                Try a different search or filter.
+              </p>
             </div>
           )}
-
-          <section className="mt-5 sm:mt-6">
-            <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-slate-400 sm:mb-4">
-              <p className="font-medium text-gray-700 dark:text-slate-200">
-                {resultsSummary}
-              </p>
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setActiveCategory('all');
-                    setConditionFilter('all');
-                    setSortOption('latest');
-                  }}
-                  className="rounded-full border border-gray-200 dark:border-white/10 px-2.5 py-1 text-xs font-medium text-gray-500 dark:text-slate-300 transition-colors hover:border-[#2F3FBF]/30 hover:text-[#2F3FBF] dark:hover:border-white/20 dark:hover:text-slate-100"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-
-            {filteredListings.length > 0 ? (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
-                {filteredListings.map((listing) => (
-                  <ListingCard
-                    key={listing.id}
-                    listing={listing}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-gray-300 dark:border-white/15 bg-white dark:bg-slate-900 p-10 text-center sm:p-12">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">
-                  No listings found.
-                </h2>
-                <p className="mt-2 text-sm text-gray-500 dark:text-slate-400">
-                  Try a different search or filter.
-                </p>
-              </div>
-            )}
-          </section>
-        </Container>
-      </main>
-
-      <div className="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900">
-        <Footer />
-      </div>
-    </div>
+        </section>
+      </Container>
+    </main>
   );
 }
 

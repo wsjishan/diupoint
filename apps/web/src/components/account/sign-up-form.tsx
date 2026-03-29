@@ -7,6 +7,7 @@ import Button from '@/components/ui/button';
 import { getApiBaseUrl, isApiRequestError } from '@/lib/api/http';
 import { useAuth } from '@/lib/auth/auth-context';
 import { getVerificationStatusByEmail } from '@/lib/auth-account';
+import { APP_ROUTES, sanitizeReturnTo } from '@/lib/routes';
 
 interface SignUpSubmitPayload {
   fullName: string;
@@ -24,7 +25,7 @@ interface SignUpFormProps {
 
 export default function SignUpForm({
   onSubmit,
-  signInHref = '/sign-in',
+  signInHref = APP_ROUTES.signIn,
   showSocialDivider = true,
   className = '',
 }: SignUpFormProps) {
@@ -116,8 +117,10 @@ export default function SignUpForm({
         );
       }
 
-      const returnTo = searchParams.get('returnTo');
-      const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+      const nextPath = sanitizeReturnTo(
+        searchParams.get('returnTo'),
+        APP_ROUTES.home
+      );
       router.replace(nextPath);
     } catch (error) {
       setAuthError(toSignUpErrorMessage(error));
@@ -127,8 +130,10 @@ export default function SignUpForm({
   }
 
   function handleGoogleSignUp() {
-    const returnTo = searchParams.get('returnTo');
-    const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+    const nextPath = sanitizeReturnTo(
+      searchParams.get('returnTo'),
+      APP_ROUTES.home
+    );
     const authUrl = `${getApiBaseUrl()}/auth/google?returnTo=${encodeURIComponent(nextPath)}`;
 
     window.location.assign(authUrl);

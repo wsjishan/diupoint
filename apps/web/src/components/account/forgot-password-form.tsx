@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import Button from '@/components/ui/button';
+import { APP_ROUTES } from '@/lib/routes';
 
 interface ForgotPasswordSubmitPayload {
   email: string;
@@ -22,7 +23,7 @@ function wait(ms: number) {
 
 export default function ForgotPasswordForm({
   onSubmit,
-  signInHref = '/sign-in',
+  signInHref = APP_ROUTES.signIn,
   className = '',
 }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState('');

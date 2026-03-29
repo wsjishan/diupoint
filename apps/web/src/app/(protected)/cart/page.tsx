@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCart } from '@/lib/cart/cart-context';
+import { APP_ROUTES } from '@/lib/routes';
 
 function toPrice(value: number | string): number {
   if (typeof value === 'number') return value;
@@ -35,7 +35,6 @@ function getThumbnailFallbackGradient(seed: string): string {
 }
 
 export default function CartPage() {
-  const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const {
     items,
@@ -51,12 +50,6 @@ export default function CartPage() {
   const [failedThumbnailUrls, setFailedThumbnailUrls] = useState<
     Record<string, true>
   >({});
-
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Fcart');
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return;
@@ -165,7 +158,7 @@ export default function CartPage() {
                   Add items from store listings to start your order.
                 </p>
                 <Link
-                  href="/search"
+                  href={APP_ROUTES.search}
                   className="mt-5 inline-flex h-10 items-center justify-center rounded-xl bg-[#2F3FBF] px-5 text-sm font-semibold text-white shadow-sm shadow-[#2F3FBF]/25 transition-colors hover:bg-[#2535a8]"
                 >
                   Continue browsing
@@ -311,7 +304,7 @@ export default function CartPage() {
                   </div>
 
                   <Link
-                    href="/checkout"
+                    href={APP_ROUTES.checkout}
                     className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#2F3FBF] px-4 text-sm font-semibold text-white shadow-sm shadow-[#2F3FBF]/30 transition-colors hover:bg-[#2535a8]"
                   >
                     Checkout

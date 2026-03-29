@@ -7,6 +7,10 @@ import Button from '@/components/ui/button';
 import { CATEGORIES } from '@/data/mock-listings';
 import { updateListing } from '@/lib/api/listings';
 import type { ApiListing } from '@/lib/api/types';
+import {
+  APP_ROUTES,
+  createMyListingsUpdatedHref,
+} from '@/lib/routes';
 
 interface FormValues {
   title: string;
@@ -95,7 +99,7 @@ export default function EditListingForm({ listing }: { listing: ApiListing }) {
         location: values.location.trim(),
       });
 
-      router.push('/my-listings?updated=1');
+      router.push(createMyListingsUpdatedHref());
     } catch {
       setSubmissionError(
         'Unable to update listing right now. Please try again.'
@@ -271,7 +275,7 @@ export default function EditListingForm({ listing }: { listing: ApiListing }) {
 
       <div className="mt-5 flex flex-wrap items-center justify-end gap-2.5">
         <Link
-          href="/my-listings"
+          href={APP_ROUTES.myListings}
           className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-600 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100"
         >
           Cancel

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Store } from '@/data/mock-stores';
+import { createStoreHref } from '@/lib/routes';
 
 interface StoreCardProps {
   store: Store;
@@ -15,7 +16,7 @@ export default function StoreCard({ store }: StoreCardProps) {
           </div>
           <div className="min-w-0">
             <Link
-              href={`/store/${store.slug}`}
+              href={createStoreHref(store.slug)}
               className="block truncate text-sm font-semibold text-gray-900 transition-colors hover:text-[#2F3FBF] dark:text-slate-100 dark:hover:text-indigo-300"
             >
               {store.name}
@@ -39,7 +40,7 @@ export default function StoreCard({ store }: StoreCardProps) {
       </p>
 
       <Link
-        href={`/store/${store.slug}`}
+        href={createStoreHref(store.slug)}
         className="mt-3 inline-flex w-fit items-center gap-1 rounded-lg bg-[#2F3FBF] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#2535a8]"
       >
         View Store

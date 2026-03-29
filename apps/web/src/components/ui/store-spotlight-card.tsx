@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Store } from '@/data/mock-stores';
+import { createStoreHref } from '@/lib/routes';
 
 interface StoreSpotlightCardProps {
   store: Store;
@@ -22,7 +23,7 @@ export default function StoreSpotlightCard({ store }: StoreSpotlightCardProps) {
               Store Spotlight
             </p>
             <Link
-              href={`/store/${store.slug}`}
+              href={createStoreHref(store.slug)}
               className="mt-0.5 block truncate text-base font-bold text-gray-900 transition-colors hover:text-[#2F3FBF] dark:text-slate-100 dark:hover:text-indigo-300"
             >
               {store.name}
@@ -68,7 +69,7 @@ export default function StoreSpotlightCard({ store }: StoreSpotlightCardProps) {
         </div>
 
         <Link
-          href={`/store/${store.slug}`}
+          href={createStoreHref(store.slug)}
           className="inline-flex w-full shrink-0 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-colors hover:bg-indigo-100 dark:border-indigo-300/40 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:bg-indigo-500/20 sm:w-fit"
         >
           Visit Store

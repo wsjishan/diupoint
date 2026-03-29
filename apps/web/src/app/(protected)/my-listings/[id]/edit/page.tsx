@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import EditListingForm from '@/components/listing/edit-listing-form';
@@ -10,20 +10,14 @@ import Container from '@/components/ui/container';
 import { fetchMyListingById } from '@/lib/api/listings';
 import type { ApiListing } from '@/lib/api/types';
 import { useAuth } from '@/lib/auth/auth-context';
+import { APP_ROUTES } from '@/lib/routes';
 
 export default function EditMyListingPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
   const [listing, setListing] = useState<ApiListing | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Fmy-listings');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || !params?.id) return;
@@ -67,7 +61,7 @@ export default function EditMyListingPage() {
               <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700 dark:border-rose-400/35 dark:bg-rose-500/10 dark:text-rose-300 sm:p-6">
                 <p>{error}</p>
                 <Link
-                  href="/my-listings"
+                  href={APP_ROUTES.myListings}
                   className="mt-3 inline-flex h-9 items-center justify-center rounded-lg border border-rose-200 bg-white px-3 text-sm font-medium text-rose-700 transition-colors hover:bg-rose-100 dark:border-rose-400/35 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-500/20"
                 >
                   Back to My Listings

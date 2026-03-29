@@ -19,7 +19,7 @@ export async function createOrder(
 }
 
 export async function fetchMyOrders(): Promise<ApiMyOrder[]> {
-  return apiRequestWithAuth<ApiMyOrder[]>('/orders/me', {
+  return apiRequestWithAuth<ApiMyOrder[]>('/orders', {
     method: 'GET',
   });
 }

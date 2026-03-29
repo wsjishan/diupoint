@@ -1,6 +1,4 @@
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
 import Container from '@/components/ui/container';
 import StorefrontProducts from '@/components/store/storefront-products';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
@@ -91,12 +89,9 @@ export default async function StorePage({ params }: StorePageProps) {
   const hiddenCategoryCount = Math.max(storeCategories.length - 3, 0);
 
   return (
-    <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
-      <Navbar />
-
-      <main>
-        <div className="bg-white pb-10 pt-6 dark:bg-slate-950 sm:pb-12 sm:pt-8">
-          <Container>
+    <main>
+      <div className="bg-white pb-10 pt-6 dark:bg-slate-950 sm:pb-12 sm:pt-8">
+        <Container>
             <section className="relative overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950 shadow-xl shadow-slate-900/30 dark:border-indigo-400/25">
               <div
                 className="relative h-40 w-full border-b border-white/10 sm:h-48"
@@ -346,21 +341,16 @@ export default async function StorePage({ params }: StorePageProps) {
                 </div>
               </div>
             </section>
-          </Container>
-        </div>
-
-        <Container>
-          <StorefrontProducts
-            storeName={store.name}
-            listings={storeListings}
-            productCount={store.productCount}
-          />
         </Container>
+      </div>
 
-        <div className="bg-white dark:bg-slate-950">
-          <Footer />
-        </div>
-      </main>
-    </div>
+      <Container>
+        <StorefrontProducts
+          storeName={store.name}
+          listings={storeListings}
+          productCount={store.productCount}
+        />
+      </Container>
+    </main>
   );
 }

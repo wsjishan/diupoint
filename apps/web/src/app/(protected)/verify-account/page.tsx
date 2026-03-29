@@ -1,36 +1,25 @@
 'use client';
 
 import { Suspense, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import AccountVerificationFlow from '@/components/account/account-verification-flow';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
-
-function resolveReturnPath(returnTo: string): string {
-  return returnTo.startsWith('/') ? returnTo : '/';
-}
+import { APP_ROUTES, sanitizeReturnTo } from '@/lib/routes';
 
 function VerifyAccountPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoading, isAuthenticated, verificationStatus, refreshCurrentUser } =
-    useAuth();
+  const { isLoading, verificationStatus, refreshCurrentUser } = useAuth();
   const [isDone, setIsDone] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
 
   const returnTo = useMemo(() => {
-    return resolveReturnPath(searchParams.get('returnTo') ?? '/');
+    return sanitizeReturnTo(searchParams.get('returnTo'), APP_ROUTES.home);
   }, [searchParams]);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Fverify-account');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   const isAlreadyVerified = verificationStatus === 'VERIFIED';
 

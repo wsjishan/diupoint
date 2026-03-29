@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
 import { clearToken, setToken } from '@/lib/auth/token';
+import { APP_ROUTES, sanitizeReturnTo } from '@/lib/routes';
 
 function toErrorMessage(errorCode: string | null): string {
   if (errorCode === 'access_denied') {
@@ -42,13 +43,10 @@ export default function AuthCallbackClient() {
   const error = searchParams.get('error');
   const returnTo = searchParams.get('returnTo');
 
-  const redirectTarget = useMemo(() => {
-    if (returnTo && returnTo.startsWith('/')) {
-      return returnTo;
-    }
-
-    return '/';
-  }, [returnTo]);
+  const redirectTarget = useMemo(
+    () => sanitizeReturnTo(returnTo, APP_ROUTES.home),
+    [returnTo]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -120,13 +118,13 @@ export default function AuthCallbackClient() {
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2.5">
                   <Link
-                    href="/sign-in"
+                    href={APP_ROUTES.signIn}
                     className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2F3FBF] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#2535a8]"
                   >
                     Back to sign in
                   </Link>
                   <Link
-                    href="/"
+                    href={APP_ROUTES.home}
                     className="inline-flex h-10 items-center justify-center rounded-xl border border-gray-200 bg-white px-4 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     Go home

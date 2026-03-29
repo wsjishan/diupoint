@@ -8,8 +8,9 @@ export async function fetchFavorites(): Promise<ApiFavorite[]> {
 }
 
 export async function addFavorite(listingId: string): Promise<ApiFavorite> {
-  return apiRequestWithAuth<ApiFavorite>(`/favorites/${listingId}`, {
+  return apiRequestWithAuth<ApiFavorite>('/favorites', {
     method: 'POST',
+    body: { listingId },
   });
 }
 

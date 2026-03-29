@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import Container from '@/components/ui/container';
@@ -15,6 +14,7 @@ import {
 } from '@/lib/api/listings';
 import type { ApiListing, ApiListingStatus } from '@/lib/api/types';
 import { useAuth } from '@/lib/auth/auth-context';
+import { APP_ROUTES, createMyListingEditHref } from '@/lib/routes';
 
 function toManageStatus(
   status: ApiListingStatus
@@ -37,19 +37,12 @@ function statusClasses(status: 'ACTIVE' | 'SOLD' | 'ARCHIVED'): string {
 }
 
 export default function MyListingsPage() {
-  const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
   const [isFetching, setIsFetching] = useState(true);
   const [listings, setListings] = useState<ApiListing[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Fmy-listings');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
     if (isLoading || !isAuthenticated) return;
@@ -134,7 +127,7 @@ export default function MyListingsPage() {
                 </p>
               </div>
               <Link
-                href="/post-item"
+                href={APP_ROUTES.postItem}
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
               >
                 + Post New Item
@@ -164,7 +157,7 @@ export default function MyListingsPage() {
                   Start selling by posting your first item.
                 </p>
                 <Link
-                  href="/post-item"
+                  href={APP_ROUTES.postItem}
                   className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
                 >
                   Post First Item
@@ -203,7 +196,7 @@ export default function MyListingsPage() {
 
                             <div className="mt-3 grid grid-cols-3 gap-2">
                               <Link
-                                href={`/my-listings/${listing.id}/edit`}
+                                href={createMyListingEditHref(listing.id)}
                                 className="inline-flex h-9 items-center justify-center rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-500"
                               >
                                 Edit

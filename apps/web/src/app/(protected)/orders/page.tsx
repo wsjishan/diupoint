@@ -10,6 +10,7 @@ import { fetchMyOrders } from '@/lib/api/orders';
 import { isApiRequestError } from '@/lib/api/http';
 import type { ApiMyOrder } from '@/lib/api/types';
 import { useAuth } from '@/lib/auth/auth-context';
+import { APP_ROUTES, createSignInHref } from '@/lib/routes';
 
 function toPrice(value: number | string): number {
   if (typeof value === 'number') return value;
@@ -68,12 +69,6 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Forders');
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
-
-  useEffect(() => {
     if (isAuthLoading || !isAuthenticated) {
       return;
     }
@@ -92,7 +87,7 @@ export default function OrdersPage() {
         if (cancelled) return;
 
         if (isApiRequestError(loadError) && loadError.status === 401) {
-          router.replace('/sign-in?returnTo=%2Forders');
+          router.replace(createSignInHref(APP_ROUTES.orders));
           return;
         }
 
@@ -153,7 +148,7 @@ export default function OrdersPage() {
               </div>
 
               <Link
-                href="/search"
+                href={APP_ROUTES.search}
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
               >
                 Continue Browsing
@@ -177,7 +172,7 @@ export default function OrdersPage() {
                   Place an order from a store listing to see it here.
                 </p>
                 <Link
-                  href="/search"
+                  href={APP_ROUTES.search}
                   className="mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-[#2F3FBF] px-4 text-sm font-semibold text-white shadow-sm shadow-[#2F3FBF]/25 transition-colors hover:bg-[#2535a8]"
                 >
                   Continue browsing stores

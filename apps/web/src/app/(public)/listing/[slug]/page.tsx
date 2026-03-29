@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
 import FavoriteToggleButton from '@/components/listing/favorite-toggle-button';
 import ListingImageGallery from '@/components/listing/listing-image-gallery';
 import PersonalSellerActions from '@/components/listing/personal-seller-actions';
@@ -11,6 +9,7 @@ import ListingCard from '@/components/ui/listing-card';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
 import { fetchListingBySlug, fetchListings } from '@/lib/api/listings';
+import { createStoreHref } from '@/lib/routes';
 import { fetchStoreBySlug } from '@/lib/api/stores';
 
 interface ListingPageProps {
@@ -132,9 +131,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
   );
 
   return (
-    <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
-      <Navbar />
-
+    <>
       <main
         className={`pt-5 sm:pt-6 ${isStoreSeller ? 'pb-30 sm:pb-16' : 'pb-12 sm:pb-16'}`}
       >
@@ -231,7 +228,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                     {isStoreSeller ? (
                       listing.storeSlug ? (
                         <Link
-                          href={`/store/${listing.storeSlug}`}
+                          href={createStoreHref(listing.storeSlug)}
                           className="transition-colors hover:text-[#2F3FBF] dark:hover:text-indigo-300"
                         >
                           {store?.name ?? listing.seller}
@@ -274,7 +271,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
                 {isStoreSeller && listing.storeSlug ? (
                   <Link
-                    href={`/store/${listing.storeSlug}`}
+                    href={createStoreHref(listing.storeSlug)}
                     className="mt-1.5 inline-flex items-center text-sm font-semibold text-[#2F3FBF]/90 transition-colors hover:text-[#2535a8] dark:text-indigo-300/90 dark:hover:text-indigo-200"
                   >
                     Visit store page
@@ -380,10 +377,6 @@ export default async function ListingPage({ params }: ListingPageProps) {
           </div>
         </div>
       ) : null}
-
-      <div className="bg-gray-50 dark:bg-slate-900">
-        <Footer />
-      </div>
-    </div>
+    </>
   );
 }

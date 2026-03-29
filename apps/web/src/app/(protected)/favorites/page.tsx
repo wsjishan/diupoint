@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import Container from '@/components/ui/container';
@@ -10,17 +9,11 @@ import ListingCard from '@/components/ui/listing-card';
 import { mapApiListingToUi } from '@/lib/api/adapters';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useFavorites } from '@/lib/favorites/favorites-context';
+import { APP_ROUTES } from '@/lib/routes';
 
 export default function FavoritesPage() {
-  const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { favorites, isLoading, refreshFavorites } = useFavorites();
-
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Ffavorites');
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return;
@@ -48,7 +41,7 @@ export default function FavoritesPage() {
                 </p>
               </div>
               <Link
-                href="/search"
+                href={APP_ROUTES.search}
                 className="inline-flex h-10 items-center justify-center rounded-lg bg-[#2F3FBF] px-4 text-sm font-medium text-white transition-colors hover:bg-[#2535a8]"
               >
                 Browse Listings

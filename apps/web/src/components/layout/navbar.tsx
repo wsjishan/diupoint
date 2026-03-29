@@ -1,11 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Container from '@/components/ui/container';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCart } from '@/lib/cart/cart-context';
+import {
+  APP_ROUTES,
+  createVerifyAccountHref,
+} from '@/lib/routes';
 
 interface SearchInputProps {
   className?: string;
@@ -100,6 +105,7 @@ export default function Navbar({
   onSearchQueryChange,
   onSearchSubmit,
 }: NavbarProps) {
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const {
     isAuthenticated,
@@ -121,6 +127,21 @@ export default function Navbar({
     setTheme(isDark ? 'light' : 'dark');
   }
 
+  function handleSearchSubmit(value: string) {
+    if (onSearchSubmit) {
+      onSearchSubmit(value);
+      return;
+    }
+
+    const query = value.trim();
+    if (!query) {
+      router.push(APP_ROUTES.search);
+      return;
+    }
+
+    router.push(`${APP_ROUTES.search}?q=${encodeURIComponent(query)}`);
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/95 shadow-sm backdrop-blur-sm transition-colors duration-200">
       <Container>
@@ -131,7 +152,7 @@ export default function Navbar({
         <div className="flex items-center gap-2 py-2.5 sm:h-16 sm:gap-6 sm:py-0 lg:gap-8">
           {/* Logo */}
           <Link
-            href="/"
+            href={APP_ROUTES.home}
             className="flex shrink-0 items-center"
           >
             <span className="text-[22px] font-black tracking-tight text-[#2F3FBF] dark:text-indigo-400 sm:text-2xl">
@@ -144,7 +165,7 @@ export default function Navbar({
             className="hidden flex-1 sm:block"
             value={searchQuery}
             onChange={onSearchQueryChange}
-            onSubmit={onSearchSubmit}
+            onSubmit={handleSearchSubmit}
           />
 
           {/* Action group */}
@@ -196,7 +217,7 @@ export default function Navbar({
 
             {/* Post Item */}
             <Link
-              href="/post-item"
+              href={APP_ROUTES.postItem}
               className="inline-flex h-9 items-center justify-center gap-0.5 rounded-lg bg-[#2F3FBF] px-3 text-xs font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
             >
               <span className="text-sm font-light leading-none sm:text-base">
@@ -225,14 +246,14 @@ export default function Navbar({
                 </span>
 
                 <Link
-                  href="/my-listings"
+                  href={APP_ROUTES.myListings}
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                 >
                   My Listings
                 </Link>
 
                 <Link
-                  href="/cart"
+                  href={APP_ROUTES.cart}
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                 >
                   Cart
@@ -244,14 +265,14 @@ export default function Navbar({
                 </Link>
 
                 <Link
-                  href="/orders"
+                  href={APP_ROUTES.orders}
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                 >
                   Orders
                 </Link>
 
                 <Link
-                  href="/favorites"
+                  href={APP_ROUTES.favorites}
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                 >
                   Saved Items
@@ -260,8 +281,8 @@ export default function Navbar({
                 <Link
                   href={
                     verificationStatus === 'VERIFIED'
-                      ? '/'
-                      : `/verify-account?returnTo=${encodeURIComponent('/')}`
+                      ? APP_ROUTES.home
+                      : createVerifyAccountHref(APP_ROUTES.home)
                   }
                   className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
                   title={currentUser?.email}
@@ -279,7 +300,7 @@ export default function Navbar({
               </>
             ) : (
               <Link
-                href="/sign-in"
+                href={APP_ROUTES.signIn}
                 className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
               >
                 Sign In
@@ -293,7 +314,7 @@ export default function Navbar({
           <SearchInput
             value={searchQuery}
             onChange={onSearchQueryChange}
-            onSubmit={onSearchSubmit}
+            onSubmit={handleSearchSubmit}
           />
         </div>
       </Container>

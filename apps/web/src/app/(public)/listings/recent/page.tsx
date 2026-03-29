@@ -15,8 +15,6 @@ import ListingCard from '@/components/ui/listing-card';
 import CategoryChip from '@/components/ui/category-chip';
 import { CATEGORIES, type Listing } from '@/data/mock-listings';
 import { fetchListings, type ListingSort } from '@/lib/api/listings';
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
 import Pagination from '@/components/ui/pagination';
 
 const ITEMS_PER_PAGE = 20;
@@ -331,8 +329,6 @@ function RecentListingsContent() {
     rawSeller === 'store' ? rawSeller : null;
   const isStoreOnlyMode = sellerFilter === 'store';
 
-  const [searchInput, setSearchInput] = useState(query);
-
   const hasActiveFilters =
     query.length > 0 ||
     activeCategory !== 'all' ||
@@ -386,10 +382,6 @@ function RecentListingsContent() {
   );
 
   useEffect(() => {
-    setSearchInput(query);
-  }, [query]);
-
-  useEffect(() => {
     if (!rawPage) {
       return;
     }
@@ -414,22 +406,6 @@ function RecentListingsContent() {
       updateRoute({ seller: null }, 'replace');
     }
   }, [rawSeller, updateRoute]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const nextQuery = searchInput.trim();
-
-      if (nextQuery === query) {
-        return;
-      }
-
-      updateRoute({ q: nextQuery || null, page: null }, 'replace');
-    }, 260);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [query, searchInput, updateRoute]);
 
   useEffect(() => {
     let cancelled = false;
@@ -578,21 +554,9 @@ function RecentListingsContent() {
     });
   };
 
-  const handleSearchSubmit = (nextValue: string) => {
-    const normalized = nextValue.trim();
-    setSearchInput(normalized);
-    updateRoute({ q: normalized || null, page: null });
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
-      <Navbar
-        searchQuery={searchInput}
-        onSearchQueryChange={setSearchInput}
-        onSearchSubmit={handleSearchSubmit}
-      />
-      <main>
-        <Container className="py-5 sm:py-7 lg:py-9">
+    <main className="bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
+      <Container className="py-5 sm:py-7 lg:py-9">
           <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -731,10 +695,8 @@ function RecentListingsContent() {
               </div>
             )}
           </section>
-        </Container>
-      </main>
-      <Footer />
-    </div>
+      </Container>
+    </main>
   );
 }
 
@@ -742,13 +704,10 @@ export default function RecentListingsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
-          <Navbar />
-          <main>
-            <Container className="py-6">
-              <LoadingSkeleton />
-            </Container>
-          </main>
+        <div className="bg-gray-50 dark:bg-slate-950">
+          <Container className="py-6">
+            <LoadingSkeleton />
+          </Container>
         </div>
       }
     >

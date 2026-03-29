@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Footer from '@/components/layout/footer';
 import Navbar from '@/components/layout/navbar';
 import Container from '@/components/ui/container';
 import { createOrder } from '@/lib/api/orders';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCart } from '@/lib/cart/cart-context';
+import { APP_ROUTES } from '@/lib/routes';
 
 function toPrice(value: number | string): number {
   if (typeof value === 'number') return value;
@@ -29,7 +29,6 @@ function isValidBdPhone(value: string): boolean {
 }
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { items, isLoading, subtotal, refreshCart } = useCart();
 
@@ -41,12 +40,6 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<CheckoutFieldErrors>({});
-
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.replace('/sign-in?returnTo=%2Fcheckout');
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
     if (isAuthLoading || !isAuthenticated) return;
@@ -163,13 +156,13 @@ export default function CheckoutPage() {
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2.5">
                   <Link
-                    href="/search"
+                    href={APP_ROUTES.search}
                     className="inline-flex h-10 items-center justify-center rounded-xl bg-[#2F3FBF] px-4 text-sm font-semibold text-white shadow-sm shadow-[#2F3FBF]/25 transition-colors hover:bg-[#2535a8]"
                   >
                     Continue Shopping
                   </Link>
                   <Link
-                    href="/"
+                    href={APP_ROUTES.home}
                     className="inline-flex h-10 items-center justify-center rounded-xl border border-emerald-200 bg-white px-4 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-400/35 dark:bg-slate-900 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
                   >
                     Go Home
@@ -189,7 +182,7 @@ export default function CheckoutPage() {
                   Add store items to your cart before checkout.
                 </p>
                 <Link
-                  href="/search"
+                  href={APP_ROUTES.search}
                   className="mt-4 inline-flex h-10 items-center justify-center rounded-xl bg-[#2F3FBF] px-4 text-sm font-semibold text-white shadow-sm shadow-[#2F3FBF]/25 transition-colors hover:bg-[#2535a8]"
                 >
                   Browse Listings

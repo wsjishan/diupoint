@@ -2,27 +2,20 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
 import StoreCard from '@/components/ui/store-card';
 import CategoryFilter from '@/components/layout/category-filter';
-import Navbar from '@/components/layout/navbar';
-import Footer from '@/components/layout/footer';
 import {
   CATEGORIES,
-  LATEST_FROM_STORES,
-  ALL_LISTINGS,
   type Listing,
 } from '@/data/mock-listings';
 import { FEATURED_STORES } from '@/data/mock-stores';
 import { buildMixedLatestFeed } from '@/lib/api/home';
 import { fetchListings } from '@/lib/api/listings';
+import { APP_ROUTES } from '@/lib/routes';
 
-const LATEST_LISTINGS_FEED = buildMixedLatestFeed(ALL_LISTINGS).slice(0, 18);
-
-const FRESH_FROM_STORES = LATEST_FROM_STORES.slice(0, 8);
 const HOMEPAGE_FEATURED_STORES = FEATURED_STORES.slice(0, 4);
 const CATEGORY_LABEL_BY_ID = CATEGORIES.reduce<Record<string, string>>(
   (acc, category) => {
@@ -104,29 +97,41 @@ function ListingSection({
   );
 }
 
-export default function HomePage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+interface HomePageClientProps {
+  initialLatestListingsFeed: Listing[];
+  initialFreshFromStores: Listing[];
+}
+
+export default function HomePageClient({
+  initialLatestListingsFeed,
+  initialFreshFromStores,
+}: HomePageClientProps) {
   const [activeCategory, setActiveCategory] = useState('all');
   const [latestListingsFeed, setLatestListingsFeed] =
-    useState<Listing[]>(LATEST_LISTINGS_FEED);
+    useState<Listing[]>(initialLatestListingsFeed);
   const [freshFromStores, setFreshFromStores] =
-    useState<Listing[]>(FRESH_FROM_STORES);
+    useState<Listing[]>(initialFreshFromStores);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadListings() {
-      const { listings } = await fetchListings();
+      try {
+        const { listings } = await fetchListings();
 
-      if (cancelled || listings.length === 0) {
-        return;
+        if (cancelled || listings.length === 0) {
+          return;
+        }
+
+        setLatestListingsFeed(buildMixedLatestFeed(listings).slice(0, 18));
+        setFreshFromStores(
+          listings
+            .filter((listing) => listing.sellerType === 'store')
+            .slice(0, 8)
+        );
+      } catch {
+        // Keep server-provided data when client refresh fails.
       }
-
-      setLatestListingsFeed(buildMixedLatestFeed(listings).slice(0, 18));
-      setFreshFromStores(
-        listings.filter((listing) => listing.sellerType === 'store').slice(0, 8)
-      );
     }
 
     void loadListings();
@@ -135,16 +140,6 @@ export default function HomePage() {
       cancelled = true;
     };
   }, []);
-
-  function handleSearchSubmit(query: string) {
-    const trimmedQuery = query.trim();
-    if (!trimmedQuery) {
-      router.push('/search');
-      return;
-    }
-
-    router.push(`/search?q=${encodeURIComponent(trimmedQuery)}`);
-  }
 
   const latestListings = useMemo(() => {
     if (activeCategory === 'all') {
@@ -163,12 +158,7 @@ export default function HomePage() {
       : `Latest ${CATEGORY_LABEL_BY_ID[activeCategory]?.toLowerCase() ?? 'category'} listings across DIU`;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
-      <Navbar
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        onSearchSubmit={handleSearchSubmit}
-      />
+    <>
       <CategoryFilter
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
@@ -180,7 +170,7 @@ export default function HomePage() {
           subtitle={latestListingsSubtitle}
           listings={latestListings}
           className="bg-white dark:bg-slate-950"
-          viewAllHref="/listings/recent"
+          viewAllHref={APP_ROUTES.recentListings}
           emptyTitle="No listings found in this category yet."
           emptyDescription="Try another category."
         />
@@ -191,7 +181,7 @@ export default function HomePage() {
               <SectionHeader
                 title="Fresh from Stores"
                 subtitle="Picks from student-run stores"
-                viewAllHref="/listings/recent?seller=store"
+                viewAllHref={`${APP_ROUTES.recentListings}?seller=store`}
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
                 {freshFromStores.map((listing) => (
@@ -228,7 +218,6 @@ export default function HomePage() {
           </Container>
         </div>
 
-        {/* CTA + footer region */}
         <div className="bg-gray-50 dark:bg-slate-900">
           <Container className="py-8 sm:py-10">
             <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 sm:p-6">
@@ -239,16 +228,15 @@ export default function HomePage() {
                 Connect with students who are looking for it.
               </p>
               <Link
-                href="/post-item"
+                href={APP_ROUTES.postItem}
                 className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2F3FBF] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
               >
                 + Post Now
               </Link>
             </section>
           </Container>
-          <Footer />
         </div>
       </main>
-    </div>
+    </>
   );
 }

@@ -32,7 +32,11 @@ export async function searchListings(
   try {
     const listings = await apiRequest<ApiListing[]>(path);
     return listings.map(mapApiListingToUi);
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
     return filterAndSortMockListings(ALL_LISTINGS, query);
   }
 }

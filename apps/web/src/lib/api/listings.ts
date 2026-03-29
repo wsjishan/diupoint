@@ -4,7 +4,11 @@ import {
   type Listing,
 } from '@/data/mock-listings';
 import { mapApiListingToUi } from '@/lib/api/adapters';
-import { apiRequest, apiRequestWithAuth } from '@/lib/api/http';
+import {
+  apiRequest,
+  apiRequestWithAuth,
+  isApiRequestError,
+} from '@/lib/api/http';
 import type {
   ApiListing,
   ApiListingCondition,
@@ -138,7 +142,11 @@ export async function fetchListings(
       listings: result.listings.map(mapApiListingToUi),
       total: result.total,
     };
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
     const mockListings = filterAndSortMockListings(ALL_LISTINGS, query);
     const { page = 1, limit = 20 } = query;
     const start = (page - 1) * limit;
@@ -156,7 +164,15 @@ export async function fetchListingBySlug(
   try {
     const listing = await apiRequest<ApiListing>(`/listings/${slug}`);
     return mapApiListingToUi(listing);
-  } catch {
+  } catch (error) {
+    if (isApiRequestError(error) && error.status === 404) {
+      return null;
+    }
+
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
     return getListingBySlug(slug) ?? null;
   }
 }

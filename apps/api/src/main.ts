@@ -3,9 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
+import { ApiExceptionFilter } from './common/filters/api-exception.filter';
+import { apiLoggingMiddleware } from './common/middleware/api-logging.middleware';
+import { requestContextMiddleware } from './common/middleware/request-context.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(requestContextMiddleware);
+  app.use(apiLoggingMiddleware);
 
   app.enableCors({
     origin: true,
@@ -20,6 +26,7 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     })
   );
+  app.useGlobalFilters(new ApiExceptionFilter());
 
   app.setGlobalPrefix('api');
 

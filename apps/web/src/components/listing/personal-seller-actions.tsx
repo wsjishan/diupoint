@@ -4,6 +4,11 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/auth-context';
+import {
+  APP_ROUTES,
+  createSignInHref,
+  createVerifyAccountHref,
+} from '@/lib/routes';
 
 type GateModalType = 'login-required' | 'verification-required' | null;
 
@@ -51,10 +56,10 @@ export default function PersonalSellerActions({
 
   const loginHref = useMemo(() => {
     if (typeof window === 'undefined') {
-      return '/sign-in';
+      return APP_ROUTES.signIn;
     }
 
-    return `/sign-in?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    return createSignInHref(window.location.pathname + window.location.search);
   }, []);
 
   function handleContactSellerClick() {
@@ -92,7 +97,7 @@ export default function PersonalSellerActions({
           title: 'Sign in to continue',
           message: 'Contact options are available for verified accounts.',
           primaryLabel: 'Sign In',
-          primaryHref: '/sign-in',
+          primaryHref: APP_ROUTES.signIn,
           secondaryLabel: 'Cancel',
         }
       : gateModal === 'verification-required'
@@ -101,7 +106,7 @@ export default function PersonalSellerActions({
             message:
               'Use your DIU email to unlock calling and WhatsApp access and help keep DIUPoint safe for everyone.',
             primaryLabel: 'Verify Now',
-            primaryHref: '/verify-account',
+            primaryHref: createVerifyAccountHref(),
             secondaryLabel: 'Maybe Later',
           }
         : null;

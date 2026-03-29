@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/button';
 import { useCart } from '@/lib/cart/cart-context';
+import { APP_ROUTES, createSignInHref } from '@/lib/routes';
 
 interface StorePurchaseActionsProps {
   listingId: string;
@@ -42,12 +43,12 @@ export default function StorePurchaseActions({
 
       if (result.requiresAuth) {
         if (typeof window === 'undefined') {
-          router.push('/sign-in');
+          router.push(APP_ROUTES.signIn);
           return;
         }
 
         const returnTo = `${window.location.pathname}${window.location.search}`;
-        router.push(`/sign-in?returnTo=${encodeURIComponent(returnTo)}`);
+        router.push(createSignInHref(returnTo));
         return;
       }
 
@@ -57,7 +58,7 @@ export default function StorePurchaseActions({
       }
 
       if (redirectToCheckout) {
-        router.push('/checkout');
+        router.push(APP_ROUTES.checkout);
         return;
       }
 

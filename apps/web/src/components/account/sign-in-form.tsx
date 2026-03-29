@@ -7,6 +7,7 @@ import Button from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/auth-context';
 import { getVerificationStatusByEmail } from '@/lib/auth-account';
 import { getApiBaseUrl, isApiRequestError } from '@/lib/api/http';
+import { APP_ROUTES, sanitizeReturnTo } from '@/lib/routes';
 
 interface SignInSubmitPayload {
   email: string;
@@ -23,8 +24,8 @@ interface SignInFormProps {
 
 export default function SignInForm({
   onSubmit,
-  forgotPasswordHref = '/forgot-password',
-  createAccountHref = '/sign-up',
+  forgotPasswordHref = APP_ROUTES.forgotPassword,
+  createAccountHref = APP_ROUTES.signUp,
   showSocialDivider = true,
   className = '',
 }: SignInFormProps) {
@@ -111,8 +112,10 @@ export default function SignInForm({
           : 'Signed in successfully. You can verify later with a DIU email.'
       );
 
-      const returnTo = searchParams.get('returnTo');
-      const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+      const nextPath = sanitizeReturnTo(
+        searchParams.get('returnTo'),
+        APP_ROUTES.home
+      );
       router.replace(nextPath);
     } catch (error) {
       setAuthError(toSignInErrorMessage(error));
@@ -122,8 +125,10 @@ export default function SignInForm({
   }
 
   function handleGoogleSignIn() {
-    const returnTo = searchParams.get('returnTo');
-    const nextPath = returnTo?.startsWith('/') ? returnTo : '/';
+    const nextPath = sanitizeReturnTo(
+      searchParams.get('returnTo'),
+      APP_ROUTES.home
+    );
     const authUrl = `${getApiBaseUrl()}/auth/google?returnTo=${encodeURIComponent(nextPath)}`;
 
     window.location.assign(authUrl);
