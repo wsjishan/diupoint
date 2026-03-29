@@ -218,9 +218,9 @@ export default function Navbar({
             {/* Post Item */}
             <Link
               href={APP_ROUTES.postItem}
-              className="inline-flex h-9 items-center justify-center gap-0.5 rounded-lg bg-[#2F3FBF] px-3 text-xs font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
+              className="group inline-flex h-9 items-center justify-center gap-0.5 rounded-xl border border-white/25 bg-linear-to-r from-[#2F3FBF] to-[#3F5BFF] px-3 text-xs font-semibold text-white shadow-sm shadow-indigo-900/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-indigo-900/30 active:translate-y-0 active:from-[#2535a8] active:to-[#3249db] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF]/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:gap-1.5 sm:px-4 sm:text-sm"
             >
-              <span className="text-sm font-light leading-none sm:text-base">
+              <span className="text-sm leading-none sm:text-base">
                 +
               </span>
               Post Item

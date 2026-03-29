@@ -10,8 +10,8 @@ import { createListingHref, createStoreHref } from '@/lib/routes';
 type ConditionBadge = 'new' | 'used';
 
 const badgeClasses: Record<ConditionBadge, string> = {
-  new: 'bg-green-500 text-white',
-  used: 'bg-amber-500 text-white',
+  new: 'border border-emerald-300/85 bg-emerald-50/95 text-emerald-800 shadow-sm shadow-black/5 backdrop-blur-[1px]',
+  used: 'border border-amber-300/85 bg-amber-50/95 text-amber-800 shadow-sm shadow-black/5 backdrop-blur-[1px]',
 };
 
 const badgeLabels: Record<ConditionBadge, string> = {
@@ -103,7 +103,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-black/20 to-transparent" />
 
         <span
-          className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold ${badgeClasses[conditionBadge]}`}
+          className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[11px] font-medium ${badgeClasses[conditionBadge]}`}
         >
           {badgeLabels[conditionBadge]}
         </span>
