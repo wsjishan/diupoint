@@ -104,6 +104,18 @@ jobs:
           popd >/dev/null
           exit 1
 
+      - name: Package Runtime Node Modules
+        run: |
+          set -euo pipefail
+
+          test -d deploy_ready/node_modules
+
+          pushd deploy_ready >/dev/null
+          tar -czf node_modules.tar.gz node_modules
+          rm -rf node_modules
+          test -f node_modules.tar.gz
+          popd >/dev/null
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -127,11 +139,15 @@ jobs:
           echo "Inspecting downloaded artifact..."
           ls -la .
           test -f dist/main.js
-          test -d node_modules
-          test -d node_modules/.pnpm
+          test -f node_modules.tar.gz
 
-          node -e "require('./node_modules/jsonwebtoken'); console.log('jsonwebtoken + transitive deps resolvable')"
-          node -e "require('./node_modules/@nestjs/jwt'); console.log('@nestjs/jwt resolvable')"
+          rm -rf /tmp/artifact_modules
+          mkdir -p /tmp/artifact_modules
+          tar -xzf node_modules.tar.gz -C /tmp/artifact_modules
+
+          test -d /tmp/artifact_modules/node_modules
+          node -e "require('/tmp/artifact_modules/node_modules/jsonwebtoken'); console.log('jsonwebtoken + transitive deps resolvable')"
+          node -e "require('/tmp/artifact_modules/node_modules/@nestjs/jwt'); console.log('@nestjs/jwt resolvable')"
 
       - name: 'Deploy to Azure Web App'
         id: deploy_to_azure
