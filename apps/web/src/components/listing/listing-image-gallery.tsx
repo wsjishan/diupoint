@@ -11,6 +11,17 @@ const FALLBACK_GRADIENTS = [
   'linear-gradient(135deg, #f8fafc, #e0e7ff)',
 ];
 
+function normalizeImageSrcForNextImage(src: string): string {
+  const trimmedSrc = src.trim();
+  if (!trimmedSrc.startsWith('/')) {
+    return trimmedSrc;
+  }
+
+  const [withoutHash] = trimmedSrc.split('#');
+  const [withoutQuery] = withoutHash.split('?');
+  return withoutQuery;
+}
+
 function getFallbackGradient(seed: string): string {
   let hash = 0;
 
@@ -42,6 +53,7 @@ export default function ListingImageGallery({
   const [loadedImages, setLoadedImages] = useState<Record<string, true>>({});
 
   const activeImage = validImages[activeIndex] ?? '';
+  const activeImageSrc = normalizeImageSrcForNextImage(activeImage);
   const showActiveImage = activeImage.length > 0 && !failedImages[activeImage];
   const fallbackBackground = getFallbackGradient(fallbackSeed);
 
@@ -80,7 +92,7 @@ export default function ListingImageGallery({
       <div className="relative flex w-full aspect-4/3 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900 lg:aspect-5/4">
         {showActiveImage ? (
           <Image
-            src={activeImage}
+            src={activeImageSrc}
             alt={title}
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -110,6 +122,7 @@ export default function ListingImageGallery({
           {validImages.map((image, index) => {
             const isActive = index === activeIndex;
             const showThumb = !failedImages[image];
+            const thumbSrc = normalizeImageSrcForNextImage(image);
 
             return (
               <button
@@ -125,7 +138,7 @@ export default function ListingImageGallery({
               >
                 {showThumb ? (
                   <Image
-                    src={image}
+                    src={thumbSrc}
                     alt={`${title} thumbnail ${index + 1}`}
                     fill
                     sizes="120px"

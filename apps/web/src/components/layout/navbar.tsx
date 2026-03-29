@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import Container from '@/components/ui/container';
+import VerificationTick from '@/components/ui/verification-tick';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useCart } from '@/lib/cart/cart-context';
 import {
@@ -229,21 +230,9 @@ export default function Navbar({
             {/* Sign In */}
             {!isLoading && isAuthenticated ? (
               <>
-                <span
-                  className={`hidden rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${
-                    verificationStatus === 'VERIFIED'
-                      ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-500/15 dark:text-emerald-300'
-                      : verificationStatus === 'PENDING'
-                        ? 'border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400/40 dark:bg-sky-500/15 dark:text-sky-300'
-                        : 'border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/40 dark:bg-amber-500/15 dark:text-amber-300'
-                  }`}
-                >
-                  {verificationStatus === 'VERIFIED'
-                    ? 'Verified'
-                    : verificationStatus === 'PENDING'
-                      ? 'Pending'
-                      : 'Unverified'}
-                </span>
+                {verificationStatus === 'VERIFIED' ? (
+                  <VerificationTick className="hidden sm:inline-flex" />
+                ) : null}
 
                 <Link
                   href={APP_ROUTES.myListings}

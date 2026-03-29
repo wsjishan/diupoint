@@ -6,6 +6,7 @@ import PersonalSellerActions from '@/components/listing/personal-seller-actions'
 import StorePurchaseActions from '@/components/listing/store-purchase-actions';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
+import VerificationTick from '@/components/ui/verification-tick';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
 import { fetchListingBySlug, fetchListings } from '@/lib/api/listings';
@@ -240,21 +241,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                       listing.seller
                     )}
                   </p>
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                      isVerified
-                        ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-500/15 dark:text-emerald-300'
-                        : 'border border-gray-200 bg-white text-gray-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300'
-                    }`}
-                  >
-                    {isVerified
-                      ? isStoreSeller
-                        ? 'Verified Store'
-                        : 'Verified Seller'
-                      : isStoreSeller
-                        ? 'Unverified Store'
-                        : 'Unverified Seller'}
-                  </span>
+                  {isVerified ? <VerificationTick /> : null}
                   <span className="inline-flex rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400">
                     {isStoreSeller ? 'Store Seller' : 'Personal Seller'}
                   </span>

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Container from '@/components/ui/container';
+import VerificationTick from '@/components/ui/verification-tick';
 import StorefrontProducts from '@/components/store/storefront-products';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug as getMockStoreBySlug } from '@/data/mock-stores';
@@ -123,17 +124,7 @@ export default async function StorePage({ params }: StorePageProps) {
                             {store.name}
                           </h1>
 
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
-                              store.isVerified
-                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-500/15 dark:text-emerald-300'
-                                : 'border border-gray-200 bg-gray-50 text-gray-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300'
-                            }`}
-                          >
-                            {store.isVerified
-                              ? 'Verified Store'
-                              : 'Unverified Store'}
-                          </span>
+                          {store.isVerified ? <VerificationTick /> : null}
                         </div>
 
                         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-gray-700 dark:text-slate-300 sm:mt-2.5 sm:text-[15px]">
