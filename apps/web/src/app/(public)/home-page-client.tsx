@@ -6,7 +6,9 @@ import Container from '@/components/ui/container';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
 import StoreCard from '@/components/ui/store-card';
-import CategoryFilter from '@/components/layout/category-filter';
+import CategoryFilter, {
+  type CategoryConditionFilter,
+} from '@/components/layout/category-filter';
 import {
   CATEGORIES,
   type Listing,
@@ -36,6 +38,31 @@ interface ListingSectionProps {
   emptyDescription?: string;
 }
 
+function SectionFooterViewAllLink({ href }: { href: string }) {
+  return (
+    <div className="mt-4 flex justify-end sm:mt-5">
+      <Link
+        href={href}
+        className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/70 hover:text-[#2535a8] dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-300/40 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-200"
+      >
+        <span className="whitespace-nowrap">View all</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </Link>
+    </div>
+  );
+}
+
 function ListingSection({
   title,
   icon,
@@ -54,7 +81,6 @@ function ListingSection({
             title={title}
             icon={icon}
             subtitle={subtitle}
-            viewAllHref={viewAllHref}
           />
           {listings.length > 0 ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
@@ -91,6 +117,7 @@ function ListingSection({
               </p>
             </div>
           )}
+          {viewAllHref ? <SectionFooterViewAllLink href={viewAllHref} /> : null}
         </section>
       </Container>
     </div>
@@ -107,6 +134,8 @@ export default function HomePageClient({
   initialFreshFromStores,
 }: HomePageClientProps) {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCondition, setActiveCondition] =
+    useState<CategoryConditionFilter>('all');
   const [latestListingsFeed, setLatestListingsFeed] =
     useState<Listing[]>(initialLatestListingsFeed);
   const [freshFromStores, setFreshFromStores] =
@@ -142,26 +171,44 @@ export default function HomePageClient({
   }, []);
 
   const latestListings = useMemo(() => {
-    if (activeCategory === 'all') {
-      return latestListingsFeed;
+    return latestListingsFeed.filter((listing) => {
+      const categoryMatches =
+        activeCategory === 'all' ||
+        listing.category === CATEGORY_LABEL_BY_ID[activeCategory];
+      const conditionMatches =
+        activeCondition === 'all' ||
+        listing.condition === activeCondition;
+
+      return categoryMatches && conditionMatches;
+    });
+  }, [activeCategory, activeCondition, latestListingsFeed]);
+
+  const latestListingsSubtitle = useMemo(() => {
+    if (activeCategory === 'all' && activeCondition === 'all') {
+      return 'A mix of student and store listings';
     }
 
-    const categoryLabel = CATEGORY_LABEL_BY_ID[activeCategory];
-    return latestListingsFeed.filter(
-      (listing) => listing.category === categoryLabel
-    );
-  }, [activeCategory, latestListingsFeed]);
+    if (activeCategory === 'all') {
+      return `Latest ${activeCondition} listings across DIU`;
+    }
 
-  const latestListingsSubtitle =
-    activeCategory === 'all'
-      ? 'A mix of student and store listings'
-      : `Latest ${CATEGORY_LABEL_BY_ID[activeCategory]?.toLowerCase() ?? 'category'} listings across DIU`;
+    const categoryLabel =
+      CATEGORY_LABEL_BY_ID[activeCategory]?.toLowerCase() ?? 'category';
+
+    if (activeCondition === 'all') {
+      return `Latest ${categoryLabel} listings across DIU`;
+    }
+
+    return `Latest ${activeCondition} ${categoryLabel} listings across DIU`;
+  }, [activeCategory, activeCondition]);
 
   return (
     <>
       <CategoryFilter
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
+        activeCondition={activeCondition}
+        onConditionChange={setActiveCondition}
       />
 
       <main>
@@ -171,8 +218,8 @@ export default function HomePageClient({
           listings={latestListings}
           className="bg-white dark:bg-slate-950"
           viewAllHref={APP_ROUTES.recentListings}
-          emptyTitle="No listings found in this category yet."
-          emptyDescription="Try another category."
+          emptyTitle="No listings match these filters yet."
+          emptyDescription="Try another category or condition."
         />
 
         <div className="bg-gray-50 dark:bg-slate-900">
@@ -181,7 +228,6 @@ export default function HomePageClient({
               <SectionHeader
                 title="Fresh from Stores"
                 subtitle="Picks from student-run stores"
-                viewAllHref={`${APP_ROUTES.recentListings}?seller=store`}
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
                 {freshFromStores.map((listing) => (
@@ -193,6 +239,9 @@ export default function HomePageClient({
                   </div>
                 ))}
               </div>
+              <SectionFooterViewAllLink
+                href={`${APP_ROUTES.recentListings}?seller=store`}
+              />
             </section>
           </Container>
         </div>

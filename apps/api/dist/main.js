@@ -67,6 +67,119 @@ exports.AppModule = AppModule = __decorate([
 
 /***/ },
 
+/***/ "./src/common/filters/api-exception.filter.ts"
+/*!****************************************************!*\
+  !*** ./src/common/filters/api-exception.filter.ts ***!
+  \****************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiExceptionFilter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const request_context_middleware_1 = __webpack_require__(/*! ../middleware/request-context.middleware */ "./src/common/middleware/request-context.middleware.ts");
+function toRequestId(req, res) {
+    const localRequestId = res.locals
+        .requestId;
+    if (localRequestId) {
+        return localRequestId;
+    }
+    const headerValue = req.headers[request_context_middleware_1.REQUEST_ID_HEADER];
+    if (Array.isArray(headerValue)) {
+        return headerValue[0] ?? 'unknown';
+    }
+    return headerValue ?? 'unknown';
+}
+function toNestErrorBody(exception, statusCode) {
+    const responseBody = exception.getResponse();
+    if (typeof responseBody === 'string') {
+        return {
+            statusCode,
+            message: responseBody,
+            error: exception.name,
+        };
+    }
+    return {
+        statusCode,
+        ...responseBody,
+    };
+}
+let ApiExceptionFilter = class ApiExceptionFilter {
+    catch(exception, host) {
+        const context = host.switchToHttp();
+        const response = context.getResponse();
+        const request = context.getRequest();
+        const statusCode = exception instanceof common_1.HttpException
+            ? exception.getStatus()
+            : common_1.HttpStatus.INTERNAL_SERVER_ERROR;
+        const baseBody = exception instanceof common_1.HttpException
+            ? toNestErrorBody(exception, statusCode)
+            : {
+                statusCode,
+                message: 'Internal server error',
+                error: 'Internal Server Error',
+            };
+        response.status(statusCode).json({
+            ...baseBody,
+            statusCode,
+            timestamp: new Date().toISOString(),
+            path: request.originalUrl || request.url,
+            requestId: toRequestId(request, response),
+        });
+    }
+};
+exports.ApiExceptionFilter = ApiExceptionFilter;
+exports.ApiExceptionFilter = ApiExceptionFilter = __decorate([
+    (0, common_1.Catch)()
+], ApiExceptionFilter);
+
+
+/***/ },
+
+/***/ "./src/common/http/deprecation.ts"
+/*!****************************************!*\
+  !*** ./src/common/http/deprecation.ts ***!
+  \****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.markDeprecatedRoute = markDeprecatedRoute;
+const request_context_middleware_1 = __webpack_require__(/*! ../middleware/request-context.middleware */ "./src/common/middleware/request-context.middleware.ts");
+const DEFAULT_SUNSET_WINDOW_DAYS = 90;
+function toRequestId(req, res) {
+    const localRequestId = res.locals
+        .requestId;
+    if (localRequestId) {
+        return localRequestId;
+    }
+    const headerValue = req.headers[request_context_middleware_1.REQUEST_ID_HEADER];
+    if (Array.isArray(headerValue)) {
+        return headerValue[0] ?? 'unknown';
+    }
+    return headerValue ?? 'unknown';
+}
+function toSunsetDate(daysFromNow) {
+    const sunsetDate = new Date(Date.now() + daysFromNow * 24 * 60 * 60 * 1000);
+    return sunsetDate.toUTCString();
+}
+function markDeprecatedRoute({ canonicalPath, logger, req, res, }) {
+    res.setHeader('Deprecation', 'true');
+    res.setHeader('Sunset', toSunsetDate(DEFAULT_SUNSET_WINDOW_DAYS));
+    res.setHeader('Link', `<${canonicalPath}>; rel="successor-version"`);
+    const requestId = toRequestId(req, res);
+    logger.warn(`[deprecated-route] ${req.method} ${req.originalUrl || req.url} -> ${canonicalPath} [${requestId}]`);
+}
+
+
+/***/ },
+
 /***/ "./src/common/legacy-prisma-enums.ts"
 /*!*******************************************!*\
   !*** ./src/common/legacy-prisma-enums.ts ***!
@@ -129,6 +242,80 @@ var OrderStatus;
     OrderStatus["DELIVERED"] = "DELIVERED";
     OrderStatus["CANCELLED"] = "CANCELLED";
 })(OrderStatus || (exports.OrderStatus = OrderStatus = {}));
+
+
+/***/ },
+
+/***/ "./src/common/middleware/api-logging.middleware.ts"
+/*!*********************************************************!*\
+  !*** ./src/common/middleware/api-logging.middleware.ts ***!
+  \*********************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.apiLoggingMiddleware = apiLoggingMiddleware;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const request_context_middleware_1 = __webpack_require__(/*! ./request-context.middleware */ "./src/common/middleware/request-context.middleware.ts");
+const logger = new common_1.Logger('ApiLogger');
+function toRequestId(req, res) {
+    const localRequestId = res.locals
+        .requestId;
+    if (localRequestId) {
+        return localRequestId;
+    }
+    const headerValue = req.headers[request_context_middleware_1.REQUEST_ID_HEADER];
+    if (Array.isArray(headerValue)) {
+        return headerValue[0] ?? 'unknown';
+    }
+    return headerValue ?? 'unknown';
+}
+function shouldSkipLog(url) {
+    return url.startsWith('/api/health');
+}
+function apiLoggingMiddleware(req, res, next) {
+    const startedAt = process.hrtime.bigint();
+    res.on('finish', () => {
+        const url = req.originalUrl || req.url;
+        if (shouldSkipLog(url)) {
+            return;
+        }
+        const durationMs = Number((process.hrtime.bigint() - startedAt) / 1000000n);
+        const requestId = toRequestId(req, res);
+        logger.log(`${req.method} ${url} ${res.statusCode} ${durationMs}ms [${requestId}]`);
+    });
+    next();
+}
+
+
+/***/ },
+
+/***/ "./src/common/middleware/request-context.middleware.ts"
+/*!*************************************************************!*\
+  !*** ./src/common/middleware/request-context.middleware.ts ***!
+  \*************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.REQUEST_ID_HEADER = void 0;
+exports.requestContextMiddleware = requestContextMiddleware;
+const node_crypto_1 = __webpack_require__(/*! node:crypto */ "node:crypto");
+exports.REQUEST_ID_HEADER = 'x-request-id';
+function normalizeHeaderValue(value) {
+    if (Array.isArray(value)) {
+        return value[0] ?? '';
+    }
+    return value ?? '';
+}
+function requestContextMiddleware(req, res, next) {
+    const incomingRequestId = normalizeHeaderValue(req.headers[exports.REQUEST_ID_HEADER]);
+    const requestId = incomingRequestId.trim() || (0, node_crypto_1.randomUUID)();
+    req.headers[exports.REQUEST_ID_HEADER] = requestId;
+    res.locals.requestId = requestId;
+    res.setHeader(exports.REQUEST_ID_HEADER, requestId);
+    next();
+}
 
 
 /***/ },
@@ -1516,6 +1703,38 @@ __decorate([
 
 /***/ },
 
+/***/ "./src/modules/favorites/dto/add-favorite.dto.ts"
+/*!*******************************************************!*\
+  !*** ./src/modules/favorites/dto/add-favorite.dto.ts ***!
+  \*******************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AddFavoriteDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class AddFavoriteDto {
+    listingId;
+}
+exports.AddFavoriteDto = AddFavoriteDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], AddFavoriteDto.prototype, "listingId", void 0);
+
+
+/***/ },
+
 /***/ "./src/modules/favorites/favorites.controller.ts"
 /*!*******************************************************!*\
   !*** ./src/modules/favorites/favorites.controller.ts ***!
@@ -1535,21 +1754,34 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var FavoritesController_1;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FavoritesController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const deprecation_1 = __webpack_require__(/*! ../../common/http/deprecation */ "./src/common/http/deprecation.ts");
 const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
+const add_favorite_dto_1 = __webpack_require__(/*! ./dto/add-favorite.dto */ "./src/modules/favorites/dto/add-favorite.dto.ts");
 const favorites_service_1 = __webpack_require__(/*! ./favorites.service */ "./src/modules/favorites/favorites.service.ts");
-let FavoritesController = class FavoritesController {
+let FavoritesController = FavoritesController_1 = class FavoritesController {
     favoritesService;
+    logger = new common_1.Logger(FavoritesController_1.name);
     constructor(favoritesService) {
         this.favoritesService = favoritesService;
     }
     list(req) {
         return this.favoritesService.list(req.user.sub);
     }
-    add(req, listingId) {
+    add(req, dto) {
+        return this.favoritesService.add(req.user.sub, dto.listingId);
+    }
+    addLegacy(req, listingId, res) {
+        (0, deprecation_1.markDeprecatedRoute)({
+            canonicalPath: '/api/favorites',
+            logger: this.logger,
+            req,
+            res,
+        });
         return this.favoritesService.add(req.user.sub, listingId);
     }
     remove(req, listingId) {
@@ -1561,26 +1793,35 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _b : Object]),
     __metadata("design:returntype", void 0)
 ], FavoritesController.prototype, "list", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _c : Object, typeof (_d = typeof add_favorite_dto_1.AddFavoriteDto !== "undefined" && add_favorite_dto_1.AddFavoriteDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", void 0)
+], FavoritesController.prototype, "add", null);
 __decorate([
     (0, common_1.Post)(':listingId'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('listingId')),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [typeof (_e = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _e : Object, String, Object]),
     __metadata("design:returntype", void 0)
-], FavoritesController.prototype, "add", null);
+], FavoritesController.prototype, "addLegacy", null);
 __decorate([
     (0, common_1.Delete)(':listingId'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('listingId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [typeof (_f = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _f : Object, String]),
     __metadata("design:returntype", void 0)
 ], FavoritesController.prototype, "remove", null);
-exports.FavoritesController = FavoritesController = __decorate([
+exports.FavoritesController = FavoritesController = FavoritesController_1 = __decorate([
     (0, common_1.Controller)('favorites'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [typeof (_a = typeof favorites_service_1.FavoritesService !== "undefined" && favorites_service_1.FavoritesService) === "function" ? _a : Object])
@@ -1984,7 +2225,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ListListingsQueryDto = exports.ListingSort = void 0;
 const legacy_prisma_enums_1 = __webpack_require__(/*! ../../../common/legacy-prisma-enums */ "./src/common/legacy-prisma-enums.ts");
@@ -2000,6 +2241,7 @@ class ListListingsQueryDto {
     q;
     category;
     condition;
+    seller;
     sort = ListingSort.LATEST;
     page = 1;
     limit = 20;
@@ -2024,6 +2266,12 @@ __decorate([
     (0, class_validator_1.IsEnum)(legacy_prisma_enums_1.ListingCondition),
     __metadata("design:type", typeof (_a = typeof legacy_prisma_enums_1.ListingCondition !== "undefined" && legacy_prisma_enums_1.ListingCondition) === "function" ? _a : Object)
 ], ListListingsQueryDto.prototype, "condition", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => String(value).trim().toUpperCase()),
+    (0, class_validator_1.IsEnum)(legacy_prisma_enums_1.SellerType),
+    __metadata("design:type", typeof (_b = typeof legacy_prisma_enums_1.SellerType !== "undefined" && legacy_prisma_enums_1.SellerType) === "function" ? _b : Object)
+], ListListingsQueryDto.prototype, "seller", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(ListingSort),
@@ -2300,6 +2548,9 @@ let ListingsService = class ListingsService {
         }
         if (query.condition) {
             where.condition = query.condition;
+        }
+        if (query.seller) {
+            where.sellerType = query.seller;
         }
         let orderBy = { createdAt: 'desc' };
         if (query.sort === list_listings_query_dto_1.ListingSort.PRICE_ASC) {
@@ -2590,15 +2841,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var OrdersController_1;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrdersController = void 0;
+exports.StoreOrdersController = exports.OrdersController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const deprecation_1 = __webpack_require__(/*! ../../common/http/deprecation */ "./src/common/http/deprecation.ts");
 const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
 const create_order_dto_1 = __webpack_require__(/*! ./dto/create-order.dto */ "./src/modules/orders/dto/create-order.dto.ts");
 const orders_service_1 = __webpack_require__(/*! ./orders.service */ "./src/modules/orders/orders.service.ts");
-let OrdersController = class OrdersController {
+let OrdersController = OrdersController_1 = class OrdersController {
     ordersService;
+    logger = new common_1.Logger(OrdersController_1.name);
     constructor(ordersService) {
         this.ordersService = ordersService;
     }
@@ -2608,38 +2862,67 @@ let OrdersController = class OrdersController {
     listMyOrders(req) {
         return this.ordersService.listMyOrders(req.user.sub);
     }
-    listStoreOrders(req) {
-        return this.ordersService.listStoreOrders(req.user.sub);
+    listMyOrdersAlias(req, res) {
+        (0, deprecation_1.markDeprecatedRoute)({
+            canonicalPath: '/api/orders',
+            logger: this.logger,
+            req,
+            res,
+        });
+        return this.ordersService.listMyOrders(req.user.sub);
     }
 };
 exports.OrdersController = OrdersController;
 __decorate([
-    (0, common_1.Post)('orders'),
+    (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, typeof (_b = typeof create_order_dto_1.CreateOrderDto !== "undefined" && create_order_dto_1.CreateOrderDto) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _b : Object, typeof (_c = typeof create_order_dto_1.CreateOrderDto !== "undefined" && create_order_dto_1.CreateOrderDto) === "function" ? _c : Object]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "create", null);
 __decorate([
-    (0, common_1.Get)('orders/me'),
+    (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_d = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _d : Object]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "listMyOrders", null);
 __decorate([
-    (0, common_1.Get)('stores/me/orders'),
+    (0, common_1.Get)('me'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _e : Object, Object]),
     __metadata("design:returntype", void 0)
-], OrdersController.prototype, "listStoreOrders", null);
-exports.OrdersController = OrdersController = __decorate([
-    (0, common_1.Controller)(),
+], OrdersController.prototype, "listMyOrdersAlias", null);
+exports.OrdersController = OrdersController = OrdersController_1 = __decorate([
+    (0, common_1.Controller)('orders'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [typeof (_a = typeof orders_service_1.OrdersService !== "undefined" && orders_service_1.OrdersService) === "function" ? _a : Object])
 ], OrdersController);
+let StoreOrdersController = class StoreOrdersController {
+    ordersService;
+    constructor(ordersService) {
+        this.ordersService = ordersService;
+    }
+    listStoreOrders(req) {
+        return this.ordersService.listStoreOrders(req.user.sub);
+    }
+};
+exports.StoreOrdersController = StoreOrdersController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _g : Object]),
+    __metadata("design:returntype", void 0)
+], StoreOrdersController.prototype, "listStoreOrders", null);
+exports.StoreOrdersController = StoreOrdersController = __decorate([
+    (0, common_1.Controller)('stores/me/orders'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_f = typeof orders_service_1.OrdersService !== "undefined" && orders_service_1.OrdersService) === "function" ? _f : Object])
+], StoreOrdersController);
 
 
 /***/ },
@@ -2667,7 +2950,7 @@ let OrdersModule = class OrdersModule {
 exports.OrdersModule = OrdersModule;
 exports.OrdersModule = OrdersModule = __decorate([
     (0, common_1.Module)({
-        controllers: [orders_controller_1.OrdersController],
+        controllers: [orders_controller_1.OrdersController, orders_controller_1.StoreOrdersController],
         providers: [orders_service_1.OrdersService],
     })
 ], OrdersModule);
@@ -4171,8 +4454,13 @@ const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const app_module_1 = __webpack_require__(/*! ./app.module */ "./src/app.module.ts");
+const api_exception_filter_1 = __webpack_require__(/*! ./common/filters/api-exception.filter */ "./src/common/filters/api-exception.filter.ts");
+const api_logging_middleware_1 = __webpack_require__(/*! ./common/middleware/api-logging.middleware */ "./src/common/middleware/api-logging.middleware.ts");
+const request_context_middleware_1 = __webpack_require__(/*! ./common/middleware/request-context.middleware */ "./src/common/middleware/request-context.middleware.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.use(request_context_middleware_1.requestContextMiddleware);
+    app.use(api_logging_middleware_1.apiLoggingMiddleware);
     app.enableCors({
         origin: true,
         credentials: true,
@@ -4183,6 +4471,7 @@ async function bootstrap() {
         forbidUnknownValues: true,
         transformOptions: { enableImplicitConversion: true },
     }));
+    app.useGlobalFilters(new api_exception_filter_1.ApiExceptionFilter());
     app.setGlobalPrefix('api');
     const configService = app.get(config_1.ConfigService);
     const port = Number(process.env.PORT ?? configService.get('PORT') ?? '4000');

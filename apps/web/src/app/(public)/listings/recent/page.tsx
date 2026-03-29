@@ -97,6 +97,8 @@ interface ModernSelectProps {
   ariaLabel: string;
 }
 
+type FiltersLayout = 'panel' | 'sidebar';
+
 function ModernSelect({
   value,
   options,
@@ -225,7 +227,11 @@ function ModernSelect({
   );
 }
 
-function FiltersPanel({
+interface FiltersPanelContentProps extends FiltersPanelProps {
+  layout: FiltersLayout;
+}
+
+function FiltersPanelContent({
   activeCategory,
   onCategoryChange,
   conditionFilter,
@@ -234,14 +240,28 @@ function FiltersPanel({
   onSortChange,
   hasActiveFilters,
   onClearAll,
-}: FiltersPanelProps) {
+  layout,
+}: FiltersPanelContentProps) {
+  const categoryContainerClassName =
+    layout === 'sidebar'
+      ? 'mt-2.5 flex flex-wrap gap-2'
+      : 'scrollbar-hide flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0';
+
+  const controlsGridClassName =
+    layout === 'sidebar'
+      ? 'mt-4 grid grid-cols-1 gap-3'
+      : 'mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2';
+
+  const clearButtonClassName =
+    'inline-flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 py-2.5 text-sm font-medium text-gray-600 dark:text-slate-300 transition-colors hover:border-[#2F3FBF]/30 hover:text-[#2F3FBF] disabled:cursor-not-allowed disabled:opacity-45 dark:hover:border-white/20 dark:hover:text-slate-100';
+
   return (
-    <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 sm:p-5">
+    <>
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
           Category
         </p>
-        <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
+        <div className={categoryContainerClassName}>
           {CATEGORIES.map((category) => (
             <CategoryChip
               key={category.id}
@@ -250,14 +270,16 @@ function FiltersPanel({
               onClick={() => onCategoryChange(category.id)}
             />
           ))}
-          <div
-            className="w-1 shrink-0 sm:hidden"
-            aria-hidden="true"
-          />
+          {layout === 'panel' ? (
+            <div
+              className="w-1 shrink-0 sm:hidden"
+              aria-hidden="true"
+            />
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+      <div className={controlsGridClassName}>
         <div className="flex flex-col gap-1.5 text-sm text-gray-600 dark:text-slate-300">
           <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Condition
@@ -289,13 +311,37 @@ function FiltersPanel({
             type="button"
             onClick={onClearAll}
             disabled={!hasActiveFilters}
-            className="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 py-2.5 text-sm font-medium text-gray-600 dark:text-slate-300 transition-colors hover:border-[#2F3FBF]/30 hover:text-[#2F3FBF] disabled:cursor-not-allowed disabled:opacity-45 dark:hover:border-white/20 dark:hover:text-slate-100 lg:w-auto"
+            className={clearButtonClassName}
           >
             Clear all
           </button>
         </div>
       </div>
+    </>
+  );
+}
+
+function MobileFiltersPanel(props: FiltersPanelProps) {
+  return (
+    <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-4 sm:p-5">
+      <FiltersPanelContent
+        {...props}
+        layout="panel"
+      />
     </div>
+  );
+}
+
+function DesktopFiltersSidebar(props: FiltersPanelProps) {
+  return (
+    <aside className="hidden lg:block lg:sticky lg:top-24 lg:h-fit">
+      <div className="rounded-xl border border-gray-200/70 bg-white/70 p-4 backdrop-blur-sm dark:border-white/10 dark:bg-slate-900/60">
+        <FiltersPanelContent
+          {...props}
+          layout="sidebar"
+        />
+      </div>
+    </aside>
   );
 }
 
@@ -596,47 +642,60 @@ function RecentListingsContent() {
             </div>
           </section>
 
-          <section className="mt-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5">
-            <div className="sm:hidden">
-              <button
-                type="button"
-                onClick={() => setShowMobileFilters((current) => !current)}
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
-              >
-                {showMobileFilters ? 'Hide filters' : 'Filters & sort'}
-              </button>
-            </div>
+          <div className="mt-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-6">
+            <DesktopFiltersSidebar
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+              conditionFilter={conditionFilter}
+              onConditionChange={handleConditionChange}
+              sortOption={sortOption}
+              onSortChange={handleSortChange}
+              hasActiveFilters={hasActiveFilters}
+              onClearAll={handleClearAll}
+            />
 
-            <div className="mt-4 hidden sm:block">
-              <FiltersPanel
-                activeCategory={activeCategory}
-                onCategoryChange={handleCategoryChange}
-                conditionFilter={conditionFilter}
-                onConditionChange={handleConditionChange}
-                sortOption={sortOption}
-                onSortChange={handleSortChange}
-                hasActiveFilters={hasActiveFilters}
-                onClearAll={handleClearAll}
-              />
-            </div>
+            <div className="min-w-0">
+              <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5 lg:hidden">
+                <div className="sm:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setShowMobileFilters((current) => !current)}
+                    className="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
+                  >
+                    {showMobileFilters ? 'Hide filters' : 'Filters & sort'}
+                  </button>
+                </div>
 
-            {showMobileFilters && (
-              <div className="mt-4 sm:hidden">
-                <FiltersPanel
-                  activeCategory={activeCategory}
-                  onCategoryChange={handleCategoryChange}
-                  conditionFilter={conditionFilter}
-                  onConditionChange={handleConditionChange}
-                  sortOption={sortOption}
-                  onSortChange={handleSortChange}
-                  hasActiveFilters={hasActiveFilters}
-                  onClearAll={handleClearAll}
-                />
-              </div>
-            )}
-          </section>
+                <div className="mt-4 hidden sm:block">
+                  <MobileFiltersPanel
+                    activeCategory={activeCategory}
+                    onCategoryChange={handleCategoryChange}
+                    conditionFilter={conditionFilter}
+                    onConditionChange={handleConditionChange}
+                    sortOption={sortOption}
+                    onSortChange={handleSortChange}
+                    hasActiveFilters={hasActiveFilters}
+                    onClearAll={handleClearAll}
+                  />
+                </div>
 
-          <section className="mt-5 sm:mt-6">
+                {showMobileFilters && (
+                  <div className="mt-4 sm:hidden">
+                    <MobileFiltersPanel
+                      activeCategory={activeCategory}
+                      onCategoryChange={handleCategoryChange}
+                      conditionFilter={conditionFilter}
+                      onConditionChange={handleConditionChange}
+                      sortOption={sortOption}
+                      onSortChange={handleSortChange}
+                      hasActiveFilters={hasActiveFilters}
+                      onClearAll={handleClearAll}
+                    />
+                  </div>
+                )}
+              </section>
+
+              <section className="mt-5 sm:mt-6 lg:mt-0">
             <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-slate-400 sm:mb-4">
               <p className="font-medium text-gray-700 dark:text-slate-200">
                 {resultsSummary}
@@ -694,7 +753,9 @@ function RecentListingsContent() {
                 </button>
               </div>
             )}
-          </section>
+              </section>
+            </div>
+          </div>
       </Container>
     </main>
   );
