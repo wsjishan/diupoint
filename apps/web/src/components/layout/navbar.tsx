@@ -19,6 +19,14 @@ interface SearchInputProps {
   onSubmit?: (value: string) => void;
 }
 
+const PLACEHOLDER_EXAMPLES = [
+  '"used calculator"',
+  '"gaming laptop"',
+  '"room essentials"',
+  '"CSE notes"',
+  '"female sublet"',
+];
+
 function SearchInput({
   className = '',
   value,
@@ -28,7 +36,55 @@ function SearchInput({
   const isControlled =
     typeof value === 'string' && typeof onChange === 'function';
   const [internalValue, setInternalValue] = useState('');
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isReducedMotion, setIsReducedMotion] = useState(false);
   const resolvedValue = isControlled ? value : internalValue;
+  const isInputEmpty = resolvedValue.trim().length === 0;
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncMotionPreference = (event?: MediaQueryListEvent) => {
+      setIsReducedMotion(event ? event.matches : mediaQuery.matches);
+    };
+
+    syncMotionPreference();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncMotionPreference);
+      return () => mediaQuery.removeEventListener('change', syncMotionPreference);
+    }
+
+    mediaQuery.addListener(syncMotionPreference);
+    return () => mediaQuery.removeListener(syncMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    if (
+      isReducedMotion ||
+      isFocused ||
+      !isInputEmpty ||
+      PLACEHOLDER_EXAMPLES.length < 2
+    ) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setPlaceholderIndex((current) => (current + 1) % PLACEHOLDER_EXAMPLES.length);
+    }, 2500);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isFocused, isInputEmpty, isReducedMotion]);
+
+  const displayedPlaceholder =
+    PLACEHOLDER_EXAMPLES[isReducedMotion ? 0 : placeholderIndex] ??
+    PLACEHOLDER_EXAMPLES[0];
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,6 +115,8 @@ function SearchInput({
       <input
         type="search"
         value={resolvedValue}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         onChange={(event) => {
           if (isControlled) {
             onChange(event.target.value);
@@ -67,7 +125,7 @@ function SearchInput({
 
           setInternalValue(event.target.value);
         }}
-        placeholder="Search items, books, electronics, housing..."
+        placeholder={`Search ${displayedPlaceholder}`}
         className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-2.5 pl-10 pr-10 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10 sm:pl-11 sm:pr-11 sm:py-2.5"
       />
       <button

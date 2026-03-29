@@ -43,7 +43,7 @@ function SectionFooterViewAllLink({ href }: { href: string }) {
     <div className="mt-4 flex justify-end sm:mt-5">
       <Link
         href={href}
-        className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1.5 text-sm font-semibold text-[#2F3FBF] transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/70 hover:text-[#2535a8] dark:border-indigo-400/30 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-300/40 dark:hover:bg-indigo-500/15 dark:hover:text-indigo-200"
+        className="group inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-gray-600 transition-colors duration-150 hover:text-[#2F3FBF] focus:outline-none focus-visible:rounded-md focus-visible:ring-2 focus-visible:ring-[#2F3FBF]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-slate-300 dark:hover:text-indigo-300 dark:focus-visible:ring-white/20 dark:focus-visible:ring-offset-slate-950"
       >
         <span className="whitespace-nowrap">View all</span>
         <svg
