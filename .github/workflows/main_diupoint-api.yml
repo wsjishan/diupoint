@@ -109,6 +109,7 @@ jobs:
         with:
           name: node-app
           path: deploy_ready
+          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -118,6 +119,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Validate Artifact Runtime Dependencies
+        run: |
+          set -euo pipefail
+
+          echo "Inspecting downloaded artifact..."
+          ls -la .
+          test -f dist/main.js
+          test -d node_modules
+          test -d node_modules/.pnpm
+
+          node -e "require('./node_modules/jsonwebtoken'); console.log('jsonwebtoken + transitive deps resolvable')"
+          node -e "require('./node_modules/@nestjs/jwt'); console.log('@nestjs/jwt resolvable')"
 
       - name: 'Deploy to Azure Web App'
         id: deploy_to_azure
