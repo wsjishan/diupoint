@@ -3,3 +3,4 @@ node_modules
 .turbo
 .next
 .env
+PROJECT_CONTEXT.md

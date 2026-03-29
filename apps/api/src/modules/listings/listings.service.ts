@@ -44,6 +44,10 @@ export class ListingsService {
       if (query.condition) {
         where.condition = query.condition as ListingCondition;
       }
+
+      if (query.seller) {
+        where.sellerType = query.seller as SellerType;
+      }
   
       let orderBy: any = { createdAt: 'desc' };
   

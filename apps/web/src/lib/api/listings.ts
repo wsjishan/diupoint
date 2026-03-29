@@ -18,6 +18,7 @@ export interface ListingQuery {
   q?: string;
   category?: string;
   condition?: 'new' | 'used';
+  seller?: 'store' | 'personal';
   sort?: ListingSort;
   page?: number;
   limit?: number;
@@ -89,6 +90,14 @@ export function filterAndSortMockListings(
     );
   }
 
+  if (query.seller) {
+    filtered = filtered.filter((listing) => {
+      const sellerType =
+        listing.sellerType ?? (listing.storeSlug ? 'store' : 'personal');
+      return sellerType === query.seller;
+    });
+  }
+
   return [...filtered].sort((left, right) => {
     if (query.sort === 'price-asc') {
       return left.price - right.price;
@@ -112,6 +121,7 @@ export async function fetchListings(
   if (query.q?.trim()) params.set('q', query.q.trim());
   if (query.category) params.set('category', query.category);
   if (query.condition) params.set('condition', query.condition.toUpperCase());
+  if (query.seller) params.set('seller', query.seller.toUpperCase());
   if (query.page) params.set('page', String(query.page));
   if (query.limit) params.set('limit', String(query.limit));
 

@@ -1,6 +1,13 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import Container from '@/components/ui/container';
@@ -14,8 +21,21 @@ import Pagination from '@/components/ui/pagination';
 
 const ITEMS_PER_PAGE = 20;
 type ConditionFilter = 'all' | 'new' | 'used';
+type SellerFilter = 'store';
+type SelectValue = ConditionFilter | ListingSort;
 
-const SORT_OPTIONS: Array<{ value: ListingSort; label: string }> = [
+interface SelectOption {
+  value: SelectValue;
+  label: string;
+}
+
+const CONDITION_OPTIONS: Array<SelectOption> = [
+  { value: 'all', label: 'All conditions' },
+  { value: 'new', label: 'New' },
+  { value: 'used', label: 'Used' },
+];
+
+const SORT_OPTIONS: Array<SelectOption> = [
   { value: 'latest', label: 'Latest' },
   { value: 'price-asc', label: 'Price low to high' },
   { value: 'price-desc', label: 'Price high to low' },
@@ -72,6 +92,141 @@ interface FiltersPanelProps {
   onClearAll: () => void;
 }
 
+interface ModernSelectProps {
+  value: SelectValue;
+  options: Array<SelectOption>;
+  onChange: (nextValue: SelectValue) => void;
+  ariaLabel: string;
+}
+
+function ModernSelect({
+  value,
+  options,
+  onChange,
+  ariaLabel,
+}: ModernSelectProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const activeOption =
+    options.find((option) => option.value === value) ?? options[0];
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (!wrapperRef.current) {
+        return;
+      }
+      const target = event.target;
+      if (target instanceof Node && !wrapperRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
+  return (
+    <div
+      ref={wrapperRef}
+      className="relative"
+    >
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={ariaLabel}
+        onClick={() => setIsOpen((current) => !current)}
+        className="group flex h-11 w-full items-center justify-between rounded-xl border border-gray-200 dark:border-white/10 bg-gradient-to-b from-white to-gray-50 dark:from-white/10 dark:to-white/[0.04] px-3 text-left text-sm font-semibold text-gray-900 shadow-sm shadow-gray-900/[0.03] outline-none transition-all duration-150 hover:border-[#2F3FBF]/35 hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#2F3FBF]/20 dark:text-slate-100 dark:hover:border-white/20 dark:focus-visible:ring-white/15"
+      >
+        <span>{activeOption?.label}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.8}
+          className={`h-4 w-4 text-gray-400 transition-all duration-200 group-hover:text-[#2F3FBF] dark:text-slate-400 dark:group-hover:text-slate-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m5.75 7.75 4.25 4.5 4.25-4.5"
+          />
+        </svg>
+      </button>
+
+      {isOpen ? (
+        <ul
+          role="listbox"
+          aria-label={ariaLabel}
+          className="absolute left-0 right-0 z-30 mt-2 max-h-56 overflow-y-auto rounded-xl border border-gray-200/80 dark:border-white/10 bg-white/98 dark:bg-slate-900/95 p-1.5 shadow-xl shadow-gray-900/10 backdrop-blur"
+        >
+          {options.map((option) => {
+            const isActive = option.value === value;
+
+            return (
+              <li key={option.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={isActive}
+                  onClick={() => {
+                    onChange(option.value);
+                    setIsOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-sm transition-colors duration-150 ${
+                    isActive
+                      ? 'bg-[#2F3FBF]/10 text-[#2F3FBF] dark:bg-indigo-500/20 dark:text-indigo-300'
+                      : 'text-gray-700 hover:bg-gray-100 dark:text-slate-200 dark:hover:bg-white/10'
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  {isActive ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      className="h-4 w-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m5 10 3.2 3.2L15 6.7"
+                      />
+                    </svg>
+                  ) : null}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function FiltersPanel({
   activeCategory,
   onCategoryChange,
@@ -105,42 +260,31 @@ function FiltersPanel({
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-        <label className="flex flex-col gap-1.5 text-sm text-gray-600 dark:text-slate-300">
+        <div className="flex flex-col gap-1.5 text-sm text-gray-600 dark:text-slate-300">
           <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Condition
           </span>
-          <select
+          <ModernSelect
             value={conditionFilter}
-            onChange={(event) =>
-              onConditionChange(event.target.value as ConditionFilter)
+            options={CONDITION_OPTIONS}
+            onChange={(nextValue) =>
+              onConditionChange(nextValue as ConditionFilter)
             }
-            className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10"
-          >
-            <option value="all">All conditions</option>
-            <option value="new">New</option>
-            <option value="used">Used</option>
-          </select>
-        </label>
+            ariaLabel="Condition"
+          />
+        </div>
 
-        <label className="flex flex-col gap-1.5 text-sm text-gray-600 dark:text-slate-300">
+        <div className="flex flex-col gap-1.5 text-sm text-gray-600 dark:text-slate-300">
           <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
             Sort by
           </span>
-          <select
+          <ModernSelect
             value={sortOption}
-            onChange={(event) => onSortChange(event.target.value as ListingSort)}
-            className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-slate-100 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10"
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            options={SORT_OPTIONS}
+            onChange={(nextValue) => onSortChange(nextValue as ListingSort)}
+            ariaLabel="Sort by"
+          />
+        </div>
 
         <div className="flex items-end">
           <button
@@ -172,6 +316,7 @@ function RecentListingsContent() {
   const rawCondition = searchParams.get('condition');
   const rawSort = searchParams.get('sort');
   const rawPage = searchParams.get('page');
+  const rawSeller = searchParams.get('seller');
 
   const activeCategory =
     rawCategory && VALID_CATEGORY_IDS.has(rawCategory) ? rawCategory : 'all';
@@ -182,6 +327,9 @@ function RecentListingsContent() {
       ? (rawSort as ListingSort)
       : 'latest';
   const page = sanitizePageParam(rawPage);
+  const sellerFilter: SellerFilter | null =
+    rawSeller === 'store' ? rawSeller : null;
+  const isStoreOnlyMode = sellerFilter === 'store';
 
   const [searchInput, setSearchInput] = useState(query);
 
@@ -198,6 +346,7 @@ function RecentListingsContent() {
         category: string | null;
         condition: ConditionFilter | null;
         sort: ListingSort | null;
+        seller: SellerFilter | null;
         page: number | null;
       }>,
       method: 'push' | 'replace' = 'push'
@@ -257,6 +406,16 @@ function RecentListingsContent() {
   }, [rawPage, updateRoute]);
 
   useEffect(() => {
+    if (!rawSeller) {
+      return;
+    }
+
+    if (rawSeller !== 'store') {
+      updateRoute({ seller: null }, 'replace');
+    }
+  }, [rawSeller, updateRoute]);
+
+  useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       const nextQuery = searchInput.trim();
 
@@ -288,6 +447,7 @@ function RecentListingsContent() {
           category,
           condition:
             conditionFilter === 'all' ? undefined : conditionFilter,
+          seller: sellerFilter ?? undefined,
           sort: sortOption,
           page,
           limit: ITEMS_PER_PAGE,
@@ -339,6 +499,7 @@ function RecentListingsContent() {
     conditionFilter,
     page,
     query,
+    sellerFilter,
     sortOption,
     updateRoute,
   ]);
@@ -350,7 +511,7 @@ function RecentListingsContent() {
   const storeListingCount = listings.filter(
     (listing) => listing.sellerType === 'store'
   ).length;
-  const personalListingCount = listings.length - storeListingCount;
+  const listingUnitLabel = isStoreOnlyMode ? 'store listing' : 'listing';
   const contextSummary = useMemo(() => {
     const parts: string[] = [];
 
@@ -365,13 +526,19 @@ function RecentListingsContent() {
     }
 
     if (parts.length === 0) {
-      return 'Showing all latest listings';
+      return isStoreOnlyMode
+        ? 'Showing all store listings'
+        : 'Showing all latest listings';
+    }
+
+    if (isStoreOnlyMode) {
+      return `Store feed filtered by ${parts.join(' · ')}`;
     }
 
     return `Filtered by ${parts.join(' · ')}`;
-  }, [activeCategory, categoryLabel, conditionFilter, query]);
+  }, [activeCategory, categoryLabel, conditionFilter, isStoreOnlyMode, query]);
 
-  const resultsSummary = `${totalResults.toLocaleString()} listing${
+  const resultsSummary = `${totalResults.toLocaleString()} ${listingUnitLabel}${
     totalResults === 1 ? '' : 's'
   } found`;
 
@@ -406,27 +573,43 @@ function RecentListingsContent() {
       category: null,
       condition: null,
       sort: null,
+      seller: isStoreOnlyMode ? 'store' : null,
       page: null,
     });
   };
 
+  const handleSearchSubmit = (nextValue: string) => {
+    const normalized = nextValue.trim();
+    setSearchInput(normalized);
+    updateRoute({ q: normalized || null, page: null });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors duration-200">
-      <Navbar />
+      <Navbar
+        searchQuery={searchInput}
+        onSearchQueryChange={setSearchInput}
+        onSearchSubmit={handleSearchSubmit}
+      />
       <main>
         <Container className="py-5 sm:py-7 lg:py-9">
           <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h1 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-2xl">
-                  Latest Listings Marketplace
+                  {isStoreOnlyMode
+                    ? 'Store Listings Marketplace'
+                    : 'Latest Listings Marketplace'}
                 </h1>
                 <p className="mt-1.5 text-sm text-gray-500 dark:text-slate-400">
-                  Browse fresh listings from DIU students and stores in one feed.
+                  {isStoreOnlyMode
+                    ? 'Browse fresh listings from DIU student-run stores.'
+                    : 'Browse fresh listings from DIU students and stores in one feed.'}
                 </p>
               </div>
               <span className="inline-flex h-fit rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-[#2F3FBF] dark:border-indigo-400/40 dark:bg-indigo-500/10 dark:text-indigo-300">
-                {totalResults.toLocaleString()} total active
+                {totalResults.toLocaleString()} active{' '}
+                {isStoreOnlyMode ? 'store listings' : 'listings'}
               </span>
             </div>
 
@@ -434,12 +617,15 @@ function RecentListingsContent() {
               <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
                 Page {page} of {totalPages}
               </span>
-              <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
-                {storeListingCount} store listings
-              </span>
-              <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
-                {personalListingCount} student sellers
-              </span>
+              {isStoreOnlyMode ? (
+                <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
+                  Store-only feed
+                </span>
+              ) : (
+                <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
+                  {storeListingCount} store listings on this page
+                </span>
+              )}
               <span className="rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-2.5 py-1 text-gray-600 dark:text-slate-300">
                 {categoryLabel}
               </span>
@@ -447,37 +633,11 @@ function RecentListingsContent() {
           </section>
 
           <section className="mt-4 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900 p-4 sm:p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    className="h-4 w-4 text-gray-400 dark:text-slate-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  type="search"
-                  value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="Search listings by title, category, location..."
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-3 pl-10 pr-4 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10"
-                />
-              </div>
-
+            <div className="sm:hidden">
               <button
                 type="button"
                 onClick={() => setShowMobileFilters((current) => !current)}
-                className="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10 sm:hidden"
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-gray-200 dark:border-white/10 px-3.5 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-gray-100 dark:hover:bg-white/10"
               >
                 {showMobileFilters ? 'Hide filters' : 'Filters & sort'}
               </button>

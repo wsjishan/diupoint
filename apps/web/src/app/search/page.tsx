@@ -206,41 +206,6 @@ function SearchPageContent() {
               Browse listings from students and stores across DIU.
             </p>
 
-            <div className="mt-4">
-              <label
-                htmlFor="search-marketplace"
-                className="sr-only"
-              >
-                Search marketplace listings
-              </label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    className="h-4 w-4 text-gray-400 dark:text-slate-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  id="search-marketplace"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Search items, books, electronics, housing..."
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 py-3 pl-10 pr-4 text-sm text-gray-900 dark:text-slate-100 placeholder-gray-400 dark:placeholder-slate-500 outline-none transition-all duration-150 focus:border-[#2F3FBF]/40 dark:focus:border-white/20 focus:bg-white dark:focus:bg-white/8 focus:ring-2 focus:ring-[#2F3FBF]/15 dark:focus:ring-white/10"
-                />
-              </div>
-            </div>
-
             <div className="mt-4 sm:hidden">
               <button
                 type="button"

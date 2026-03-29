@@ -1,4 +1,7 @@
-import { ListingCondition } from '../../../common/legacy-prisma-enums';
+import {
+  ListingCondition,
+  SellerType,
+} from '../../../common/legacy-prisma-enums';
 import { Transform, Type } from 'class-transformer';
 import {
   IsEnum,
@@ -31,6 +34,11 @@ export class ListListingsQueryDto {
   @IsOptional()
   @IsEnum(ListingCondition)
   condition?: ListingCondition;
+
+  @IsOptional()
+  @Transform(({ value }) => String(value).trim().toUpperCase())
+  @IsEnum(SellerType)
+  seller?: SellerType;
 
   @IsOptional()
   @IsEnum(ListingSort)

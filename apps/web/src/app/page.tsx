@@ -191,7 +191,7 @@ export default function HomePage() {
               <SectionHeader
                 title="Fresh from Stores"
                 subtitle="Picks from student-run stores"
-                viewAllHref="/listings?type=store"
+                viewAllHref="/listings/recent?seller=store"
               />
               <div className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:gap-4 sm:px-6 lg:mx-0 lg:px-0">
                 {freshFromStores.map((listing) => (
