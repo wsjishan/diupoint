@@ -6,6 +6,7 @@ import PersonalSellerActions from '@/components/listing/personal-seller-actions'
 import StorePurchaseActions from '@/components/listing/store-purchase-actions';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
+import SellerTypeIcon from '@/components/ui/seller-type-icon';
 import VerificationTick from '@/components/ui/verification-tick';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
@@ -242,9 +243,7 @@ export default async function ListingPage({ params }: ListingPageProps) {
                     )}
                   </p>
                   {isVerified ? <VerificationTick /> : null}
-                  <span className="inline-flex rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-400">
-                    {isStoreSeller ? 'Store Seller' : 'Personal Seller'}
-                  </span>
+                  <SellerTypeIcon sellerType={isStoreSeller ? 'store' : 'personal'} />
                 </div>
                 {isStoreSeller ? (
                   <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">

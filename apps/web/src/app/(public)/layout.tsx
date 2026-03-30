@@ -7,7 +7,7 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
+    <div suppressHydrationWarning className="min-h-screen bg-white transition-colors duration-200 dark:bg-slate-950">
       <Navbar />
       {children}
       <div className="border-t border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-slate-900">
