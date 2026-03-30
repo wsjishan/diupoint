@@ -5,7 +5,7 @@ import StorefrontProducts from '@/components/store/storefront-products';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug as getMockStoreBySlug } from '@/data/mock-stores';
 import { fetchStoreBySlug } from '@/lib/api/stores';
-import { DEFAULT_STORE_COVER_IMAGE } from '@/lib/store-cover';
+import { resolveStoreCoverBackgroundImage } from '@/lib/store-cover';
 
 interface StorePageProps {
   params: Promise<{
@@ -101,7 +101,9 @@ export default async function StorePage({ params }: StorePageProps) {
       return toStoreSlug(listing) === store.slug;
     });
 
-  const resolvedCoverImage = store.coverImage?.trim() || DEFAULT_STORE_COVER_IMAGE;
+  const heroCoverBackgroundImage = resolveStoreCoverBackgroundImage(
+    store.coverImage
+  );
 
   return (
     <main>
@@ -111,7 +113,7 @@ export default async function StorePage({ params }: StorePageProps) {
             <div
               className="relative h-44 w-full border-b border-white/10 sm:h-56"
               style={{
-                backgroundImage: `linear-gradient(135deg, rgba(2, 6, 23, 0.76), rgba(30, 27, 75, 0.68)), url(${resolvedCoverImage})`,
+                backgroundImage: heroCoverBackgroundImage,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}

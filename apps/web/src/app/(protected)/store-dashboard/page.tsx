@@ -14,7 +14,7 @@ import { isApiRequestError } from '@/lib/api/http';
 import type { ApiStoreDashboardResponse } from '@/lib/api/types';
 import { useAuth } from '@/lib/auth/auth-context';
 import { APP_ROUTES, createSignInHref, createStoreHref } from '@/lib/routes';
-import { DEFAULT_STORE_COVER_IMAGE } from '@/lib/store-cover';
+import { resolveStoreCoverBackgroundImage } from '@/lib/store-cover';
 
 function toTrimmedValue(value: string): string {
   return value.trim();
@@ -84,9 +84,8 @@ export default function StoreDashboardPage() {
     };
   }, [isAuthLoading, isAuthenticated, isStoreAccount, router]);
 
-  const previewCoverImage = useMemo(() => {
-    const trimmed = toTrimmedValue(bannerUrlInput);
-    return trimmed || DEFAULT_STORE_COVER_IMAGE;
+  const previewCoverBackgroundImage = useMemo(() => {
+    return resolveStoreCoverBackgroundImage(bannerUrlInput);
   }, [bannerUrlInput]);
 
   async function saveBannerUrl(nextBannerUrl: string) {
@@ -201,7 +200,7 @@ export default function StoreDashboardPage() {
                   <div
                     className="mt-4 h-44 w-full rounded-2xl border border-slate-900/70 bg-slate-950 shadow-lg shadow-slate-900/25 sm:h-52"
                     style={{
-                      backgroundImage: `linear-gradient(135deg, rgba(2, 6, 23, 0.76), rgba(30, 27, 75, 0.68)), url(${previewCoverImage})`,
+                      backgroundImage: previewCoverBackgroundImage,
                       backgroundSize: 'cover',
                       backgroundPosition: 'center',
                     }}
