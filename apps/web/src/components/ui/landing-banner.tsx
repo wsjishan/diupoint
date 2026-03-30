@@ -37,8 +37,8 @@ export default function LandingBanner({
 
   return (
     <section className="py-6 sm:py-8">
-      <div className="mx-auto w-full max-w-400 px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-2xl border border-gray-100 py-12 text-center dark:border-white/10 sm:py-14">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-100 py-8 text-center dark:border-white/10 sm:py-10">
           <div
             className="absolute inset-0 bg-center bg-cover bg-no-repeat"
             style={{
