@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Container from '@/components/ui/container';
+import LandingBanner from '@/components/ui/landing-banner';
 import SectionHeader from '@/components/ui/section-header';
 import ListingCard from '@/components/ui/listing-card';
 import StoreCard from '@/components/ui/store-card';
@@ -267,24 +268,12 @@ export default function HomePageClient({
           </Container>
         </div>
 
-        <div className="bg-gray-50 dark:bg-slate-900">
-          <Container className="py-8 sm:py-10">
-            <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/80 p-5 sm:p-6">
-              <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-slate-100 sm:text-xl">
-                Sell your item
-              </h2>
-              <p className="mt-1.5 max-w-xl text-sm text-gray-500 dark:text-slate-400">
-                Connect with students who are looking for it.
-              </p>
-              <Link
-                href={APP_ROUTES.postItem}
-                className="mt-4 inline-flex items-center justify-center rounded-lg bg-[#2F3FBF] px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-[#2535a8] active:bg-[#1e2d96] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
-              >
-                + Post Now
-              </Link>
-            </section>
-          </Container>
-        </div>
+        <LandingBanner
+          title="Ready to sell?"
+          subtitle="Post your item in seconds and reach hundreds of DIU students looking for what you have."
+          buttonText="Post Now"
+          buttonHref={APP_ROUTES.postItem}
+        />
       </main>
     </>
   );
