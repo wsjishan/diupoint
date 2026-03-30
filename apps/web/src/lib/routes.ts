@@ -12,6 +12,7 @@ export const APP_ROUTES = {
   orders: '/orders',
   postItem: '/post-item',
   myListings: '/my-listings',
+  storeDashboard: '/store-dashboard',
   verifyAccount: '/verify-account',
 } as const;
 
@@ -29,6 +30,7 @@ export const PROTECTED_PAGES = [
   APP_ROUTES.orders,
   APP_ROUTES.postItem,
   APP_ROUTES.myListings,
+  APP_ROUTES.storeDashboard,
   APP_ROUTES.verifyAccount,
 ] as const;
 

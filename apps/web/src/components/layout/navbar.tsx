@@ -164,6 +164,7 @@ export default function Navbar({
 
   const isDark = mounted && theme === 'dark';
   const isVerified = verificationStatus === 'VERIFIED';
+  const isStoreAccount = currentUser?.accountType === 'STORE';
   const accountFirstName =
     currentUser?.fullName?.trim().split(/\s+/)[0] ?? 'Account';
   const accountMenuItemClass =
@@ -381,6 +382,17 @@ export default function Navbar({
                         >
                           My Listings
                         </Link>
+
+                        {isStoreAccount ? (
+                          <Link
+                            href={APP_ROUTES.storeDashboard}
+                            role="menuitem"
+                            onClick={closeAccountMenu}
+                            className={accountMenuItemClass}
+                          >
+                            Store Dashboard
+                          </Link>
+                        ) : null}
 
                         <Link
                           href={APP_ROUTES.cart}

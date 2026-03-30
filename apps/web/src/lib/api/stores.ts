@@ -3,10 +3,15 @@ import { getStoreBySlug, type Store } from '@/data/mock-stores';
 import { mapApiStoreToUi } from '@/lib/api/adapters';
 import {
   apiRequest,
+  apiRequestWithAuth,
   isApiRequestError,
   logPublicApiFallback,
 } from '@/lib/api/http';
-import type { ApiStorePublicResponse } from '@/lib/api/types';
+import type {
+  ApiStoreDashboardResponse,
+  ApiStoreProfile,
+  ApiStorePublicResponse,
+} from '@/lib/api/types';
 
 export async function fetchStoreBySlug(
   slug: string
@@ -33,4 +38,23 @@ export async function fetchStoreBySlug(
       listings: fallbackListings,
     };
   }
+}
+
+export interface UpdateMyStorePayload {
+  bannerUrl?: string;
+}
+
+export async function fetchMyStoreDashboard(): Promise<ApiStoreDashboardResponse> {
+  return apiRequestWithAuth<ApiStoreDashboardResponse>('/stores/me/dashboard', {
+    method: 'GET',
+  });
+}
+
+export async function updateMyStore(
+  payload: UpdateMyStorePayload
+): Promise<ApiStoreProfile> {
+  return apiRequestWithAuth<ApiStoreProfile>('/stores/me', {
+    method: 'PATCH',
+    body: payload,
+  });
 }

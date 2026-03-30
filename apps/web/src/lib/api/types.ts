@@ -64,6 +64,31 @@ export interface ApiStorePublicResponse {
   };
 }
 
+export interface ApiStoreProfile {
+  id: string;
+  userId: string;
+  storeName: string;
+  slug: string;
+  description: string | null;
+  phone: string | null;
+  whatsapp: string | null;
+  logoUrl: string | null;
+  bannerUrl: string | null;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApiStoreDashboardResponse {
+  storeProfile: ApiStoreProfile;
+  productCount: number;
+  orderCount: number;
+  latestListings: ApiListing[];
+  summary: {
+    latestListingCount: number;
+  };
+}
+
 export interface ApiAuthUser {
   id: string;
   fullName: string;
