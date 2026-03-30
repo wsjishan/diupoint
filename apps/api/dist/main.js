@@ -80,6 +80,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var ApiExceptionFilter_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiExceptionFilter = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -110,11 +111,13 @@ function toNestErrorBody(exception, statusCode) {
         ...responseBody,
     };
 }
-let ApiExceptionFilter = class ApiExceptionFilter {
+let ApiExceptionFilter = ApiExceptionFilter_1 = class ApiExceptionFilter {
+    logger = new common_1.Logger(ApiExceptionFilter_1.name);
     catch(exception, host) {
         const context = host.switchToHttp();
         const response = context.getResponse();
         const request = context.getRequest();
+        const requestId = toRequestId(request, response);
         const statusCode = exception instanceof common_1.HttpException
             ? exception.getStatus()
             : common_1.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -125,17 +128,25 @@ let ApiExceptionFilter = class ApiExceptionFilter {
                 message: 'Internal server error',
                 error: 'Internal Server Error',
             };
+        if (statusCode >= common_1.HttpStatus.INTERNAL_SERVER_ERROR) {
+            const error = exception instanceof Error
+                ? exception
+                : new Error(typeof exception === 'string'
+                    ? exception
+                    : 'Unknown internal exception');
+            this.logger.error(`${request.method} ${request.originalUrl || request.url} ${statusCode} [${requestId}] ${error.name}: ${error.message}`, error.stack);
+        }
         response.status(statusCode).json({
             ...baseBody,
             statusCode,
             timestamp: new Date().toISOString(),
             path: request.originalUrl || request.url,
-            requestId: toRequestId(request, response),
+            requestId,
         });
     }
 };
 exports.ApiExceptionFilter = ApiExceptionFilter;
-exports.ApiExceptionFilter = ApiExceptionFilter = __decorate([
+exports.ApiExceptionFilter = ApiExceptionFilter = ApiExceptionFilter_1 = __decorate([
     (0, common_1.Catch)()
 ], ApiExceptionFilter);
 
@@ -184,64 +195,20 @@ function markDeprecatedRoute({ canonicalPath, logger, req, res, }) {
 /*!*******************************************!*\
   !*** ./src/common/legacy-prisma-enums.ts ***!
   \*******************************************/
-(__unused_webpack_module, exports) {
+(__unused_webpack_module, exports, __webpack_require__) {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrderStatus = exports.PaymentMethod = exports.VerificationRequestStatus = exports.ListingStatus = exports.ListingCondition = exports.SellerType = exports.VerificationStatus = exports.AccountType = void 0;
-var AccountType;
-(function (AccountType) {
-    AccountType["PERSONAL"] = "PERSONAL";
-    AccountType["STORE"] = "STORE";
-})(AccountType || (exports.AccountType = AccountType = {}));
-var VerificationStatus;
-(function (VerificationStatus) {
-    VerificationStatus["UNVERIFIED"] = "UNVERIFIED";
-    VerificationStatus["PENDING"] = "PENDING";
-    VerificationStatus["VERIFIED"] = "VERIFIED";
-})(VerificationStatus || (exports.VerificationStatus = VerificationStatus = {}));
-var SellerType;
-(function (SellerType) {
-    SellerType["PERSONAL"] = "PERSONAL";
-    SellerType["STORE"] = "STORE";
-})(SellerType || (exports.SellerType = SellerType = {}));
-var ListingCondition;
-(function (ListingCondition) {
-    ListingCondition["NEW"] = "NEW";
-    ListingCondition["LIKE_NEW"] = "LIKE_NEW";
-    ListingCondition["GOOD"] = "GOOD";
-    ListingCondition["FAIR"] = "FAIR";
-    ListingCondition["POOR"] = "POOR";
-})(ListingCondition || (exports.ListingCondition = ListingCondition = {}));
-var ListingStatus;
-(function (ListingStatus) {
-    ListingStatus["DRAFT"] = "DRAFT";
-    ListingStatus["PUBLISHED"] = "PUBLISHED";
-    ListingStatus["SOLD"] = "SOLD";
-    ListingStatus["ARCHIVED"] = "ARCHIVED";
-})(ListingStatus || (exports.ListingStatus = ListingStatus = {}));
-var VerificationRequestStatus;
-(function (VerificationRequestStatus) {
-    VerificationRequestStatus["PENDING"] = "PENDING";
-    VerificationRequestStatus["VERIFIED"] = "VERIFIED";
-    VerificationRequestStatus["EXPIRED"] = "EXPIRED";
-    VerificationRequestStatus["CANCELLED"] = "CANCELLED";
-})(VerificationRequestStatus || (exports.VerificationRequestStatus = VerificationRequestStatus = {}));
-var PaymentMethod;
-(function (PaymentMethod) {
-    PaymentMethod["CASH_ON_DELIVERY"] = "CASH_ON_DELIVERY";
-    PaymentMethod["ONLINE_PAYMENT"] = "ONLINE_PAYMENT";
-})(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
-var OrderStatus;
-(function (OrderStatus) {
-    OrderStatus["PENDING"] = "PENDING";
-    OrderStatus["CONFIRMED"] = "CONFIRMED";
-    OrderStatus["PAID"] = "PAID";
-    OrderStatus["PROCESSING"] = "PROCESSING";
-    OrderStatus["SHIPPED"] = "SHIPPED";
-    OrderStatus["DELIVERED"] = "DELIVERED";
-    OrderStatus["CANCELLED"] = "CANCELLED";
-})(OrderStatus || (exports.OrderStatus = OrderStatus = {}));
+var client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
+Object.defineProperty(exports, "AccountType", ({ enumerable: true, get: function () { return client_1.AccountType; } }));
+Object.defineProperty(exports, "VerificationStatus", ({ enumerable: true, get: function () { return client_1.VerificationStatus; } }));
+Object.defineProperty(exports, "SellerType", ({ enumerable: true, get: function () { return client_1.SellerType; } }));
+Object.defineProperty(exports, "ListingCondition", ({ enumerable: true, get: function () { return client_1.ListingCondition; } }));
+Object.defineProperty(exports, "ListingStatus", ({ enumerable: true, get: function () { return client_1.ListingStatus; } }));
+Object.defineProperty(exports, "VerificationRequestStatus", ({ enumerable: true, get: function () { return client_1.VerificationRequestStatus; } }));
+Object.defineProperty(exports, "PaymentMethod", ({ enumerable: true, get: function () { return client_1.PaymentMethod; } }));
+Object.defineProperty(exports, "OrderStatus", ({ enumerable: true, get: function () { return client_1.OrderStatus; } }));
 
 
 /***/ },

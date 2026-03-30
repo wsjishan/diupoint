@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Container from '@/components/ui/container';
 import VerificationTick from '@/components/ui/verification-tick';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -117,15 +117,79 @@ export default function Navbar({
   } = useAuth();
   const { quantityCount } = useCart();
   const [mounted, setMounted] = useState(false);
+  const [openMenuForUserId, setOpenMenuForUserId] = useState<string | null>(
+    null
+  );
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+  const isAccountMenuOpen = Boolean(
+    currentUser && openMenuForUserId === currentUser.id
+  );
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!isAccountMenuOpen) {
+      return;
+    }
+
+    function handlePointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node | null;
+      if (!target || !accountMenuRef.current) {
+        return;
+      }
+
+      if (!accountMenuRef.current.contains(target)) {
+        setOpenMenuForUserId(null);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setOpenMenuForUserId(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isAccountMenuOpen]);
+
   const isDark = mounted && theme === 'dark';
+  const isVerified = verificationStatus === 'VERIFIED';
+  const accountFirstName =
+    currentUser?.fullName?.trim().split(/\s+/)[0] ?? 'Account';
+  const accountMenuItemClass =
+    'flex h-10 items-center rounded-lg px-3 text-sm font-medium text-gray-700 dark:text-slate-200 transition-colors hover:bg-[#2F3FBF]/8 dark:hover:bg-white/8 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF]/35 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900';
 
   function toggleTheme() {
     setTheme(isDark ? 'light' : 'dark');
+  }
+
+  function closeAccountMenu() {
+    setOpenMenuForUserId(null);
+  }
+
+  function toggleAccountMenu() {
+    if (!currentUser) {
+      return;
+    }
+
+    setOpenMenuForUserId((previous) =>
+      previous === currentUser.id ? null : currentUser.id
+    );
+  }
+
+  function handleLogout() {
+    closeAccountMenu();
+    logout();
   }
 
   function handleSearchSubmit(value: string) {
@@ -230,62 +294,151 @@ export default function Navbar({
             {/* Sign In */}
             {!isLoading && isAuthenticated ? (
               <>
-                {verificationStatus === 'VERIFIED' ? (
-                  <VerificationTick className="hidden sm:inline-flex" />
-                ) : null}
-
-                <Link
-                  href={APP_ROUTES.myListings}
-                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
+                <div
+                  ref={accountMenuRef}
+                  className="relative"
                 >
-                  My Listings
-                </Link>
-
-                <Link
-                  href={APP_ROUTES.cart}
-                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
-                >
-                  Cart
-                  {quantityCount > 0 ? (
-                    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full bg-[#2F3FBF] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
-                      {quantityCount}
+                  <button
+                    type="button"
+                    onClick={toggleAccountMenu}
+                    aria-haspopup="menu"
+                    aria-expanded={isAccountMenuOpen}
+                    aria-controls="account-menu"
+                    className="inline-flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-2 text-xs font-medium text-gray-700 dark:text-slate-200 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:gap-2 sm:px-3 sm:text-sm"
+                  >
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#2F3FBF]/10 text-[#2F3FBF] dark:bg-indigo-300/15 dark:text-indigo-200">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.75}
+                        className="h-4 w-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.75 6.75a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a7.5 7.5 0 0 1 15 0"
+                        />
+                      </svg>
                     </span>
+                    <span className="hidden max-w-[8rem] truncate sm:block">
+                      {accountFirstName}
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                      className={`hidden h-4 w-4 transition-transform sm:block ${isAccountMenuOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m6 9 6 6 6-6"
+                      />
+                    </svg>
+                  </button>
+
+                  {isAccountMenuOpen ? (
+                    <div
+                      id="account-menu"
+                      role="menu"
+                      aria-label="Account menu"
+                      className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(90vw,20rem)] sm:w-72 overflow-hidden rounded-2xl border border-gray-200/95 bg-white/98 p-2 shadow-xl shadow-gray-900/12 backdrop-blur-sm dark:border-white/10 dark:bg-slate-900/98 dark:shadow-black/35"
+                    >
+                      <div className="mb-1 rounded-xl border border-gray-100 bg-gray-50 px-3.5 py-3 dark:border-white/8 dark:bg-white/5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
+                              {currentUser?.fullName ?? 'Account'}
+                            </p>
+                            <p
+                              className="truncate text-xs text-gray-500 dark:text-slate-400"
+                              title={currentUser?.email}
+                            >
+                              {currentUser?.email}
+                            </p>
+                          </div>
+
+                          {isVerified ? (
+                            <VerificationTick className="shrink-0" />
+                          ) : (
+                            <span className="shrink-0 rounded-full border border-amber-300/70 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-200">
+                              Unverified
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-0.5">
+                        <Link
+                          href={APP_ROUTES.myListings}
+                          role="menuitem"
+                          onClick={closeAccountMenu}
+                          className={accountMenuItemClass}
+                        >
+                          My Listings
+                        </Link>
+
+                        <Link
+                          href={APP_ROUTES.cart}
+                          role="menuitem"
+                          onClick={closeAccountMenu}
+                          className={`${accountMenuItemClass} justify-between`}
+                        >
+                          <span>Cart</span>
+                          {quantityCount > 0 ? (
+                            <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-[#2F3FBF] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                              {quantityCount}
+                            </span>
+                          ) : null}
+                        </Link>
+
+                        <Link
+                          href={APP_ROUTES.orders}
+                          role="menuitem"
+                          onClick={closeAccountMenu}
+                          className={accountMenuItemClass}
+                        >
+                          Orders
+                        </Link>
+
+                        <Link
+                          href={APP_ROUTES.favorites}
+                          role="menuitem"
+                          onClick={closeAccountMenu}
+                          className={accountMenuItemClass}
+                        >
+                          Saved Items
+                        </Link>
+
+                        {!isVerified ? (
+                          <Link
+                            href={createVerifyAccountHref(APP_ROUTES.home)}
+                            role="menuitem"
+                            onClick={closeAccountMenu}
+                            className={accountMenuItemClass}
+                          >
+                            Verify Account
+                          </Link>
+                        ) : null}
+                      </div>
+
+                      <div className="my-1 border-t border-gray-100 dark:border-white/8" />
+
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={handleLogout}
+                        className="flex h-10 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-300/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/40 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                      >
+                        Log out
+                      </button>
+                    </div>
                   ) : null}
-                </Link>
-
-                <Link
-                  href={APP_ROUTES.orders}
-                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
-                >
-                  Orders
-                </Link>
-
-                <Link
-                  href={APP_ROUTES.favorites}
-                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
-                >
-                  Saved Items
-                </Link>
-
-                <Link
-                  href={
-                    verificationStatus === 'VERIFIED'
-                      ? APP_ROUTES.home
-                      : createVerifyAccountHref(APP_ROUTES.home)
-                  }
-                  className="hidden h-10 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-sm font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 lg:flex"
-                  title={currentUser?.email}
-                >
-                  {currentUser?.fullName?.split(' ')[0] ?? 'Account'}
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="flex h-9 items-center rounded-xl border border-gray-200 dark:border-white/10 px-3 text-xs font-medium text-gray-600 dark:text-slate-300 transition-all hover:border-[#2F3FBF]/40 dark:hover:border-white/20 hover:bg-[#2F3FBF]/5 dark:hover:bg-white/5 hover:text-[#2F3FBF] dark:hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2F3FBF] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 sm:h-10 sm:px-4 sm:text-sm"
-                >
-                  Log out
-                </button>
+                </div>
               </>
             ) : (
               <Link

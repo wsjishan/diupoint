@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
@@ -53,10 +54,13 @@ function toNestErrorBody(
 
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(ApiExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
     const request = context.getRequest<Request>();
+    const requestId = toRequestId(request, response);
 
     const statusCode =
       exception instanceof HttpException
@@ -72,12 +76,28 @@ export class ApiExceptionFilter implements ExceptionFilter {
             error: 'Internal Server Error',
           };
 
+    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      const error =
+        exception instanceof Error
+          ? exception
+          : new Error(
+              typeof exception === 'string'
+                ? exception
+                : 'Unknown internal exception'
+            );
+
+      this.logger.error(
+        `${request.method} ${request.originalUrl || request.url} ${statusCode} [${requestId}] ${error.name}: ${error.message}`,
+        error.stack
+      );
+    }
+
     response.status(statusCode).json({
       ...baseBody,
       statusCode,
       timestamp: new Date().toISOString(),
       path: request.originalUrl || request.url,
-      requestId: toRequestId(request, response),
+      requestId,
     });
   }
 }
