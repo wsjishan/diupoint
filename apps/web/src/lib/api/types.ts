@@ -202,3 +202,23 @@ export interface ApiCreateOrderResponse {
     orderCount: number;
   };
 }
+
+export interface ApiRating {
+  id: string;
+  userId: string;
+  listingId: string;
+  value: number;
+  comment: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    fullName: string;
+  };
+}
+
+export interface ApiListingRatingsResponse {
+  ratings: ApiRating[];
+  average: number | null;
+  count: number;
+}

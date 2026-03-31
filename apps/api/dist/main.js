@@ -27,6 +27,7 @@ const favorites_module_1 = __webpack_require__(/*! ./modules/favorites/favorites
 const health_module_1 = __webpack_require__(/*! ./modules/health/health.module */ "./src/modules/health/health.module.ts");
 const listings_module_1 = __webpack_require__(/*! ./modules/listings/listings.module */ "./src/modules/listings/listings.module.ts");
 const orders_module_1 = __webpack_require__(/*! ./modules/orders/orders.module */ "./src/modules/orders/orders.module.ts");
+const ratings_module_1 = __webpack_require__(/*! ./modules/ratings/ratings.module */ "./src/modules/ratings/ratings.module.ts");
 const search_module_1 = __webpack_require__(/*! ./modules/search/search.module */ "./src/modules/search/search.module.ts");
 const stores_module_1 = __webpack_require__(/*! ./modules/stores/stores.module */ "./src/modules/stores/stores.module.ts");
 const users_module_1 = __webpack_require__(/*! ./modules/users/users.module */ "./src/modules/users/users.module.ts");
@@ -60,6 +61,7 @@ exports.AppModule = AppModule = __decorate([
             favorites_module_1.FavoritesModule,
             cart_module_1.CartModule,
             orders_module_1.OrdersModule,
+            ratings_module_1.RatingsModule,
         ],
     })
 ], AppModule);
@@ -3126,6 +3128,257 @@ exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)()
 ], OrdersService);
+
+
+/***/ },
+
+/***/ "./src/modules/ratings/dto/create-rating.dto.ts"
+/*!******************************************************!*\
+  !*** ./src/modules/ratings/dto/create-rating.dto.ts ***!
+  \******************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CreateRatingDto = void 0;
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateRatingDto {
+    value;
+    comment;
+}
+exports.CreateRatingDto = CreateRatingDto;
+__decorate([
+    (0, class_transformer_1.Transform)(({ value }) => Number(value)),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(5),
+    __metadata("design:type", Number)
+], CreateRatingDto.prototype, "value", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], CreateRatingDto.prototype, "comment", void 0);
+
+
+/***/ },
+
+/***/ "./src/modules/ratings/ratings.controller.ts"
+/*!***************************************************!*\
+  !*** ./src/modules/ratings/ratings.controller.ts ***!
+  \***************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RatingsController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
+const create_rating_dto_1 = __webpack_require__(/*! ./dto/create-rating.dto */ "./src/modules/ratings/dto/create-rating.dto.ts");
+const ratings_service_1 = __webpack_require__(/*! ./ratings.service */ "./src/modules/ratings/ratings.service.ts");
+let RatingsController = class RatingsController {
+    ratingsService;
+    constructor(ratingsService) {
+        this.ratingsService = ratingsService;
+    }
+    getListingRatings(listingId) {
+        return this.ratingsService.getListingRatings(listingId);
+    }
+    getUserRating(req, listingId) {
+        return this.ratingsService.getUserRating(req.user.sub, listingId);
+    }
+    createOrUpdateRating(req, listingId, dto) {
+        return this.ratingsService.createOrUpdateRating(req.user.sub, listingId, dto);
+    }
+};
+exports.RatingsController = RatingsController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Param)('listingId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], RatingsController.prototype, "getListingRatings", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('listingId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _b : Object, String]),
+    __metadata("design:returntype", void 0)
+], RatingsController.prototype, "getUserRating", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Put)(),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('listingId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof AuthenticatedRequest !== "undefined" && AuthenticatedRequest) === "function" ? _c : Object, String, typeof (_d = typeof create_rating_dto_1.CreateRatingDto !== "undefined" && create_rating_dto_1.CreateRatingDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", void 0)
+], RatingsController.prototype, "createOrUpdateRating", null);
+exports.RatingsController = RatingsController = __decorate([
+    (0, common_1.Controller)('listings/:listingId/ratings'),
+    __metadata("design:paramtypes", [typeof (_a = typeof ratings_service_1.RatingsService !== "undefined" && ratings_service_1.RatingsService) === "function" ? _a : Object])
+], RatingsController);
+
+
+/***/ },
+
+/***/ "./src/modules/ratings/ratings.module.ts"
+/*!***********************************************!*\
+  !*** ./src/modules/ratings/ratings.module.ts ***!
+  \***********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RatingsModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const ratings_controller_1 = __webpack_require__(/*! ./ratings.controller */ "./src/modules/ratings/ratings.controller.ts");
+const ratings_service_1 = __webpack_require__(/*! ./ratings.service */ "./src/modules/ratings/ratings.service.ts");
+let RatingsModule = class RatingsModule {
+};
+exports.RatingsModule = RatingsModule;
+exports.RatingsModule = RatingsModule = __decorate([
+    (0, common_1.Module)({
+        controllers: [ratings_controller_1.RatingsController],
+        providers: [ratings_service_1.RatingsService],
+    })
+], RatingsModule);
+
+
+/***/ },
+
+/***/ "./src/modules/ratings/ratings.service.ts"
+/*!************************************************!*\
+  !*** ./src/modules/ratings/ratings.service.ts ***!
+  \************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RatingsService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const client_1 = __webpack_require__(/*! @prisma/client */ "@prisma/client");
+const prisma = new client_1.PrismaClient();
+let RatingsService = class RatingsService {
+    async getListingRatings(listingId) {
+        const listing = await prisma.listing.findUnique({
+            where: { id: listingId },
+            select: { id: true },
+        });
+        if (!listing) {
+            throw new common_1.NotFoundException('Listing not found.');
+        }
+        const ratings = await prisma.rating.findMany({
+            where: { listingId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                    },
+                },
+            },
+        });
+        const count = ratings.length;
+        const average = count > 0
+            ? Math.round((ratings.reduce((sum, r) => sum + r.value, 0) /
+                count) *
+                10) / 10
+            : null;
+        return { ratings, average, count };
+    }
+    async getUserRating(userId, listingId) {
+        return prisma.rating.findUnique({
+            where: {
+                userId_listingId: {
+                    userId,
+                    listingId,
+                },
+            },
+        });
+    }
+    async createOrUpdateRating(userId, listingId, dto) {
+        const listing = await prisma.listing.findUnique({
+            where: { id: listingId },
+            select: { id: true },
+        });
+        if (!listing) {
+            throw new common_1.NotFoundException('Listing not found.');
+        }
+        const rating = await prisma.rating.upsert({
+            where: {
+                userId_listingId: {
+                    userId,
+                    listingId,
+                },
+            },
+            update: {
+                value: dto.value,
+                comment: dto.comment ?? null,
+            },
+            create: {
+                userId,
+                listingId,
+                value: dto.value,
+                comment: dto.comment ?? null,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                    },
+                },
+            },
+        });
+        return rating;
+    }
+};
+exports.RatingsService = RatingsService;
+exports.RatingsService = RatingsService = __decorate([
+    (0, common_1.Injectable)()
+], RatingsService);
 
 
 /***/ },

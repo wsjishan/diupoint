@@ -3,16 +3,19 @@ import { notFound } from 'next/navigation';
 import FavoriteToggleButton from '@/components/listing/favorite-toggle-button';
 import ListingImageGallery from '@/components/listing/listing-image-gallery';
 import PersonalSellerActions from '@/components/listing/personal-seller-actions';
+import RatingSection from '@/components/listing/rating-section';
 import StorePurchaseActions from '@/components/listing/store-purchase-actions';
 import Container from '@/components/ui/container';
 import ListingCard from '@/components/ui/listing-card';
 import SellerTypeIcon from '@/components/ui/seller-type-icon';
+import StarRating from '@/components/ui/star-rating';
 import VerificationTick from '@/components/ui/verification-tick';
 import { ALL_LISTINGS, type Listing } from '@/data/mock-listings';
 import { getStoreBySlug } from '@/data/mock-stores';
 import { fetchListingBySlug, fetchListings } from '@/lib/api/listings';
-import { createStoreHref } from '@/lib/routes';
+import { fetchListingRatings } from '@/lib/api/ratings';
 import { fetchStoreBySlug } from '@/lib/api/stores';
+import { createStoreHref } from '@/lib/routes';
 
 interface ListingPageProps {
   params: Promise<{
@@ -105,11 +108,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
     notFound();
   }
 
-  const [relatedSource, storefront] = await Promise.all([
+  const [relatedSource, storefront, ratingsSummary] = await Promise.all([
     fetchListings({ category: listing.category }),
     listing.storeSlug
       ? fetchStoreBySlug(listing.storeSlug)
       : Promise.resolve(null),
+    fetchListingRatings(listing.id),
   ]);
 
   const store = listing.storeSlug
@@ -120,11 +124,6 @@ export default async function ListingPage({ params }: ListingPageProps) {
   const isVerified = isStoreSeller
     ? (store?.isVerified ?? listing.isSellerVerified ?? false)
     : (listing.isSellerVerified ?? false);
-  const sellerSummary = isStoreSeller
-    ? (listing.sellerSummary ??
-      store?.shortTagline ??
-      'Student-run store on DIUPoint.')
-    : (listing.sellerSummary ?? 'DIU student seller.');
   const stockStatus = listing.stockStatus ?? 'in-stock';
   const paymentMethods = listing.paymentSupported ?? [];
   const relatedListings = getRelatedListings(
@@ -179,6 +178,27 @@ export default async function ListingPage({ params }: ListingPageProps) {
                 ৳ {listing.price.toLocaleString()}
               </p>
 
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <p className="text-[15px] font-semibold text-gray-900 dark:text-slate-100">
+                  {isStoreSeller ? (
+                    listing.storeSlug ? (
+                      <Link
+                        href={createStoreHref(listing.storeSlug)}
+                        className="transition-colors hover:text-[#2F3FBF] dark:hover:text-indigo-300"
+                      >
+                        {store?.name ?? listing.seller}
+                      </Link>
+                    ) : (
+                      (store?.name ?? listing.seller)
+                    )
+                  ) : (
+                    listing.seller
+                  )}
+                </p>
+                {isVerified ? <VerificationTick /> : null}
+                <SellerTypeIcon sellerType={isStoreSeller ? 'store' : 'personal'} />
+              </div>
+
               <div className="mt-3.5 space-y-1.5 text-sm text-gray-500 dark:text-slate-400">
                 <div className="flex items-center gap-2">
                   <svg
@@ -223,46 +243,27 @@ export default async function ListingPage({ params }: ListingPageProps) {
 
               <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-slate-800/70">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400">
-                  {isStoreSeller ? 'Store Identity' : 'Seller Identity'}
+                  Rating
                 </p>
-                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                  <p className="text-[15px] font-semibold text-gray-900 dark:text-slate-100">
-                    {isStoreSeller ? (
-                      listing.storeSlug ? (
-                        <Link
-                          href={createStoreHref(listing.storeSlug)}
-                          className="transition-colors hover:text-[#2F3FBF] dark:hover:text-indigo-300"
-                        >
-                          {store?.name ?? listing.seller}
-                        </Link>
-                      ) : (
-                        (store?.name ?? listing.seller)
-                      )
-                    ) : (
-                      listing.seller
-                    )}
-                  </p>
-                  {isVerified ? <VerificationTick /> : null}
-                  <SellerTypeIcon sellerType={isStoreSeller ? 'store' : 'personal'} />
+                <div className="mt-1.5 flex items-center gap-2">
+                  {ratingsSummary.average !== null ? (
+                    <>
+                      <StarRating
+                        rating={ratingsSummary.average}
+                        size="md"
+                        showValue
+                      />
+                      <span className="text-xs text-gray-500 dark:text-slate-400">
+                        ({ratingsSummary.count} rating{ratingsSummary.count === 1 ? '' : 's'})
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-500 dark:text-slate-400">
+                      Unrated
+                    </span>
+                  )}
                 </div>
-                {isStoreSeller ? (
-                  <p className="mt-1.5 text-sm text-gray-600 dark:text-slate-300">
-                    {`Sold by ${store?.name ?? listing.seller}. ${sellerSummary}`}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                    Responds directly via phone or WhatsApp
-                  </p>
-                )}
 
-                {isStoreSeller && listing.storeSlug ? (
-                  <Link
-                    href={createStoreHref(listing.storeSlug)}
-                    className="mt-1.5 inline-flex items-center text-sm font-semibold text-[#2F3FBF]/90 transition-colors hover:text-[#2535a8] dark:text-indigo-300/90 dark:hover:text-indigo-200"
-                  >
-                    Visit store page
-                  </Link>
-                ) : null}
               </div>
 
               {isStoreSeller ? (
@@ -317,6 +318,12 @@ export default async function ListingPage({ params }: ListingPageProps) {
               {listing.description}
             </p>
           </section>
+
+          <RatingSection
+            listingId={listing.id}
+            initialAverage={ratingsSummary.average}
+            initialCount={ratingsSummary.count}
+          />
 
           <section className="mt-10 sm:mt-12">
             <div className="mb-4 flex items-end justify-between sm:mb-5">

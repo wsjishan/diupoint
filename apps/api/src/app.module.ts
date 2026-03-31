@@ -9,6 +9,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { HealthModule } from './modules/health/health.module';
 import { ListingsModule } from './modules/listings/listings.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { RatingsModule } from './modules/ratings/ratings.module';
 import { SearchModule } from './modules/search/search.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { UsersModule } from './modules/users/users.module';
@@ -40,6 +41,7 @@ import { VerificationModule } from './modules/verification/verification.module';
     FavoritesModule,
     CartModule,
     OrdersModule,
+    RatingsModule,
   ],
 })
 export class AppModule {}
